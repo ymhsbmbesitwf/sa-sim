@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Import Vue -->
+    <!-- development version, includes helpful console warnings -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+    <script src="templates.js"></script>
+
+    <link rel="stylesheet" href="style.css" />
+
+    <title>Assignment 6</title>
+  </head>
+  <body>
+    <div id="app">
+      <div id="cardboard" v-if="imageFiles">
+        <card
+          v-on:sendcard="sendCard($event)"
+          v-for="image, index in imageFiles"
+          :key="`image-${index}`"
+          :image-name="image"
+        >
+        </card>
+      </div>
+      <div id="scoreboard">
+        <div>
+          <p>Current turn is Player {{currentTurn}}</p>
+          <p>Total flips are {{flips}}</p>
+          <p>Player 1 score: {{player1Score}}</p>
+          <p>Player 2 score: {{player2Score}}</p>
+          <p>Playtime is {{time}} seconds</p>
+        </div>
+        <strong v-show="winner">The winner is {{winner}}</strong>
+      </div>
+    </div>
+  </body>
+  <script src="app.js"></script>
+</html>
