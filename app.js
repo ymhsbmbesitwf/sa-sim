@@ -1,25 +1,9 @@
 var app = new Vue({
   el: "#app",
   data: {
-    imageFiles: [
-      "images/ferrari.png",
-      "images/ferrari.png",
-      "images/alfa_romeo.png",
-      "images/alfa_romeo.png",
-      "images/haas.png",
-      "images/haas.png",
-      "images/renault.png",
-      "images/renault.png",
-      "images/red_bull.png",
-      "images/red_bull.png",
-      "images/alpha_tauri.png",
-      "images/alpha_tauri.png",
-      "images/mclaren.png",
-      "images/mclaren.png",
-      "images/racing_point.png",
-      "images/racing_point.png"
-    ],
+    imageFiles: [],
     currentImages: [],
+    flippedImages: [],
     flips: 0,
     currentTurn: 1,
     player1Score: 0,
@@ -29,8 +13,7 @@ var app = new Vue({
     winner: null
   },
   created: function() {
-    this.shuffle();
-    this.startTimer();
+    this.themeFormula1();
   },
   methods: {
     shuffle() {
@@ -47,6 +30,7 @@ var app = new Vue({
     },
     sendCard(image) {
       this.currentImages.push(image);
+      this.flippedImages.push(image);
       this.checkCards();
       this.flips++;
     },
@@ -85,6 +69,7 @@ var app = new Vue({
       }
     },
     startTimer() {
+      this.time = 0;
       this.timer = setInterval(() => {
         this.time++;
       }, 1000);
@@ -105,6 +90,64 @@ var app = new Vue({
         return true;
       }
       return false;
+    },
+    themeFormula1() {
+      this.newGame();
+      this.imageFiles = [
+        "images/ferrari.png",
+        "images/ferrari.png",
+        "images/alfa_romeo.png",
+        "images/alfa_romeo.png",
+        "images/haas.png",
+        "images/haas.png",
+        "images/renault.png",
+        "images/renault.png",
+        "images/red_bull.png",
+        "images/red_bull.png",
+        "images/alpha_tauri.png",
+        "images/alpha_tauri.png",
+        "images/mclaren.png",
+        "images/mclaren.png",
+        "images/racing_point.png",
+        "images/racing_point.png"
+      ];
+      this.shuffle();
+    },
+    themeColors() {
+      this.newGame();
+      this.imageFiles = [
+        "images/nevermind.png",
+        "images/nevermind.png",
+        "images/beigepink_tinge.png",
+        "images/beigepink_tinge.png",
+        "images/fish_food.png",
+        "images/fish_food.png",
+        "images/h.png",
+        "images/h.png",
+        "images/island_grotto.png",
+        "images/island_grotto.png",
+        "images/rosabelle.png",
+        "images/rosabelle.png",
+        "images/tiger_black.png",
+        "images/tiger_black.png",
+        "images/vwe75.png",
+        "images/vwe75.png"
+      ];
+      this.shuffle();
+    },
+    newGame() {
+      if (this.timer) {
+        this.stopTimer();
+      }
+      for (const image of this.flippedImages) {
+        image.flipped = false;
+      }
+      this.player1Score = 0;
+      this.player2Score = 0;
+      this.flips = 0;
+      this.currentTurn = 1;
+      this.winner = null;
+      this.startTimer();
     }
   }
 });

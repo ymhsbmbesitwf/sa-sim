@@ -33,6 +33,10 @@
           <p>Player 2 score: {{player2Score}}</p>
           <p>Playtime is {{time}} seconds</p>
         </div>
+        <div id="changeLayout">
+          <button v-on:click="themeFormula1">Formula 1</button>
+          <button v-on:click="themeColors">Colors</button>
+        </div>
         <strong v-show="winner">The winner is {{winner}}</strong>
       </div>
     </div>
