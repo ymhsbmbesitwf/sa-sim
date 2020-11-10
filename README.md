@@ -1,4 +1,3 @@
-Assignment 6
-============
+# GodNooNoo webpages
 
-Add your files here.  The page should be called `index.html`.
+Add your files here. The page should be called `index.html`.
