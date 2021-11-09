@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
 let AB = autoBattle;
 let LZ = LZString;
 let startTime;
-let formatter = new Intl.NumberFormat("en-IN", { minimumFractionDigits: 3 });
+let formatter = new Intl.NumberFormat("en-GB", { minimumFractionDigits: 3 });
 function format(num) {
 	num = formatter.format(num);
 	return num.replaceAll(",", " ");
@@ -41,7 +41,7 @@ const startSimulation = () => {
 	// AB.resetAll();
 	AB.enemyLevel = settings.enemyLevel;
 	AB.maxEnemyLevel = settings.maxEnemyLevel;
-	AB.bonuses.Extra_Limbs.level = 20; // TODO: make this better if needed?
+	AB.bonuses.Extra_Limbs.level = 100; // TODO: make this better if needed?
 	setActiveItems();
 	setActiveOneTimers();
 	setLevels();
