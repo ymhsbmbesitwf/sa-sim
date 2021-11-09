@@ -1,23 +1,41 @@
 <!DOCTYPE html>
-<meta charset="UTF-8" />
-<link href="blue.css" rel="stylesheet" />
-<link href="dark.css" rel="stylesheet" id="dark" />
-<script src="lz-string.js"></script>
-<script src="trimps.js"></script>
-<title>Index</title>
-<h1>Index</h1>
-<p id="alert"></p>
-
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src="index.js" type="module"></script>
+	<link rel="stylesheet" href="style.css">
+	<title>Document</title>
+</head>
 <body>
-    Nothing to see, here
+	<div id="mainDiv">
+		<div id="leftSideDiv">
+			<div id="equipDiv"></div>
+			<div>
+				<div id="oneTimersDiv"></div>
+				<div id="otherInputs">
+					<span class="levelInp">Set Level: <input type="text" id="currentLevel"></span>
+					<span class="levelInp">Highest Level Cleared: <input type="text" id="highestLevel"></span>
+				</div>
+			</div>
+		</div>
+		
+		<div id="rightSideDiv">
+			<span>Build cost: <span id="buildCost">0</span></span>
+			<button id="startButton">Press this to run the simulation!</button>
+			<div id="resultsDiv">
+				<h3>Simulation</h3>
+				<span>Time spent: <span id="timeSpent"></span></span>
+				<span>Time processed: <span id="processedTime"></span></span>
+				<span>Enemies killed: <span id="enemiesKilled"></span></span>
+				<span>Trimps killed [WR]: <span id="trimpsKilled"></span></span>
+				<span>Clearing time: <span id="clearingTime"></span></span>
+				<span>Dust per second: <span id="dustPs"></span></span>
+				<span>Average fight time: <span id="averageFightTime"></span></span>
+				<span>Average kill time: <span id="averageKillTime"></span></span>
+			</div>
+		</div>
+	</div>
 </body>
-
-<nav class="flexbox">
-    <a href="bwcalc.html">BWCalc</a>
-    <span class="centered"></span>
-    <a onclick="switch_theme()">Switch theme</a>
-    <a href="changelog.html">Changelog</a>
-    <a href="https://github.com/GodNooNoo/GodNooNoo.github.io/issues/new">Report a bug</a>
-    <a href="https://github.com/GodNooNoo/godnoonoo.github.io">View the source</a>
-    <a href="https://github.com/GodNooNoo">By GodNooNoo</a>
-</nav>
+</html>

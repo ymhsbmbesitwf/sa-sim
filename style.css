@@ -1,0 +1,62 @@
+body {
+	background-color: darkgray;
+}
+
+#mainDiv {
+	display: flex;
+}
+
+#leftSideDiv {
+	display: flex;
+}
+
+#rightSideDiv {
+	display: flex;
+	flex-direction: column;
+}
+
+#equipDiv {
+	display: flex;
+	flex-direction: column;
+	margin-right: 1em;
+}
+
+.equipInpDiv {
+	display: flex;
+	justify-content: space-between;
+	border-bottom: 1px solid darkslateblue;
+}
+
+#oneTimersDiv {
+	display: flex;
+	flex-direction: column;
+	margin-right: 1em;
+}
+
+.oneTimersInpDiv {
+	display: flex;
+	justify-content: space-between;
+	border-bottom: 1px solid darkslateblue;
+}
+
+.equipInput {
+	width: 20px;
+	text-align: right;
+}
+
+#resultsDiv {
+	display: flex;
+	flex-direction: column;
+}
+
+#otherInputs {
+	display: flex;
+	flex-direction: column;
+	margin-top: 1em;
+}
+
+.levelInp {
+	display: flex;
+	justify-content: space-between;
+	border-bottom: 1px solid darkslateblue;
+}
