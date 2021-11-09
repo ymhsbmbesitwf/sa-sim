@@ -291,7 +291,7 @@ function setItemsInHtml(itemsList) {
 	itemBoxes.forEach(box => {
 		let item = box.id.replace("_Input", "");
 		if (itemsList.hasOwnProperty(item)) {
-			box.value = itemsList[item].level;
+			if (itemsList[item].equipped) box.value = itemsList[item].level;
 		}
 	});
 }
