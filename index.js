@@ -1,4 +1,5 @@
 import { autoBattle } from "./object.js";
+import { LZString } from "./lz-string.js";
 
 document.addEventListener("DOMContentLoaded", function () {
 	setup();
@@ -6,6 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 let AB = autoBattle;
+let LZ = LZString;
 let startTime;
 let formatter = new Intl.NumberFormat("en-IN", { minimumFractionDigits: 3 });
 function format(num) {
@@ -53,9 +55,6 @@ const startSimulation = () => {
 
 	let run = 0;
 	startTime = Date.now();
-	console.log(AB.items);
-	console.log(AB.trimp);
-	console.log(AB.enemy);
 	while (run++ < iterations) {
 		AB.update();
 	}
@@ -119,6 +118,15 @@ function setup() {
 	});
 	let maxLvl = document.getElementById("highestLevel");
 	maxLvl.value = AB.maxEnemyLevel;
+
+	// Input for save
+	let target = document.getElementById("saveInput");
+	target.addEventListener("paste", (event) => {
+		let paste = (event.clipboardData).getData("text");
+		let save = JSON.parse(LZ.decompressFromBase64(paste));
+		let items = save.global.autoBattleData.items;
+		setItemsInHtml(items);
+	})
 }
 
 const prettify = (num) => {
@@ -276,4 +284,14 @@ function setLevels() {
 	AB.enemyLevel = parseInt(curr.value);
 	let maxLvl = document.getElementById("highestLevel");
 	AB.maxEnemyLevel = parseInt(maxLvl.value);
+}
+
+function setItemsInHtml(itemsList) {
+	let itemBoxes = document.querySelectorAll("input.equipInput");
+	itemBoxes.forEach(box => {
+		let item = box.id.replace("_Input", "");
+		if (itemsList.hasOwnProperty(item)) {
+			box.value = itemsList[item].level;
+		}
+	});
 }
