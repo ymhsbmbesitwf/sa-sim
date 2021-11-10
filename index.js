@@ -53,6 +53,7 @@ const startSimulation = () => {
 	AB.resetStats();
 	AB.update();
 
+	console.log(AB.oneTimers);
 	let run = 0;
 	startTime = Date.now();
 	while (run++ < iterations) {
@@ -125,7 +126,8 @@ function setup() {
 		let paste = event.clipboardData.getData("text");
 		let save = JSON.parse(LZ.decompressFromBase64(paste));
 		let items = save.global.autoBattleData.items;
-		setItemsInHtml(items);
+		let oneTimers = save.global.autoBattleData.oneTimers;
+		setItemsInHtml(items, oneTimers);
 	});
 }
 
@@ -291,7 +293,7 @@ function setLevels() {
 	AB.maxEnemyLevel = parseInt(maxLvl.value);
 }
 
-function setItemsInHtml(itemsList) {
+function setItemsInHtml(itemsList, oneTimersList) {
 	let itemBoxes = document.querySelectorAll("input.equipInput");
 	itemBoxes.forEach((box) => {
 		let item = box.id.replace("_Input", "");
@@ -299,6 +301,14 @@ function setItemsInHtml(itemsList) {
 			if (itemsList[item].equipped) box.value = itemsList[item].level;
 		}
 	});
+
+	let OTBoxes = document.querySelectorAll("input.oneTimerInput");
+	OTBoxes.forEach((box) => {
+		let OT = box.id.replace("_Input", "");
+		if (oneTimersList.hasOwnProperty(OT)) {
+			if (oneTimersList[OT]) box.checked = true;
+		}
+	})
 }
 
 function orderByUnlock() {
