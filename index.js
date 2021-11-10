@@ -122,11 +122,11 @@ function setup() {
 	// Input for save
 	let target = document.getElementById("saveInput");
 	target.addEventListener("paste", (event) => {
-		let paste = (event.clipboardData).getData("text");
+		let paste = event.clipboardData.getData("text");
 		let save = JSON.parse(LZ.decompressFromBase64(paste));
 		let items = save.global.autoBattleData.items;
 		setItemsInHtml(items);
-	})
+	});
 }
 
 const prettify = (num) => {
@@ -139,25 +139,25 @@ const prettify = (num) => {
 
 function makeEquipBtns() {
 	let equipDiv = document.getElementById("equipDiv");
-	for (const item in AB.items) {
-		if (Object.hasOwnProperty.call(AB.items, item)) {
-			let div = document.createElement("div");
-			div.className = "equipInpDiv";
-			equipDiv.appendChild(div);
+	let items = orderByUnlock();
+	for (let i = 0; i < items.length; i++) {
+		let item = items[i];
+		let div = document.createElement("div");
+		div.className = "equipInpDiv";
+		equipDiv.appendChild(div);
 
-			let span = document.createElement("span");
-			let name = item.replaceAll("_", " ");
-			span.textContent = name;
-			div.appendChild(span);
+		let span = document.createElement("span");
+		let name = item.replaceAll("_", " ");
+		span.textContent = name;
+		div.appendChild(span);
 
-			let input = document.createElement("input");
-			input.type = "text";
-			input.value = 0;
-			input.className = "equipInput";
-			input.id = item + "_Input";
-			addChangeForEquip(input);
-			div.appendChild(input);
-		}
+		let input = document.createElement("input");
+		input.type = "text";
+		input.value = 0;
+		input.className = "equipInput";
+		input.id = item + "_Input";
+		addChangeForEquip(input);
+		div.appendChild(input);
 	}
 }
 
@@ -225,15 +225,20 @@ function clearItems() {
 
 function setItems() {
 	let items = document.querySelectorAll("input.equipInput");
-	items.forEach((item) => {
-		let val = parseInt(item.value);
-		if (val > 0) {
-			let name = item.id.replace("_Input", "");
-			AB.items[name].owned = true;
-			AB.items[name].level = val;
-			AB.equip(name);
+	let ogItems = AB.items;
+	for (const ogItem in ogItems) {
+		if (Object.hasOwnProperty.call(ogItems, ogItem)) {
+			items.forEach((item) => {
+				let name = item.id.replace("_Input", "");
+				let val = parseInt(item.value);
+				if (ogItem == name && val > 0) {
+					AB.items[name].owned = true;
+					AB.items[name].level = val;
+					AB.equip(name);
+				}
+			})
 		}
-	});
+	}
 }
 
 function setActiveOneTimers() {
@@ -288,10 +293,21 @@ function setLevels() {
 
 function setItemsInHtml(itemsList) {
 	let itemBoxes = document.querySelectorAll("input.equipInput");
-	itemBoxes.forEach(box => {
+	itemBoxes.forEach((box) => {
 		let item = box.id.replace("_Input", "");
 		if (itemsList.hasOwnProperty(item)) {
 			if (itemsList[item].equipped) box.value = itemsList[item].level;
 		}
 	});
+}
+
+function orderByUnlock() {
+	let order = AB.getItemOrder();
+	let sorted = [];
+	let n = order.length;
+	for (let i = 0; i < n; i++) {
+		let item = order[i];
+		sorted.push(item.name);
+	}
+	return sorted;
 }
