@@ -53,7 +53,6 @@ const startSimulation = () => {
 	AB.resetStats();
 	AB.update();
 
-	console.log(AB.oneTimers);
 	let run = 0;
 	startTime = Date.now();
 	while (run++ < iterations) {
