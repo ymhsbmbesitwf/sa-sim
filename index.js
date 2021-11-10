@@ -45,7 +45,7 @@ const startSimulation = () => {
 	setActiveItems();
 	setActiveOneTimers();
 	setLevels();
-	// calcBuildCost();
+	calcBuildCost();
 
 	let iterations = 1000;
 	AB.speed = 100;
@@ -193,10 +193,10 @@ function addChangeForEquip(item) {
 			let name = item.id.replace("_Input", "");
 			AB.equip(name);
 			AB.items[name].level = value;
-			// calcBuildCost();
 		} else {
 			event.target.value = 0;
 		}
+		// calcBuildCost();
 	});
 }
 
@@ -215,12 +215,10 @@ function setActiveItems() {
 
 function clearItems() {
 	for (const item in AB.items) {
-		if (Object.hasOwnProperty.call(AB.items, item)) {
-			AB.items[item].owned = false;
-			if (AB.items[item].equipped) AB.equip(item);
-			AB.items[item].hidden = false;
-			AB.items[item].level = 1;
-		}
+		AB.items[item].owned = false;
+		if (AB.items[item].equipped) AB.equip(item);
+		AB.items[item].hidden = false;
+		AB.items[item].level = 1;
 	}
 }
 
@@ -228,17 +226,15 @@ function setItems() {
 	let items = document.querySelectorAll("input.equipInput");
 	let ogItems = AB.items;
 	for (const ogItem in ogItems) {
-		if (Object.hasOwnProperty.call(ogItems, ogItem)) {
-			items.forEach((item) => {
-				let name = item.id.replace("_Input", "");
-				let val = parseInt(item.value);
-				if (ogItem == name && val > 0) {
-					AB.items[name].owned = true;
-					AB.items[name].level = val;
-					AB.equip(name);
-				}
-			})
-		}
+		items.forEach((item) => {
+			let name = item.id.replace("_Input", "");
+			let val = parseInt(item.value);
+			if (ogItem == name && val > 0) {
+				AB.items[name].owned = true;
+				AB.items[name].level = val;
+				AB.equip(name);
+			}
+		})
 	}
 }
 
@@ -266,23 +262,13 @@ function setOneTimers() {
 }
 
 function calcBuildCost() {
-	buildCost = 0;
-	for (const item in AB.items) {
-		if (Object.hasOwnProperty.call(AB.items, item)) {
-			if ((AB.items[item].equipped = true)) {
-				let curCost = 5;
-				let priceMod = 3;
-				if (AB.items[item].priceMod) priceMod = AB.items[item].priceMod;
-				let myCost = 0;
-				for (let step = 0; step < AB.items[item].level - 1; step++) {
-					myCost += curCost;
-					curCost *= priceMod;
-				}
-				buildCost += myCost;
-			}
+	let cost = 0;
+	for (let item in AB.items) {
+		if (AB.items[item].equipped) {
+			cost += (AB.items[item].startPrice || 5) * ((1 - Math.pow((AB.items[item].priceMod || 3), AB.items[item].level - 1)) / (1 - (AB.items[item].priceMod || 3)))
 		}
 	}
-	elements.buildCost.innerHTML = format(buildCost);
+	elements.buildCost.innerHTML = prettify(cost);
 }
 
 function setLevels() {
