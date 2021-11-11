@@ -1,5 +1,6 @@
 body {
 	background-color: darkgray;
+	color: black;
 }
 
 #mainDiv {
@@ -13,6 +14,7 @@ body {
 #rightSideDiv {
 	display: flex;
 	flex-direction: column;
+	margin-left: 1em;
 }
 
 #equipDiv {
@@ -58,5 +60,13 @@ body {
 .levelInp {
 	display: flex;
 	justify-content: space-between;
+}
+
+#resultsDiv > span {
 	border-bottom: 1px solid darkslateblue;
+}
+
+#startButton {
+	margin-top: 1em;
+	margin-bottom: 1em;
 }
