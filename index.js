@@ -157,7 +157,7 @@ function makeEquipBtns() {
 		div.appendChild(span);
 
 		let input = document.createElement("input");
-		input.type = "text";
+		input.type = "number";
 		input.value = 0;
 		input.className = "equipInput";
 		input.id = item + "_Input";
