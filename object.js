@@ -123,7 +123,6 @@ export let autoBattle = {
 		if (setting.enabled == setting.text.length - 1) setting.enabled = 0;
 		else setting.enabled++;
 		if (setting.onToggle) setting.onToggle();
-		this.popup(true, false, true);
 	},
 	settings: {
 		loadHide: {
@@ -2261,7 +2260,6 @@ export let autoBattle = {
 		this.sessionTrimpsKilled++;
 		this.lootAvg.counter += this.battleTime;
 		this.resetCombat();
-		this.popup(true, true);
 		//this.notes += "Trimp Died. "
 	},
 	getDustMult: function () {
@@ -2310,20 +2308,14 @@ export let autoBattle = {
 		}
 		this.resetCombat();
 		this.checkLastActions();
-		this.popup(true, false, true);
 	},
 	nextLevelCount: function () {
 		if (this.enemyLevel < 20) return 10 * this.enemyLevel;
 		return 190 + 15 * (this.enemyLevel - 19);
 	},
 	update: function () {
-		if (this.usingRealTimeOffline && this.speed > 1) {
-			this.settings.practice.enabled = 0;
-			this.speed = 1;
-		}
 		for (var x = 0; x < this.speed; x++) {
 			this.fight();
-			this.popup(true, true);
 			this.battleTime += this.frameTime;
 		}
 	},
@@ -2369,7 +2361,6 @@ export let autoBattle = {
 		if (!itemObj) return;
 		itemObj.equipped = !itemObj.equipped;
 		this.resetCombat(true);
-		this.popup(true);
 	},
 	countEquippedItems: function () {
 		var count = 0;
@@ -2396,7 +2387,6 @@ export let autoBattle = {
 		bonus.level++;
 		this.dust -= cost;
 		this.saveLastAction("bonus", null, cost);
-		this.popup(true, false, true);
 	},
 	buyOneTimer: function (what) {
 		var bonus = this.oneTimers[what];
@@ -2406,7 +2396,6 @@ export let autoBattle = {
 		if (bonus.onPurchase) bonus.onPurchase();
 		this.dust -= cost;
 		this.saveLastAction("bonus", null, cost);
-		this.popup(true, false, true);
 	},
 	hoverItem: function (item, upgrade) {
 		var itemObj = this.items[item];
@@ -2416,7 +2405,6 @@ export let autoBattle = {
 		} else {
 			this.notes = itemObj.description();
 		}
-		this.popup(true, true);
 	},
 	upgradeCost: function (item) {
 		var itemObj = this.items[item];
@@ -2435,7 +2423,6 @@ export let autoBattle = {
 		this.saveLastAction("upgrade", item);
 		this.dust -= cost;
 		itemObj.level++;
-		this.popup(false, false, true);
 	},
 	checkLastActions: function () {
 		var somethinGood = false;
@@ -2508,22 +2495,18 @@ export let autoBattle = {
 		this.popupMode = to;
 		this.notes = "";
 		this.confirmUndo = false;
-		this.popup(false, false, true);
 	},
 	toggleHideMode: function () {
 		this.hideMode = !this.hideMode;
 		this.popupMode = "items";
-		this.popup(false, false, true);
 	},
 	hide: function (itemName) {
 		this.items[itemName].hidden = true;
 		if (this.items[itemName].equipped)
 			this.items[itemName].equipped = false;
-		this.popup(false, false, true);
 	},
 	restore: function (itemName) {
 		this.items[itemName].hidden = false;
-		this.popup(false, false, true);
 	},
 	renamePresetTooltip: function (which) {
 		var text =
@@ -2541,33 +2524,8 @@ export let autoBattle = {
 		if (value.length < 1) return;
 		value = htmlEncode(value.substring(0, 25));
 		this.presets.names[which - 1] = value;
-		autoBattle.popup(false, false, false, true);
 	},
 	hideMode: false,
-	popup: function (updateOnly, statsOnly, itemsOnly, leaveMode) {
-		if (!updateOnly && !statsOnly && !itemsOnly) {
-			if (!leaveMode) this.popupMode = "items";
-			this.hideMode = false;
-			this.confirmUndo = false;
-		}
-		if (this.usingRealTimeOffline) {
-			cancelTooltip();
-			return;
-		}
-		var trimpAttackTime = this.trimp.attackSpeed;
-		var enemyAttackTime = this.enemy.attackSpeed;
-		var things = ["trimp", "enemy"];
-		for (var x = 0; x < things.length; x++) {
-			var fighterName = things[x];
-			var attackTime =
-				fighterName == "trimp" ? trimpAttackTime : enemyAttackTime;
-			attackTime /= 1000;
-
-			var freePmod = 0;
-			if (this.oneTimers.Master_of_Arms.owned) freePmod += 2;
-			if (this.oneTimers.Whirlwind_of_Arms.owned) freePmod += 10;
-		}
-	},
 };
 
 const prettify = (num) => {

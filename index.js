@@ -10,13 +10,13 @@ let AB = autoBattle;
 let LZ = LZString;
 let startTime;
 let formatter = new Intl.NumberFormat("en-GB", { minimumFractionDigits: 3 });
+
 function format(num) {
 	num = formatter.format(num);
 	return num.replaceAll(",", " ");
 }
-let buildCost;
-let elements;
 
+let elements;
 let settings = {
 	enemyLevel: 1,
 	maxEnemyLevel: 1,
@@ -48,7 +48,7 @@ const startSimulation = () => {
 	calcBuildCost();
 
 	let iterations = 1000;
-	AB.speed = 100;
+	AB.speed = 200;
 	AB.resetCombat();
 	AB.resetStats();
 	AB.update();
@@ -113,7 +113,7 @@ function setup() {
 		let value = event.target.value;
 		let maxLvl = document.getElementById("highestLevel");
 		if (maxLvl.value < value) {
-			maxLvl.value = value;
+			maxLvl.value = value - 1;
 		}
 	});
 	let maxLvl = document.getElementById("highestLevel");
@@ -123,10 +123,14 @@ function setup() {
 	let target = document.getElementById("saveInput");
 	target.addEventListener("paste", (event) => {
 		let paste = event.clipboardData.getData("text");
-		let save = JSON.parse(LZ.decompressFromBase64(paste));
-		let items = save.global.autoBattleData.items;
-		let oneTimers = save.global.autoBattleData.oneTimers;
-		setItemsInHtml(items, oneTimers);
+		try {
+			let save = JSON.parse(LZ.decompressFromBase64(paste));
+			let items = save.global.autoBattleData.items;
+			let oneTimers = save.global.autoBattleData.oneTimers;
+			setItemsInHtml(items, oneTimers);
+		}
+		catch(TypeError) {}
+		
 	});
 }
 
@@ -234,7 +238,7 @@ function setItems() {
 				AB.items[name].level = val;
 				AB.equip(name);
 			}
-		})
+		});
 	}
 }
 
@@ -265,7 +269,14 @@ function calcBuildCost() {
 	let cost = 0;
 	for (let item in AB.items) {
 		if (AB.items[item].equipped) {
-			cost += (AB.items[item].startPrice || 5) * ((1 - Math.pow((AB.items[item].priceMod || 3), AB.items[item].level - 1)) / (1 - (AB.items[item].priceMod || 3)))
+			cost +=
+				(AB.items[item].startPrice || 5) *
+				((1 -
+					Math.pow(
+						AB.items[item].priceMod || 3,
+						AB.items[item].level - 1
+					)) /
+					(1 - (AB.items[item].priceMod || 3)));
 		}
 	}
 	elements.buildCost.innerHTML = prettify(cost);
@@ -293,7 +304,7 @@ function setItemsInHtml(itemsList, oneTimersList) {
 		if (oneTimersList.hasOwnProperty(OT)) {
 			if (oneTimersList[OT]) box.checked = true;
 		}
-	})
+	});
 }
 
 function orderByUnlock() {
