@@ -110,9 +110,9 @@ function setup() {
 	let curr = document.getElementById("currentLevel");
 	curr.value = AB.enemyLevel;
 	curr.addEventListener("change", (event) => {
-		let value = event.target.value;
+		let value = parseInt(event.target.value);
 		let maxLvl = document.getElementById("highestLevel");
-		if (maxLvl.value < value) {
+		if (parseInt(maxLvl.value) < value) {
 			maxLvl.value = value - 1;
 		}
 	});
@@ -123,19 +123,15 @@ function setup() {
 	let target = document.getElementById("saveInput");
 	target.addEventListener("paste", (event) => {
 		let paste = event.clipboardData.getData("text");
-		try {
-			let save = JSON.parse(LZ.decompressFromBase64(paste));
-			let items = save.global.autoBattleData.items;
-			let oneTimers = save.global.autoBattleData.oneTimers;
-			setItemsInHtml(items, oneTimers);
-		}
-		catch(TypeError) {}
-		
+		let save = JSON.parse(LZ.decompressFromBase64(paste));
+		let items = save.global.autoBattleData.items;
+		let oneTimers = save.global.autoBattleData.oneTimers;
+		setItemsInHtml(items, oneTimers);
 	});
 }
 
 const prettify = (num) => {
-	return num.toLocaleString("en-US", {
+	return num.toLocaleString("en-GB", {
 		maximumSignificantDigits: 4,
 		notation: "compact",
 		compactDisplay: "short",
