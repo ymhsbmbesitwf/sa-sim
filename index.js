@@ -46,18 +46,7 @@ const startSimulation = () => {
 	setActiveOneTimers();
 	setLevels();
 	calcBuildCost();
-
-	let iterations = 1000;
-	AB.speed = 200;
-	AB.resetCombat();
-	AB.resetStats();
-	AB.update();
-
-	let run = 0;
-	startTime = Date.now();
-	while (run++ < iterations) {
-		AB.update();
-	}
+	runSimulation(100000);
 	wrapup();
 };
 
@@ -102,32 +91,7 @@ const wrapup = () => {
 function setup() {
 	makeEquipBtns();
 	makeOneTimersBtns();
-	// Start button
-	document
-		.getElementById("startButton")
-		.addEventListener("click", startSimulation);
-	// Levels
-	let curr = document.getElementById("currentLevel");
-	curr.value = AB.enemyLevel;
-	curr.addEventListener("change", (event) => {
-		let value = parseInt(event.target.value);
-		let maxLvl = document.getElementById("highestLevel");
-		if (parseInt(maxLvl.value) < value) {
-			maxLvl.value = value - 1;
-		}
-	});
-	let maxLvl = document.getElementById("highestLevel");
-	maxLvl.value = AB.maxEnemyLevel;
-
-	// Input for save
-	let target = document.getElementById("saveInput");
-	target.addEventListener("paste", (event) => {
-		let paste = event.clipboardData.getData("text");
-		let save = JSON.parse(LZ.decompressFromBase64(paste));
-		let items = save.global.autoBattleData.items;
-		let oneTimers = save.global.autoBattleData.oneTimers;
-		setItemsInHtml(items, oneTimers);
-	});
+	addListeners();
 }
 
 const prettify = (num) => {
@@ -196,7 +160,7 @@ function addChangeForEquip(item) {
 		} else {
 			event.target.value = 0;
 		}
-		// calcBuildCost();
+		calcBuildCost();
 	});
 }
 
@@ -262,6 +226,7 @@ function setOneTimers() {
 }
 
 function calcBuildCost() {
+	setActiveItems();
 	let cost = 0;
 	for (let item in AB.items) {
 		if (AB.items[item].equipped) {
@@ -312,4 +277,104 @@ function orderByUnlock() {
 		sorted.push(item.name);
 	}
 	return sorted;
+}
+
+function addListeners() {
+	let target;
+	// Start button
+	document
+		.getElementById("startButton")
+		.addEventListener("click", startSimulation);
+
+	// Levels
+	target = document.getElementById("currentLevel");
+	target.value = AB.enemyLevel;
+	target.addEventListener("change", (event) => {
+		let value = parseInt(event.target.value);
+		let maxLvl = document.getElementById("highestLevel");
+		if (parseInt(maxLvl.value) < value) {
+			maxLvl.value = value - 1;
+		}
+	});
+	document.getElementById("highestLevel").value = AB.maxEnemyLevel;
+
+	// Input for save
+	target = document.getElementById("saveInput");
+	target.addEventListener("paste", (event) => {
+		onSavePaste(event);
+	});
+
+	// Calculator buttons
+	document
+		.getElementById("bestUpgradesButton")
+		.addEventListener("click", findBestDpsUpgrade);
+}
+
+function findBestDpsUpgrade() {
+	setActiveItems();
+	setActiveOneTimers();
+
+	let speed = 200000;
+	runSimulation(speed);
+	let currDps = AB.getDustPs();
+	let items = getEquippedItems();
+	let dustForItems = [];
+	for (const ind in items) {
+		let name = items[ind].name;
+		let newDps = dustWithUpgrade(name, speed);
+		let increase = newDps - currDps;
+		dustForItems.push({name: name, increase: increase});
+	}
+
+	let div = document.getElementById("bestUpgradesDiv");
+
+	/* Clear earlier data. */
+	while (div.firstChild) {
+		div.removeChild(div.lastChild);
+	}
+
+	let info = document.createElement("span");
+	info.innerHTML = "Item +1 level : ~+Dust per Second";
+	if (dustForItems.length > 0) div.appendChild(info);
+	dustForItems.forEach(item => {
+		let span = document.createElement("span");
+		let name = item.name.replaceAll("_", " ");
+		span.innerHTML = name + ": " + prettify(item.increase);
+		div.appendChild(span);
+	});
+}
+
+function getEquippedItems() {
+	let equipped = [];
+	for (const item in AB.items) {
+		if (AB.items[item].equipped) {
+			equipped.push({name: item, data: AB.items[item]});
+		}
+	}
+	return equipped;
+}
+
+function onSavePaste(event) {
+	let paste = event.clipboardData.getData("text");
+	let save = JSON.parse(LZ.decompressFromBase64(paste));
+	let items = save.global.autoBattleData.items;
+	let oneTimers = save.global.autoBattleData.oneTimers;
+	setItemsInHtml(items, oneTimers);
+	calcBuildCost();
+}
+
+function dustWithUpgrade(name, speed) {
+	AB.items[name].level += 1;
+	runSimulation(speed);
+	AB.items[name].level -= 1;
+	return AB.getDustPs();
+}
+
+function runSimulation(speed = 100000) {
+	AB.speed = speed;
+	AB.resetCombat();
+	AB.resetStats();
+
+	startTime = Date.now();
+	AB.update()
 }

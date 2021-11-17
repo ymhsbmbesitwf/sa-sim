@@ -2348,16 +2348,6 @@ export let autoBattle = {
 	//popup stuff
 	equip: function (item) {
 		var itemObj = this.items[item];
-		if (!itemObj.equipped) {
-			var count = this.countEquippedItems();
-			if (count >= this.getMaxItems()) {
-				this.notes =
-					"<span class='red'>You can only equip " +
-					this.getMaxItems() +
-					" items at a time.</span>";
-				return;
-			}
-		}
 		if (!itemObj) return;
 		itemObj.equipped = !itemObj.equipped;
 		this.resetCombat(true);
