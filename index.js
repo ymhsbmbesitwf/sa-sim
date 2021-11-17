@@ -334,7 +334,7 @@ function findBestDpsUpgrade() {
 	}
 
 	let info = document.createElement("span");
-	info.innerHTML = "Item +1 level : ~+Dust per Second";
+	info.innerHTML = "Item +1 level : ~+DpS";
 	if (dustForItems.length > 0) div.appendChild(info);
 	dustForItems.forEach(item => {
 		let span = document.createElement("span");
