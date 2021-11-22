@@ -38,7 +38,7 @@ function getElements() {
 }
 
 const startSimulation = () => {
-	// AB.resetAll();
+	console.log(AB.items);
 	AB.enemyLevel = settings.enemyLevel;
 	AB.maxEnemyLevel = settings.maxEnemyLevel;
 	AB.bonuses.Extra_Limbs.level = 100; // TODO: make this better if needed?
@@ -253,6 +253,7 @@ function setLevels() {
 function setItemsInHtml(itemsList, oneTimersList) {
 	let itemBoxes = document.querySelectorAll("input.equipInput");
 	itemBoxes.forEach((box) => {
+		box.value = 0;
 		let item = box.id.replace("_Input", "");
 		if (itemsList.hasOwnProperty(item)) {
 			if (itemsList[item].equipped) box.value = itemsList[item].level;
