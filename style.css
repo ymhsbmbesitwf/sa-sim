@@ -54,12 +54,20 @@ body {
 #otherInputs {
 	display: flex;
 	flex-direction: column;
-	margin-top: 1em;
+	margin: 1em 1em 0 0;
 }
 
 .levelInp {
 	display: flex;
 	justify-content: space-between;
+}
+
+#currentLevel {
+	width: 10%;
+}
+
+#highestLevel {
+	width: 10%;
 }
 
 #resultsDiv > span {

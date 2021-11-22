@@ -250,7 +250,8 @@ function setLevels() {
 	AB.maxEnemyLevel = parseInt(maxLvl.value);
 }
 
-function setItemsInHtml(itemsList, oneTimersList) {
+function setItemsInHtml(itemsList, oneTimersList, currentLevel, maxLevel) {
+	
 	let itemBoxes = document.querySelectorAll("input.equipInput");
 	itemBoxes.forEach((box) => {
 		box.value = 0;
@@ -267,6 +268,13 @@ function setItemsInHtml(itemsList, oneTimersList) {
 			if (oneTimersList[OT]) box.checked = true;
 		}
 	});
+
+	let target = document.getElementById("currentLevel");
+	console.log(target);
+	target.innerHTML = currentLevel;
+	
+	target = document.getElementById("highestLevel");
+	target.innerHTML = maxLevel;
 }
 
 function orderByUnlock() {
@@ -329,7 +337,7 @@ function findBestDpsUpgrade() {
 
 	let div = document.getElementById("bestUpgradesDiv");
 
-	/* Clear earlier data. */
+	// Clear earlier data.
 	while (div.firstChild) {
 		div.removeChild(div.lastChild);
 	}
@@ -360,7 +368,9 @@ function onSavePaste(event) {
 	let save = JSON.parse(LZ.decompressFromBase64(paste));
 	let items = save.global.autoBattleData.items;
 	let oneTimers = save.global.autoBattleData.oneTimers;
-	setItemsInHtml(items, oneTimers);
+	let currentLevel = save.global.autoBattleData.enemyLevel;
+	let maxLevel = save.global.autoBattleData.maxEnemyLevel;
+	setItemsInHtml(items, oneTimers, currentLevel, maxLevel);
 	calcBuildCost();
 }
 
