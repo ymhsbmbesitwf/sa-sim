@@ -38,7 +38,6 @@ function getElements() {
 }
 
 const startSimulation = () => {
-	console.log(AB.items);
 	AB.enemyLevel = settings.enemyLevel;
 	AB.maxEnemyLevel = settings.maxEnemyLevel;
 	AB.bonuses.Extra_Limbs.level = 100; // TODO: make this better if needed?
@@ -116,13 +115,23 @@ function makeEquipBtns() {
 		span.textContent = name;
 		div.appendChild(span);
 
+		let inpDiv = document.createElement("div");
+		inpDiv.className = "inputAndCheckDivInp";
+		div.appendChild(inpDiv);
+
 		let input = document.createElement("input");
 		input.type = "number";
 		input.value = 0;
 		input.className = "equipInput";
 		input.id = item + "_Input";
 		addChangeForEquip(input);
-		div.appendChild(input);
+		inpDiv.appendChild(input);
+
+		let checkBox = document.createElement("input");
+		checkBox.type = "checkBox";
+		checkBox.id = item + "_CheckBox";
+		addChangeForCheckBox(checkBox);
+		inpDiv.appendChild(checkBox);
 	}
 }
 
@@ -151,14 +160,24 @@ function makeOneTimersBtns() {
 function addChangeForEquip(item) {
 	item.addEventListener("change", (event) => {
 		let value = event.target.value;
-		if (isInt(value)) {
+		if (isInt(value) && parseInt(Number(value)) > 0) {
+			let name = item.id.replace("_Input", "");
 			value = Number(value).toString();
 			event.target.value = value;
-			let name = item.id.replace("_Input", "");
-			AB.equip(name);
 			AB.items[name].level = value;
 		} else {
 			event.target.value = 0;
+		}
+		calcBuildCost();
+	});
+}
+
+function addChangeForCheckBox(checkBox) {
+	checkBox.addEventListener("change", (event) => {
+		let lvl = document.getElementById(checkBox.id.replace("_CheckBox", "_Input"));
+		let name = checkBox.id.replace("_CheckBox", "");
+		if (parseInt(lvl.value) > 0) {
+			AB.equip(name);
 		}
 		calcBuildCost();
 	});
@@ -196,7 +215,9 @@ function setItems() {
 			if (ogItem == name && val > 0) {
 				AB.items[name].owned = true;
 				AB.items[name].level = val;
-				AB.equip(name);
+				if (item.nextSibling.checked) {
+					AB.equip(name);
+				}
 			}
 		});
 	}
@@ -251,13 +272,15 @@ function setLevels() {
 }
 
 function setItemsInHtml(itemsList, oneTimersList, currentLevel, maxLevel) {
-	
 	let itemBoxes = document.querySelectorAll("input.equipInput");
 	itemBoxes.forEach((box) => {
 		box.value = 0;
 		let item = box.id.replace("_Input", "");
 		if (itemsList.hasOwnProperty(item)) {
-			if (itemsList[item].equipped) box.value = itemsList[item].level;
+			box.value = itemsList[item].level;
+			if (itemsList[item].equipped) {
+				box.nextSibling.checked = true;
+			}
 		}
 	});
 
@@ -270,9 +293,8 @@ function setItemsInHtml(itemsList, oneTimersList, currentLevel, maxLevel) {
 	});
 
 	let target = document.getElementById("currentLevel");
-	console.log(target);
 	target.innerHTML = currentLevel;
-	
+
 	target = document.getElementById("highestLevel");
 	target.innerHTML = maxLevel;
 }
@@ -295,17 +317,28 @@ function addListeners() {
 		.getElementById("startButton")
 		.addEventListener("click", startSimulation);
 
-	// Levels
+	// SA level
 	target = document.getElementById("currentLevel");
 	target.value = AB.enemyLevel;
 	target.addEventListener("change", (event) => {
 		let value = parseInt(event.target.value);
 		let maxLvl = document.getElementById("highestLevel");
+		if (value < 1) {
+			value = 1;
+			event.target.value = value;
+		}
 		if (parseInt(maxLvl.value) < value) {
 			maxLvl.value = value - 1;
 		}
 	});
-	document.getElementById("highestLevel").value = AB.maxEnemyLevel;
+
+	// SA highest level
+	target = document.getElementById("highestLevel");
+	target.value = AB.maxEnemyLevel;
+	target.addEventListener("change", (event) => {
+		let value = parseInt(event.target.value);
+		if (value < 1) event.target.value = 1;
+	});
 
 	// Input for save
 	target = document.getElementById("saveInput");
@@ -332,7 +365,7 @@ function findBestDpsUpgrade() {
 		let name = items[ind].name;
 		let newDps = dustWithUpgrade(name, speed);
 		let increase = newDps - currDps;
-		dustForItems.push({name: name, increase: increase});
+		dustForItems.push({ name: name, increase: increase });
 	}
 
 	let div = document.getElementById("bestUpgradesDiv");
@@ -345,7 +378,7 @@ function findBestDpsUpgrade() {
 	let info = document.createElement("span");
 	info.innerHTML = "Item +1 level : ~+DpS";
 	if (dustForItems.length > 0) div.appendChild(info);
-	dustForItems.forEach(item => {
+	dustForItems.forEach((item) => {
 		let span = document.createElement("span");
 		let name = item.name.replaceAll("_", " ");
 		span.innerHTML = name + ": " + prettify(item.increase);
@@ -357,7 +390,7 @@ function getEquippedItems() {
 	let equipped = [];
 	for (const item in AB.items) {
 		if (AB.items[item].equipped) {
-			equipped.push({name: item, data: AB.items[item]});
+			equipped.push({ name: item, data: AB.items[item] });
 		}
 	}
 	return equipped;
@@ -387,5 +420,5 @@ function runSimulation(speed = 100000) {
 	AB.resetStats();
 
 	startTime = Date.now();
-	AB.update()
+	AB.update();
 }

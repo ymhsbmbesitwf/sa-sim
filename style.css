@@ -29,6 +29,14 @@ body {
 	border-bottom: 1px solid darkslateblue;
 }
 
+.equipInpDiv span {
+	margin-right: 1em;
+}
+
+.inputAndCheckDivInp {
+	justify-content: right;
+}
+
 #oneTimersDiv {
 	display: flex;
 	flex-direction: column;
