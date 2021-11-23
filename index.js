@@ -293,10 +293,10 @@ function setItemsInHtml(itemsList, oneTimersList, currentLevel, maxLevel) {
 	});
 
 	let target = document.getElementById("currentLevel");
-	target.innerHTML = currentLevel;
+	target.value = parseInt(currentLevel);
 
 	target = document.getElementById("highestLevel");
-	target.innerHTML = maxLevel;
+	target.value = maxLevel - 1;
 }
 
 function orderByUnlock() {
