@@ -17,10 +17,6 @@ function format(num) {
 }
 
 let elements;
-let settings = {
-	enemyLevel: 1,
-	maxEnemyLevel: 1,
-};
 
 function getElements() {
 	let ele = {
@@ -38,8 +34,6 @@ function getElements() {
 }
 
 const startSimulation = () => {
-	AB.enemyLevel = settings.enemyLevel;
-	AB.maxEnemyLevel = settings.maxEnemyLevel;
 	AB.bonuses.Extra_Limbs.level = 100; // TODO: make this better if needed?
 	setActiveItems();
 	setActiveOneTimers();
@@ -296,7 +290,7 @@ function setItemsInHtml(itemsList, oneTimersList, currentLevel, maxLevel) {
 	target.value = parseInt(currentLevel);
 
 	target = document.getElementById("highestLevel");
-	target.value = maxLevel - 1;
+	target.value = maxLevel;
 }
 
 function orderByUnlock() {
@@ -328,7 +322,7 @@ function addListeners() {
 			event.target.value = value;
 		}
 		if (parseInt(maxLvl.value) < value) {
-			maxLvl.value = value - 1;
+			maxLvl.value = value;
 		}
 	});
 
