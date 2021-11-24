@@ -115,7 +115,7 @@ function makeEquipBtns() {
 
 		let input = document.createElement("input");
 		input.type = "number";
-		input.value = 0;
+		input.value = 1;
 		input.className = "equipInput";
 		input.id = item + "_Input";
 		addChangeForEquip(input);
@@ -154,13 +154,13 @@ function makeOneTimersBtns() {
 function addChangeForEquip(item) {
 	item.addEventListener("change", (event) => {
 		let value = event.target.value;
-		if (isInt(value) && parseInt(Number(value)) > 0) {
+		if (isInt(value) && parseInt(Number(value)) >= 1) {
 			let name = item.id.replace("_Input", "");
 			value = Number(value).toString();
 			event.target.value = value;
 			AB.items[name].level = value;
 		} else {
-			event.target.value = 0;
+			event.target.value = 1;
 		}
 		calcBuildCost();
 	});
@@ -268,7 +268,7 @@ function setLevels() {
 function setItemsInHtml(itemsList, oneTimersList, currentLevel, maxLevel) {
 	let itemBoxes = document.querySelectorAll("input.equipInput");
 	itemBoxes.forEach((box) => {
-		box.value = 0;
+		box.value = 1;
 		let item = box.id.replace("_Input", "");
 		if (itemsList.hasOwnProperty(item)) {
 			box.value = itemsList[item].level;
