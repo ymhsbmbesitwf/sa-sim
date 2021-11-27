@@ -67,7 +67,7 @@ const wrapup = () => {
 
 	let trimpsKilled = AB.sessionTrimpsKilled;
 	elements.trimpsKilled.innerHTML =
-		trimpsKilled + " [" + prettify(100 * WR) + "%]";
+		trimpsKilled + " [" + 100 * WR + "%]";
 	elements.clearingTime.innerHTML =
 		format(
 			((toKill / AB.sessionEnemiesKilled) * AB.lootAvg.counter) / 1000
@@ -180,7 +180,7 @@ function addChangeForCheckBox(checkBox) {
 function isInt(value) {
 	return (
 		!isNaN(value) &&
-		parseInt(Number(value)) == value &&
+		parseInt(Number(value)) === value &&
 		!isNaN(parseInt(value, 10))
 	);
 }
@@ -206,7 +206,7 @@ function setItems() {
 		items.forEach((item) => {
 			let name = item.id.replace("_Input", "");
 			let val = parseInt(item.value);
-			if (ogItem == name && val > 0) {
+			if (ogItem === name && val > 0) {
 				AB.items[name].owned = true;
 				AB.items[name].level = val;
 				if (item.nextSibling.checked) {
@@ -344,11 +344,14 @@ function addListeners() {
 	document
 		.getElementById("bestUpgradesButton")
 		.addEventListener("click", findBestDpsUpgrade);
+
+	document.getElementById("theoreticalWin").addEventListener("click", maxLuck);
 }
 
 function findBestDpsUpgrade() {
 	setActiveItems();
 	setActiveOneTimers();
+	setLevels();
 
 	let speed = 200000;
 	runSimulation(speed);
@@ -415,4 +418,15 @@ function runSimulation(speed = 100000) {
 
 	startTime = Date.now();
 	AB.update();
+}
+
+function maxLuck() {
+	setActiveItems();
+	setActiveOneTimers();
+	setLevels();
+	let whoDied = AB.oneFight();
+	let target = document.getElementById("theoreticalWin").parentElement;
+	let span = document.createElement("span");
+	span.innerHTML = "You can theoretically win: " + !whoDied.isTrimp;
+	target.appendChild(span);
 }

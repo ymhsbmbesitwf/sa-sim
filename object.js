@@ -1947,16 +1947,19 @@ export let autoBattle = {
 		if (fighterObj.isTrimp) return fighterObj.attack;
 		return fighterObj.attack * this.getEnrageMult();
 	},
-	rollDamage: function (attacker) {
+	rollDamage: function (attacker, luck = false) {
 		var baseAttack = this.getAttack(attacker);
 		var attack = baseAttack * 0.2;
 		var roll = Math.floor(Math.random() * 201);
+		if (luck) {
+			roll = 100 + luck * 100;
+		}
 		roll -= 100;
 		roll /= 100;
 		return baseAttack + attack * roll;
 	},
-	attack: function (attacker, defender) {
-		var damage = this.rollDamage(attacker);
+	attack: function (attacker, defender, luck = 0) {
+		var damage = this.rollDamage(attacker, luck);
 		var shockMod = 1;
 		if (defender.shock.time > 0) {
 			shockMod = 1 + defender.shock.mod;
@@ -2516,6 +2519,112 @@ export let autoBattle = {
 		this.presets.names[which - 1] = value;
 	},
 	hideMode: false,
+
+	// Functions to simulate max luck.
+
+	oneFight: function () {
+		this.resetCombat();
+
+		this.enemy.maxHealth = this.enemy.baseHealth;
+		this.trimp.maxHealth = this.trimp.baseHealth;
+		this.enemy.attackSpeed = this.enemy.baseAttackSpeed;
+		this.trimp.attackSpeed = this.trimp.baseAttackSpeed;
+		this.trimp.attack = this.trimp.baseAttack;
+		this.enemy.attack = this.enemy.baseAttack;
+
+		this.trimp.shockChance = 0;
+		this.trimp.shockMod = 0;
+		this.trimp.shockTime = 0;
+
+		this.trimp.bleedChance = 0;
+		this.trimp.bleedMod = 0;
+		this.trimp.bleedTime = 0;
+
+		this.trimp.poisonChance = 0;
+		this.trimp.poisonTime = 0;
+		this.trimp.poisonMod = 0;
+		this.trimp.poisonStack = 2;
+		this.trimp.poisonTick = 1000;
+		this.trimp.poisonHeal = 0;
+
+		this.trimp.shockResist = 0;
+		this.trimp.poisonResist = 0;
+		this.trimp.bleedResist = 0;
+
+		this.trimp.defense = 0;
+		this.trimp.lifesteal = 0;
+		this.trimp.damageTakenMult = 1;
+		this.trimp.slowAura = 1;
+
+		this.checkItems();
+
+		// Set all chances
+		for (let mod in this.trimp) {
+			if (mod.includes("Chance")) {
+				let val = this.trimp[mod];
+				if (val > 0 && val < 100) {
+					this.trimp[mod] = 100;
+				}
+			}
+		}
+		for (let mod in this.enemy) {
+			if (mod.includes("Chance")) {
+				let val = this.enemy[mod];
+				if (val > 0 && val < 100) {
+					this.enemy[mod] = 100;
+				}
+			}
+		}
+
+
+		var trimpAttackTime = this.trimp.attackSpeed;
+		let counter = 0;
+		while ((this.trimp.health > 0 || this.enemy.health > 0) && counter < 100) {
+			this.enemy.lastAttack += this.frameTime;
+			this.trimp.lastAttack += this.frameTime;
+			counter++;
+			if (this.trimp.lastAttack >= trimpAttackTime) {
+				this.trimp.lastAttack -= trimpAttackTime;
+				this.attack(this.trimp, this.enemy, 1);
+			}
+
+			this.checkPoison(this.trimp);
+			if (this.trimp.bleed.time > 0)
+				this.trimp.bleed.time -= this.frameTime;
+			if (this.trimp.shock.time > 0)
+				this.trimp.shock.time -= this.frameTime;
+			if (this.enemy.health <= 0) {
+				return this.enemy;
+			}
+			if (this.trimp.health <= 0) {
+				return this.trimp;
+			}
+			var enemyAttackTime = this.enemy.attackSpeed;
+			if (this.enemy.lastAttack >= enemyAttackTime) {
+				this.enemy.lastAttack -= enemyAttackTime;
+				this.attack(this.enemy, this.trimp, -1);
+			}
+
+			this.checkPoison(this.enemy);
+			if (this.enemy.bleed.time > 0)
+				this.enemy.bleed.time -= this.frameTime;
+			if (this.enemy.shock.time > 0 && this.enemy.shock.time != 9999999)
+				this.enemy.shock.time -= this.frameTime;
+			if (this.trimp.health > this.trimp.maxHealth)
+				this.trimp.health = this.trimp.maxHealth;
+			if (this.enemy.health > this.enemy.maxHealth)
+				this.enemy.health = this.enemy.maxHealth;
+			if (this.trimp.health <= 0) {
+				return this.trimp;
+			}
+			if (this.enemy.health <= 0) {
+				return this.enemy;
+			}
+
+			this.battleTime += this.frameTime;
+		}
+		return "error?";
+	},
 };
 
 const prettify = (num) => {
