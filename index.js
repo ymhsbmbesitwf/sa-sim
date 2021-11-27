@@ -425,8 +425,14 @@ function maxLuck() {
 	setActiveOneTimers();
 	setLevels();
 	let whoDied = AB.oneFight();
-	let target = document.getElementById("theoreticalWin").parentElement;
-	let span = document.createElement("span");
-	span.innerHTML = "You can theoretically win: " + !whoDied.isTrimp;
-	target.appendChild(span);
+	let span = document.getElementById("theoreticalWinSpan");
+	if (span) {
+		span.innerHTML = "You can theoretically win: " + !whoDied.isTrimp;
+	} else {
+		let parent = document.getElementById("theoreticalWin").parentElement;
+		let span = document.createElement("span");
+		span.id = "theoreticalWinSpan";
+		span.innerHTML = "You can theoretically win: " + !whoDied.isTrimp;
+		parent.appendChild(span);
+	}
 }
