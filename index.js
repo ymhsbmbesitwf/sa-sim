@@ -154,7 +154,7 @@ function makeOneTimersBtns() {
 function addChangeForEquip(item) {
 	item.addEventListener("change", (event) => {
 		let value = event.target.value;
-		if (isInt(value) && parseInt(Number(value)) >= 1) {
+		if (parseInt(Number(value)) >= 1) {
 			let name = item.id.replace("_Input", "");
 			value = Number(value).toString();
 			event.target.value = value;
