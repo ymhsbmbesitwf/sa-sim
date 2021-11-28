@@ -365,8 +365,10 @@ function findBestDpsUpgrade() {
 		dustForItems.push({ name: name, increase: increase });
 	}
 
-	let div = document.getElementById("bestUpgradesDiv");
+	// Find and highlight the best upgrade.
+	let bestUpgrade = dustForItems.reduce((a, b) => (a.increase > b.increase ? a : b));
 
+	let div = document.getElementById("bestUpgradesDiv");
 	// Clear earlier data.
 	while (div.firstChild) {
 		div.removeChild(div.lastChild);
@@ -380,7 +382,14 @@ function findBestDpsUpgrade() {
 		let name = item.name.replaceAll("_", " ");
 		span.innerHTML = name + ": " + prettify(item.increase);
 		div.appendChild(span);
+
+		if (item.name === bestUpgrade.name) {
+			// bold the best upgrade
+			span.style.fontWeight = "bold";
+		}
 	});
+
+	
 }
 
 function getEquippedItems() {

@@ -71,11 +71,11 @@ body {
 }
 
 #currentLevel {
-	width: 10%;
+	width: 2.5em;
 }
 
 #highestLevel {
-	width: 10%;
+	width: 2.5em;
 }
 
 #resultsDiv > span {
