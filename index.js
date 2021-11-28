@@ -66,8 +66,7 @@ const wrapup = () => {
 	elements.enemiesKilled.innerHTML = enemiesKilled;
 
 	let trimpsKilled = AB.sessionTrimpsKilled;
-	elements.trimpsKilled.innerHTML =
-		trimpsKilled + " [" + 100 * WR + "%]";
+	elements.trimpsKilled.innerHTML = trimpsKilled + " [" + 100 * WR + "%]";
 	elements.clearingTime.innerHTML =
 		format(
 			((toKill / AB.sessionEnemiesKilled) * AB.lootAvg.counter) / 1000
@@ -168,7 +167,9 @@ function addChangeForEquip(item) {
 
 function addChangeForCheckBox(checkBox) {
 	checkBox.addEventListener("change", (event) => {
-		let lvl = document.getElementById(checkBox.id.replace("_CheckBox", "_Input"));
+		let lvl = document.getElementById(
+			checkBox.id.replace("_CheckBox", "_Input")
+		);
 		let name = checkBox.id.replace("_CheckBox", "");
 		if (parseInt(lvl.value) > 0) {
 			AB.equip(name);
@@ -345,7 +346,9 @@ function addListeners() {
 		.getElementById("bestUpgradesButton")
 		.addEventListener("click", findBestDpsUpgrade);
 
-	document.getElementById("theoreticalWin").addEventListener("click", maxLuck);
+	document
+		.getElementById("theoreticalWin")
+		.addEventListener("click", maxLuck);
 }
 
 function findBestDpsUpgrade() {
@@ -353,43 +356,85 @@ function findBestDpsUpgrade() {
 	setActiveOneTimers();
 	setLevels();
 
-	let speed = 200000;
-	runSimulation(speed);
-	let currDps = AB.getDustPs();
-	let items = getEquippedItems();
-	let dustForItems = [];
-	for (const ind in items) {
-		let name = items[ind].name;
-		let newDps = dustWithUpgrade(name, speed);
-		let increase = newDps - currDps;
-		dustForItems.push({ name: name, increase: increase });
-	}
+	if (getEquippedItems().length) {
+		runSimulation(200069);
+		let currDps = AB.getDustPs();
+		let items = getEquippedItems();
+		let dustForItems = [];
+		for (const ind in items) {
+			let name = items[ind].name;
+			let newDps = dustWithUpgrade(name, speed);
+			let increase = newDps - currDps;
 
-	// Find and highlight the best upgrade.
-	let bestUpgrade = dustForItems.reduce((a, b) => (a.increase > b.increase ? a : b));
+			// How long until upgrade is paid back.
+			let upgradeCost = AB.upgradeCost(items[ind].name);
+			let time = upgradeCost / newDps;
 
-	let div = document.getElementById("bestUpgradesDiv");
-	// Clear earlier data.
-	while (div.firstChild) {
-		div.removeChild(div.lastChild);
-	}
-
-	let info = document.createElement("span");
-	info.innerHTML = "Item +1 level : ~+DpS";
-	if (dustForItems.length > 0) div.appendChild(info);
-	dustForItems.forEach((item) => {
-		let span = document.createElement("span");
-		let name = item.name.replaceAll("_", " ");
-		span.innerHTML = name + ": " + prettify(item.increase);
-		div.appendChild(span);
-
-		if (item.name === bestUpgrade.name) {
-			// bold the best upgrade
-			span.style.fontWeight = "bold";
+			dustForItems.push({
+				name: name,
+				increase: increase,
+				payback_time: time,
+			});
 		}
-	});
 
-	
+		// Find the best upgrade.
+		let bestUpgrade = dustForItems.reduce((a, b) =>
+			a.increase > b.increase ? a : b
+		);
+
+		// Find the lowest payback time.
+		let bestPayback = dustForItems.reduce((a, b) =>
+			a.payback_time < b.payback_time ? a : b
+		);
+
+		let div = document.getElementById("bestUpgradesDiv");
+		// Clear earlier data.
+		while (div.firstChild) {
+			div.removeChild(div.lastChild);
+		}
+
+		let ldiv = document.createElement("div");
+		let mdiv = document.createElement("div");
+		let rdiv = document.createElement("div");
+		div.appendChild(ldiv);
+		div.appendChild(mdiv);
+		div.appendChild(rdiv);
+
+		let text = document.createElement("span");
+		text.innerHTML = "Item +1 level";
+		ldiv.appendChild(text);
+
+		let text2 = document.createElement("span");
+		text2.innerHTML = "~+DpS";
+		mdiv.appendChild(text2);
+
+		let text3 = document.createElement("span");
+		text3.innerHTML = "ROI in seconds";
+		rdiv.appendChild(text3);
+
+		dustForItems.forEach((item) => {
+			let name = item.name.replaceAll("_", " ");
+			let span1 = document.createElement("span");
+			let span2 = document.createElement("span");
+			let span3 = document.createElement("span");
+			span1.innerHTML = name;
+			span2.innerHTML = prettify(item.increase);
+			span3.innerHTML = prettify(item.payback_time) + " s";
+			ldiv.appendChild(span1);
+			mdiv.appendChild(span2);
+			rdiv.appendChild(span3);
+
+			if (item.name === bestUpgrade.name) {
+				// bold the best upgradeCost
+				span2.style.fontWeight = "bold";
+			}
+
+			if (item.name === bestPayback.name) {
+				// add astrix to the best payback time
+				span3.style.fontWeight = "bold";
+			}
+		});
+	}
 }
 
 function getEquippedItems() {

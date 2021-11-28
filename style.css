@@ -87,17 +87,18 @@ body {
 	margin-bottom: 1em;
 }
 
-#calcResults {
+#calcButtons {
 	display: flex;
 	flex-direction: column;
 }
 
 #bestUpgradesDiv {
 	display: flex;
-	flex-direction: column;
+	flex-direction: vertical;
+	justify-content: space-between;
 }
 
-#calcButtons {
+#bestUpgradesDiv div {
 	display: flex;
 	flex-direction: column;
 }
