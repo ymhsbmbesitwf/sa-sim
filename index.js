@@ -357,7 +357,7 @@ function findBestDpsUpgrade() {
 	setLevels();
 
 	if (getEquippedItems().length) {
-		runSimulation(200069);
+		runSimulation(100069);
 		let currDps = AB.getDustPs();
 		let items = getEquippedItems();
 		let dustForItems = [];
