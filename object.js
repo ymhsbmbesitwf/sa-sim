@@ -2525,64 +2525,60 @@ export let autoBattle = {
 	oneFight: function () {
 		this.resetCombat();
 
-		this.enemy.maxHealth = this.enemy.baseHealth;
-		this.trimp.maxHealth = this.trimp.baseHealth;
-		this.enemy.attackSpeed = this.enemy.baseAttackSpeed;
-		this.trimp.attackSpeed = this.trimp.baseAttackSpeed;
-		this.trimp.attack = this.trimp.baseAttack;
-		this.enemy.attack = this.enemy.baseAttack;
+		while (this.trimp.health > 0 || this.enemy.health > 0) {
+			this.enemy.maxHealth = this.enemy.baseHealth;
+			this.trimp.maxHealth = this.trimp.baseHealth;
+			this.enemy.attackSpeed = this.enemy.baseAttackSpeed;
+			this.trimp.attackSpeed = this.trimp.baseAttackSpeed;
+			this.trimp.attack = this.trimp.baseAttack;
+			this.enemy.attack = this.enemy.baseAttack;
+			this.trimp.shockChance = 0;
+			this.trimp.shockMod = 0;
+			this.trimp.shockTime = 0;
 
-		this.trimp.shockChance = 0;
-		this.trimp.shockMod = 0;
-		this.trimp.shockTime = 0;
+			this.trimp.bleedChance = 0;
+			this.trimp.bleedMod = 0;
+			this.trimp.bleedTime = 0;
 
-		this.trimp.bleedChance = 0;
-		this.trimp.bleedMod = 0;
-		this.trimp.bleedTime = 0;
+			this.trimp.poisonChance = 0;
+			this.trimp.poisonTime = 0;
+			this.trimp.poisonMod = 0;
+			this.trimp.poisonStack = 2;
+			this.trimp.poisonTick = 1000;
+			this.trimp.poisonHeal = 0;
 
-		this.trimp.poisonChance = 0;
-		this.trimp.poisonTime = 0;
-		this.trimp.poisonMod = 0;
-		this.trimp.poisonStack = 2;
-		this.trimp.poisonTick = 1000;
-		this.trimp.poisonHeal = 0;
+			this.trimp.shockResist = 0;
+			this.trimp.poisonResist = 0;
+			this.trimp.bleedResist = 0;
 
-		this.trimp.shockResist = 0;
-		this.trimp.poisonResist = 0;
-		this.trimp.bleedResist = 0;
+			this.trimp.defense = 0;
+			this.trimp.lifesteal = 0;
+			this.trimp.damageTakenMult = 1;
+			this.trimp.slowAura = 1;
 
-		this.trimp.defense = 0;
-		this.trimp.lifesteal = 0;
-		this.trimp.damageTakenMult = 1;
-		this.trimp.slowAura = 1;
+			this.checkItems();
 
-		this.checkItems();
-
-		// Set all chances
-		for (let mod in this.trimp) {
-			if (mod.includes("Chance")) {
-				let val = this.trimp[mod];
-				if (val > 0 && val < 100) {
-					this.trimp[mod] = 100;
+			// Set all chances
+			for (let mod in this.trimp) {
+				if (mod.includes("Chance")) {
+					let val = this.trimp[mod];
+					if (val > 0 && val < 100) {
+						this.trimp[mod] = 100;
+					}
 				}
 			}
-		}
-		for (let mod in this.enemy) {
-			if (mod.includes("Chance")) {
-				let val = this.enemy[mod];
-				if (val > 0 && val < 100) {
-					this.enemy[mod] = 100;
+			for (let mod in this.enemy) {
+				if (mod.includes("Chance")) {
+					let val = this.enemy[mod];
+					if (val > 0 && val < 100) {
+						this.enemy[mod] = 100;
+					}
 				}
 			}
-		}
 
-
-		var trimpAttackTime = this.trimp.attackSpeed;
-		let counter = 0;
-		while ((this.trimp.health > 0 || this.enemy.health > 0) && counter < 100) {
+			var trimpAttackTime = this.trimp.attackSpeed;
 			this.enemy.lastAttack += this.frameTime;
 			this.trimp.lastAttack += this.frameTime;
-			counter++;
 			if (this.trimp.lastAttack >= trimpAttackTime) {
 				this.trimp.lastAttack -= trimpAttackTime;
 				this.attack(this.trimp, this.enemy, 1);
