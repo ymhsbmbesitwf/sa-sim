@@ -369,12 +369,15 @@ function findBestDpsUpgrade() {
 
 			// How long until upgrade is paid back.
 			let upgradeCost = AB.upgradeCost(items[ind].name);
-			let time = upgradeCost / newDps;
+			let time = upgradeCost / increase;
+			if (time < 0 ) {
+				time = "∞";
+			}
 
 			dustForItems.push({
 				name: name,
 				increase: increase,
-				payback_time: time,
+				time: time,
 			});
 		}
 
@@ -385,7 +388,7 @@ function findBestDpsUpgrade() {
 
 		// Find the lowest payback time.
 		let bestPayback = dustForItems.reduce((a, b) =>
-			a.payback_time < b.payback_time ? a : b
+			a.time < b.time ? a : b
 		);
 
 		let div = document.getElementById("bestUpgradesDiv");
@@ -410,7 +413,7 @@ function findBestDpsUpgrade() {
 		mdiv.appendChild(text2);
 
 		let text3 = document.createElement("span");
-		text3.innerHTML = "ROI in seconds";
+		text3.innerHTML = "Time until profit";
 		rdiv.appendChild(text3);
 
 		dustForItems.forEach((item) => {
@@ -420,7 +423,7 @@ function findBestDpsUpgrade() {
 			let span3 = document.createElement("span");
 			span1.innerHTML = name;
 			span2.innerHTML = prettify(item.increase);
-			span3.innerHTML = prettify(item.payback_time) + " s";
+			span3.innerHTML = prettify(item.time) + " s";
 			ldiv.appendChild(span1);
 			mdiv.appendChild(span2);
 			rdiv.appendChild(span3);
