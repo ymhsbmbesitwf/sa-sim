@@ -371,7 +371,7 @@ function findBestDpsUpgrade() {
 			let upgradeCost = AB.upgradeCost(items[ind].name);
 			let time = upgradeCost / increase;
 			if (time < 0 ) {
-				time = "∞";
+				time = Infinity;
 			}
 
 			dustForItems.push({
@@ -423,7 +423,7 @@ function findBestDpsUpgrade() {
 			let span3 = document.createElement("span");
 			span1.innerHTML = name;
 			span2.innerHTML = prettify(item.increase);
-			span3.innerHTML = prettify(item.time) + " s";
+			span3.innerHTML = prettify(item.time / 3600) + " h";
 			ldiv.appendChild(span1);
 			mdiv.appendChild(span2);
 			rdiv.appendChild(span3);
