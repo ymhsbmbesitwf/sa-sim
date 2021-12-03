@@ -423,7 +423,7 @@ function findBestDpsUpgrade() {
 			let span3 = document.createElement("span");
 			span1.innerHTML = name;
 			span2.innerHTML = prettify(item.increase);
-			span3.innerHTML = prettify(item.time / 3600) + " h";
+			span3.innerHTML = convertTime(item.time);
 			ldiv.appendChild(span1);
 			mdiv.appendChild(span2);
 			rdiv.appendChild(span3);
@@ -492,5 +492,17 @@ function maxLuck() {
 		span.id = "theoreticalWinSpan";
 		span.innerHTML = "You can theoretically win: " + !whoDied.isTrimp;
 		parent.appendChild(span);
+	}
+}
+
+function convertTime(time) {
+	// Return time as seconds, hours or days.
+	time = time.toFixed(1);
+	if (time < 3600) {
+		return time + "s";
+	} else if (time < 86400) {
+		return (time / 3600).toFixed(1) + "h";
+	} else {
+		return (time / 86400).toFixed(1) + "d";
 	}
 }
