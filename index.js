@@ -29,15 +29,14 @@ function getElements() {
 		dustPs: document.getElementById("dustPs"),
 		averageFightTime: document.getElementById("averageFightTime"),
 		averageKillTime: document.getElementById("averageKillTime"),
+		shardsPs: document.getElementById("shardsPs"),
 	};
 	elements = ele;
 }
 
 const startSimulation = () => {
-	AB.bonuses.Extra_Limbs.level = 100; // TODO: make this better if needed?
-	setActiveItems();
-	setActiveOneTimers();
-	setLevels();
+	AB.bonuses.Extra_Limbs.level = 100; // For safety
+	sets();
 	calcBuildCost();
 	runSimulation(100000);
 	wrapup();
@@ -66,7 +65,7 @@ const wrapup = () => {
 	elements.enemiesKilled.innerHTML = enemiesKilled;
 
 	let trimpsKilled = AB.sessionTrimpsKilled;
-	elements.trimpsKilled.innerHTML = trimpsKilled + " [" + 100 * WR + "%]";
+	elements.trimpsKilled.innerHTML = trimpsKilled + " [" + 100 * format(WR) + "%]";
 	elements.clearingTime.innerHTML =
 		format(
 			((toKill / AB.sessionEnemiesKilled) * AB.lootAvg.counter) / 1000
@@ -78,6 +77,9 @@ const wrapup = () => {
 
 	fightTime = timeSpent / enemiesKilled;
 	elements.averageKillTime.innerHTML = format(fightTime) + " ms";
+
+	let base_shards = AB.enemyLevel >= 51 ? base_dust/1e9 : 0;
+	elements.shardsPs.innerHTML = format(base_shards) + " S/s";
 };
 
 function setup() {
@@ -94,6 +96,12 @@ const prettify = (num) => {
 	});
 };
 
+function sets() {
+	setActiveItems();
+	setActiveOneTimers();
+	setLevels();
+}
+
 function makeEquipBtns() {
 	let equipDiv = document.getElementById("equipDiv");
 	let items = orderByUnlock();
@@ -109,7 +117,7 @@ function makeEquipBtns() {
 		div.appendChild(span);
 
 		let inpDiv = document.createElement("div");
-		inpDiv.className = "inputAndCheckDivInp";
+		inpDiv.className = "inputAndCheckDiv";
 		div.appendChild(inpDiv);
 
 		let input = document.createElement("input");
@@ -138,14 +146,40 @@ function makeOneTimersBtns() {
 
 			let span = document.createElement("span");
 			let name = oneTimer.replaceAll("_", " ");
-			span.textContent = name;
+			span.innerHTML = name;
 			div.appendChild(span);
+
+			let rightDiv = document.createElement("div");
+			rightDiv.className = "inputAndCheckRingDiv";
+			div.appendChild(rightDiv);
+
+			if (oneTimer === "The_Ring") {
+				let input = document.createElement("input");
+				input.type = "number";
+				input.value = 1;
+				input.id = "The_Ring_Input";
+				rightDiv.appendChild(input);
+
+				let dropDown = document.createElement("select");
+				rightDiv.appendChild(dropDown);
+				dropDown.id = "ringModSelect";
+				let empty = document.createElement("option");
+				empty.value = "";
+				empty.text = Array(0);
+				dropDown.appendChild(empty);
+				for (const mod in AB.ringStats) {
+					let option = document.createElement("option");
+					option.value = mod;
+					option.text = mod;
+					dropDown.appendChild(option);
+				}
+			}
 
 			let checkBox = document.createElement("input");
 			checkBox.type = "checkBox";
 			checkBox.className = "oneTimerInput";
 			checkBox.id = oneTimer + "_Input";
-			div.appendChild(checkBox);
+			rightDiv.appendChild(checkBox);
 		}
 	}
 }
@@ -237,12 +271,19 @@ function setOneTimers() {
 		if (oneTimer.checked) {
 			let name = oneTimer.id.replace("_Input", "");
 			AB.oneTimers[name].owned = true;
+			if (name === "The_Ring") {
+				let mod = oneTimer.previousSibling;
+				if (mod.value) AB.rings.mods = Array(mod.value);
+				else AB.rings.mods = Array(0);
+				let val = mod.previousSibling;
+				AB.rings.level = val.value;
+			}
 		}
 	});
 }
 
 function calcBuildCost() {
-	setActiveItems();
+	sets();
 	let cost = 0;
 	for (let item in AB.items) {
 		if (AB.items[item].equipped) {
@@ -266,7 +307,7 @@ function setLevels() {
 	AB.maxEnemyLevel = parseInt(maxLvl.value);
 }
 
-function setItemsInHtml(itemsList, oneTimersList, currentLevel, maxLevel) {
+function setItemsInHtml(itemsList, oneTimersList, currentLevel, maxLevel, rings) {
 	let itemBoxes = document.querySelectorAll("input.equipInput");
 	itemBoxes.forEach((box) => {
 		box.value = 1;
@@ -275,6 +316,8 @@ function setItemsInHtml(itemsList, oneTimersList, currentLevel, maxLevel) {
 			box.value = itemsList[item].level;
 			if (itemsList[item].equipped) {
 				box.nextSibling.checked = true;
+			} else {
+				box.nextSibling.checked = false;
 			}
 		}
 	});
@@ -284,6 +327,12 @@ function setItemsInHtml(itemsList, oneTimersList, currentLevel, maxLevel) {
 		let OT = box.id.replace("_Input", "");
 		if (oneTimersList.hasOwnProperty(OT)) {
 			if (oneTimersList[OT]) box.checked = true;
+			if (OT === "The_Ring") {
+				let mod = box.previousSibling;
+				mod.value = rings.mods;
+				let lvl = mod.previousSibling;
+				lvl.value = rings.level;
+			}
 		}
 	});
 
@@ -352,9 +401,7 @@ function addListeners() {
 }
 
 function findBestDpsUpgrade() {
-	setActiveItems();
-	setActiveOneTimers();
-	setLevels();
+	sets();
 
 	if (getEquippedItems().length) {
 		let speed = 200069;
@@ -429,12 +476,12 @@ function findBestDpsUpgrade() {
 			rdiv.appendChild(span3);
 
 			if (item.name === bestUpgrade.name) {
-				// bold the best upgradeCost
+				// Bold the best upgradeCost
 				span2.style.fontWeight = "bold";
 			}
 
 			if (item.name === bestPayback.name) {
-				// add astrix to the best payback time
+				// Add astrix to the best payback time
 				span3.style.fontWeight = "bold";
 			}
 		});
@@ -458,7 +505,8 @@ function onSavePaste(event) {
 	let oneTimers = save.global.autoBattleData.oneTimers;
 	let currentLevel = save.global.autoBattleData.enemyLevel;
 	let maxLevel = save.global.autoBattleData.maxEnemyLevel;
-	setItemsInHtml(items, oneTimers, currentLevel, maxLevel);
+	let ring = save.global.autoBattleData.rings;
+	setItemsInHtml(items, oneTimers, currentLevel, maxLevel, ring);
 	calcBuildCost();
 }
 
@@ -471,17 +519,14 @@ function dustWithUpgrade(name, speed) {
 
 function runSimulation(speed = 100000) {
 	AB.speed = speed;
-	AB.resetCombat();
-	AB.resetStats();
-
+	AB.resetAll();
+	sets();
 	startTime = Date.now();
 	AB.update();
 }
 
 function maxLuck() {
-	setActiveItems();
-	setActiveOneTimers();
-	setLevels();
+	sets();
 	let whoDied = AB.oneFight();
 	let span = document.getElementById("theoreticalWinSpan");
 	if (span) {
@@ -498,7 +543,10 @@ function maxLuck() {
 function convertTime(time) {
 	// Return time as seconds, hours or days.
 	time = time.toFixed(1);
-	if (time < 3600) {
+	if (time == Infinity) {
+		return time;
+	}
+	else if (time < 3600) {
 		return time + "s";
 	} else if (time < 86400) {
 		return (time / 3600).toFixed(1) + "h";

@@ -33,7 +33,7 @@ body {
 	margin-right: 1em;
 }
 
-.inputAndCheckDivInp {
+.inputAndCheckDiv {
 	justify-content: right;
 }
 
@@ -101,4 +101,13 @@ body {
 #bestUpgradesDiv div {
 	display: flex;
 	flex-direction: column;
+}
+
+.inputAndCheckRingDiv {
+	display: flex;
+	justify-content: right;
+}
+
+.inputAndCheckRingDiv input {
+	width: 2.5em;
 }
