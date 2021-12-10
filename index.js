@@ -423,12 +423,13 @@ function findBestDpsUpgrade() {
 
 			// Check if upgrade costs shards.
 			let shard = items[ind].data.dustType == "shards";
+			if (shard) time *= 1e9;
+			if (name === "Doppelganger_Signet") time = Infinity;
 
 			dustForItems.push({
 				name: name,
 				increase: increase,
 				time: time,
-				shard: shard,
 			});
 		}
 
@@ -552,10 +553,6 @@ function maxLuck() {
 function convertTime(item) {
 	// Return time as seconds, hours or days.
 	let time = item.time;
-	let shard = item.shard;
-
-	if (shard) time *= 1e9;
-
 	time = time.toFixed(1);
 	if (time == Infinity) {
 		return time;
