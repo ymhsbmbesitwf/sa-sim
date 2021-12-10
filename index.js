@@ -421,10 +421,14 @@ function findBestDpsUpgrade() {
 				time = Infinity;
 			}
 
+			// Check if upgrade costs shards.
+			let shard = items[ind].data.dustType == "shards";
+
 			dustForItems.push({
 				name: name,
 				increase: increase,
 				time: time,
+				shard: shard,
 			});
 		}
 
@@ -470,7 +474,7 @@ function findBestDpsUpgrade() {
 			let span3 = document.createElement("span");
 			span1.innerHTML = name;
 			span2.innerHTML = prettify(item.increase);
-			span3.innerHTML = convertTime(item.time);
+			span3.innerHTML = convertTime(item);
 			ldiv.appendChild(span1);
 			mdiv.appendChild(span2);
 			rdiv.appendChild(span3);
@@ -511,9 +515,9 @@ function onSavePaste(event) {
 }
 
 function dustWithUpgrade(name, speed) {
-	AB.items[name].level += 1;
-	runSimulation(speed);
-	AB.items[name].level -= 1;
+	AB.items[name].level++;
+	runSimulationNoSet(speed);
+	AB.items[name].level--;
 	return AB.getDustPs();
 }
 
@@ -522,6 +526,11 @@ function runSimulation(speed = 100000) {
 	AB.resetAll();
 	sets();
 	startTime = Date.now();
+	AB.update();
+}
+
+function runSimulationNoSet(speed = 100000) {
+	AB.speed = speed;
 	AB.update();
 }
 
@@ -540,8 +549,13 @@ function maxLuck() {
 	}
 }
 
-function convertTime(time) {
+function convertTime(item) {
 	// Return time as seconds, hours or days.
+	let time = item.time;
+	let shard = item.shard;
+
+	if (shard) time *= 1e9;
+
 	time = time.toFixed(1);
 	if (time == Infinity) {
 		return time;
