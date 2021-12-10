@@ -65,7 +65,8 @@ const wrapup = () => {
 	elements.enemiesKilled.innerHTML = enemiesKilled;
 
 	let trimpsKilled = AB.sessionTrimpsKilled;
-	elements.trimpsKilled.innerHTML = trimpsKilled + " [" + 100 * format(WR) + "%]";
+	elements.trimpsKilled.innerHTML =
+		trimpsKilled + " [" + 100 * format(WR) + "%]";
 	elements.clearingTime.innerHTML =
 		format(
 			((toKill / AB.sessionEnemiesKilled) * AB.lootAvg.counter) / 1000
@@ -78,7 +79,7 @@ const wrapup = () => {
 	fightTime = timeSpent / enemiesKilled;
 	elements.averageKillTime.innerHTML = format(fightTime) + " ms";
 
-	let base_shards = AB.enemyLevel >= 51 ? base_dust/1e9 : 0;
+	let base_shards = AB.enemyLevel >= 51 ? base_dust / 1e9 : 0;
 	elements.shardsPs.innerHTML = format(base_shards) + " S/s";
 };
 
@@ -307,7 +308,13 @@ function setLevels() {
 	AB.maxEnemyLevel = parseInt(maxLvl.value);
 }
 
-function setItemsInHtml(itemsList, oneTimersList, currentLevel, maxLevel, rings) {
+function setItemsInHtml(
+	itemsList,
+	oneTimersList,
+	currentLevel,
+	maxLevel,
+	rings
+) {
 	let itemBoxes = document.querySelectorAll("input.equipInput");
 	itemBoxes.forEach((box) => {
 		box.value = 1;
@@ -417,14 +424,17 @@ function findBestDpsUpgrade() {
 			// How long until upgrade is paid back.
 			let upgradeCost = AB.upgradeCost(items[ind].name);
 			let time = upgradeCost / increase;
-			if (time < 0 ) {
+			if (time < 0) {
 				time = Infinity;
 			}
 
 			// Check if upgrade costs shards.
 			let shard = items[ind].data.dustType == "shards";
 			if (shard) time *= 1e9;
-			if (name === "Doppelganger_Signet") time = Infinity;
+			if (name === "Doppelganger_Signet") {
+				time = Infinity;
+				increase = 0;
+			}
 
 			dustForItems.push({
 				name: name,
@@ -556,8 +566,7 @@ function convertTime(item) {
 	time = time.toFixed(1);
 	if (time == Infinity) {
 		return time;
-	}
-	else if (time < 3600) {
+	} else if (time < 3600) {
 		return time + "s";
 	} else if (time < 86400) {
 		return (time / 3600).toFixed(1) + "h";
