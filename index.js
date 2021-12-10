@@ -59,7 +59,7 @@ const wrapup = () => {
 	elements.timeSpent.innerHTML = time + " ms";
 
 	let timeSpent = AB.lootAvg.counter;
-	elements.processedTime.innerHTML = timeSpent + " ms";
+	elements.processedTime.innerHTML = convertTime(timeSpent) + " ms";
 
 	let enemiesKilled = AB.sessionEnemiesKilled;
 	elements.enemiesKilled.innerHTML = enemiesKilled;
