@@ -67,10 +67,10 @@ const wrapup = () => {
 	let trimpsKilled = AB.sessionTrimpsKilled;
 	elements.trimpsKilled.innerHTML =
 		trimpsKilled + " [" + 100 * format(WR) + "%]";
-	elements.clearingTime.innerHTML =
-		format(
-			((toKill / AB.sessionEnemiesKilled) * AB.lootAvg.counter) / 1000
-		) + " s";
+	
+	let clearingTime = ((toKill / AB.sessionEnemiesKilled) * AB.lootAvg.counter) / 1000;
+
+	elements.clearingTime.innerHTML = convertTime(clearingTime);
 	elements.dustPs.innerHTML = format(base_dust) + " D/s";
 
 	let fightTime = timeSpent / (enemiesKilled + trimpsKilled);
@@ -485,7 +485,7 @@ function findBestDpsUpgrade() {
 			let span3 = document.createElement("span");
 			span1.innerHTML = name;
 			span2.innerHTML = prettify(item.increase);
-			span3.innerHTML = convertTime(item);
+			span3.innerHTML = convertTime(item.time);
 			ldiv.appendChild(span1);
 			mdiv.appendChild(span2);
 			rdiv.appendChild(span3);
@@ -560,9 +560,8 @@ function maxLuck() {
 	}
 }
 
-function convertTime(item) {
+function convertTime(time) {
 	// Return time as seconds, hours or days.
-	let time = item.time;
 	time = time.toFixed(1);
 	if (time == Infinity) {
 		return time;
