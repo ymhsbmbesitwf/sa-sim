@@ -59,7 +59,7 @@ const wrapup = () => {
 	elements.timeSpent.innerHTML = time + " ms";
 
 	let timeSpent = AB.lootAvg.counter;
-	elements.processedTime.innerHTML = convertTime(timeSpent);
+	elements.processedTime.innerHTML = convertTimeMs(timeSpent);
 
 	let enemiesKilled = AB.sessionEnemiesKilled;
 	elements.enemiesKilled.innerHTML = enemiesKilled;
@@ -571,5 +571,19 @@ function convertTime(time) {
 		return (time / 3600).toFixed(1) + "h";
 	} else {
 		return (time / 86400).toFixed(1) + "d";
+	}
+}
+
+function convertTimeMs(time) {
+	// Return time as milliseconds, seconds, hours or days.
+	time = time.toFixed(1);
+	if (time < 1000) {
+		return time + "ms";
+	} else if (time < 3600000) {
+		return (time / 1000).toFixed(1) + "s";
+	} else if (time < 86400000) {
+		return (time / 3600000).toFixed(1) + "h";
+	} else {
+		return (time / 86400000).toFixed(1) + "d";
 	}
 }
