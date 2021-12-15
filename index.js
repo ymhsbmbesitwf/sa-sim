@@ -38,7 +38,7 @@ const startSimulation = () => {
 	AB.bonuses.Extra_Limbs.level = 100; // For safety
 	sets();
 	calcBuildCost();
-	runSimulation(100000);
+	runSimulation(2); // 100000
 	wrapup();
 };
 
@@ -59,7 +59,7 @@ const wrapup = () => {
 	elements.timeSpent.innerHTML = time + " ms";
 
 	let timeSpent = AB.lootAvg.counter;
-	elements.processedTime.innerHTML = convertTime(timeSpent) + " ms";
+	elements.processedTime.innerHTML = convertTime(timeSpent);
 
 	let enemiesKilled = AB.sessionEnemiesKilled;
 	elements.enemiesKilled.innerHTML = enemiesKilled;
