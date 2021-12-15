@@ -2100,8 +2100,8 @@ export let autoBattle = {
 			},
 			doStuff: function () {
 				autoBattle.trimp.attack += this.attack();
-				if (!autoBattle.items.Basket_of_Souls.equipped) 
-				autoBattle.trimp.lifesteal *= 0.75; //basket of souls special interaction
+				if (!autoBattle.items.Basket_of_Souls.equipped)
+					autoBattle.trimp.lifesteal *= 0.75; //basket of souls special interaction
 				if (autoBattle.trimp.lifesteal < 0)
 					autoBattle.trimp.lifesteal = 0;
 			},
@@ -2297,6 +2297,7 @@ export let autoBattle = {
 			this.trimpDied();
 			return;
 		}
+		if (!this.enemy.noSlow) this.enemy.attackSpeed *= this.trimp.slowAura;
 		var enemyAttackTime = this.enemy.attackSpeed;
 		if (this.enemy.lastAttack >= enemyAttackTime) {
 			this.enemy.lastAttack -= enemyAttackTime;
@@ -2373,12 +2374,11 @@ export let autoBattle = {
 		if (this.items.Grounded_Crown.equipped)
 			this.items.Grounded_Crown.afterCheck();
 
-			this.trimp.attackSpeed *= this.enemy.slowAura;
-			if (this.trimp.attackSpeed <= 500) {
+		this.trimp.attackSpeed *= this.enemy.slowAura;
+		if (this.trimp.attackSpeed <= 500) {
 			this.trimp.slowAura += (500 - this.trimp.attackSpeed) / 1000;
 			this.trimp.attackSpeed = 500;
 		}
-		if (!this.enemy.noSlow) this.enemy.attackSpeed *= this.trimp.slowAura;
 	},
 	damageCreature: function (creature, dmg, fromGoo, ignoreEth) {
 		dmg *= creature.damageTakenMult;
@@ -2505,6 +2505,7 @@ export let autoBattle = {
 			if (roll < bleedChance) {
 				if (this.items.Bloodstained_Gloves.equipped)
 					this.items.Bloodstained_Gloves.onBleed();
+				if (this.items.Bag_of_Nails.equipped) this.enemy.noSlow = true;
 				if (defender.bleed.mod < attacker.bleedMod)
 					defender.bleed.mod = 1 + attacker.bleedMod;
 				if (defender.bleed.time < attacker.bleedTime)
@@ -2787,47 +2788,47 @@ export let autoBattle = {
 					if (selectedEffectsCount[checkSelected] >= 2)
 						effects.splice(effects.indexOf(effect), 1);
 					break;
-					case "Slowing":
-						this.enemy.slowAura += 0.1;
-	
-						break;
-					case "Explosive":
-						var count = selectedEffectsCount[checkSelected];
-						if (count >= 3) effects.splice(effects.indexOf(effect), 1);
-						if (count == 1) {
-							this.enemy.explodeDamage = 1.5;
-							this.enemy.explodeFreq = 20000;
-						} else {
-							this.enemy.explodeDamage += 0.3;
-							this.enemy.explodeFreq -= 5000;
-						}
-						effects.splice(effects.indexOf("Berserking"));
-						effects.splice(effects.indexOf("Ethereal"));
-						break;
-					case "Berserking":
-						var count = selectedEffectsCount[checkSelected];
-						if (count >= 3) effects.splice(effects.indexOf(effect), 1);
-						if (count == 1) {
-							this.enemy.berserkMod = 1.05;
-							this.enemy.berserkEvery = 4;
-						} else {
-							this.enemy.berserkMod += 0.05;
-							this.enemy.berserkEvery--;
-						}
-						effects.splice(effects.indexOf("Explosive"));
-						effects.splice(effects.indexOf("Ethereal"));
-						break;
-					case "Ethereal":
-						var count = selectedEffectsCount[checkSelected];
-						if (count >= 3) effects.splice(effects.indexOf(effect), 1);
-						if (count == 1) {
-							this.enemy.ethChance = 10;
-						} else {
-							this.enemy.ethChance += 5;
-						}
-						effects.splice(effects.indexOf("Explosive"));
-						effects.splice(effects.indexOf("Berserking"));
-						break;
+				case "Slowing":
+					this.enemy.slowAura += 0.1;
+
+					break;
+				case "Explosive":
+					var count = selectedEffectsCount[checkSelected];
+					if (count >= 3) effects.splice(effects.indexOf(effect), 1);
+					if (count == 1) {
+						this.enemy.explodeDamage = 1.5;
+						this.enemy.explodeFreq = 20000;
+					} else {
+						this.enemy.explodeDamage += 0.3;
+						this.enemy.explodeFreq -= 5000;
+					}
+					effects.splice(effects.indexOf("Berserking"));
+					effects.splice(effects.indexOf("Ethereal"));
+					break;
+				case "Berserking":
+					var count = selectedEffectsCount[checkSelected];
+					if (count >= 3) effects.splice(effects.indexOf(effect), 1);
+					if (count == 1) {
+						this.enemy.berserkMod = 1.05;
+						this.enemy.berserkEvery = 4;
+					} else {
+						this.enemy.berserkMod += 0.05;
+						this.enemy.berserkEvery--;
+					}
+					effects.splice(effects.indexOf("Explosive"));
+					effects.splice(effects.indexOf("Ethereal"));
+					break;
+				case "Ethereal":
+					var count = selectedEffectsCount[checkSelected];
+					if (count >= 3) effects.splice(effects.indexOf(effect), 1);
+					if (count == 1) {
+						this.enemy.ethChance = 10;
+					} else {
+						this.enemy.ethChance += 5;
+					}
+					effects.splice(effects.indexOf("Explosive"));
+					effects.splice(effects.indexOf("Berserking"));
+					break;
 			}
 		}
 		this.enemy.baseHealth *= healthMult;

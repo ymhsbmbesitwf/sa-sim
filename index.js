@@ -38,7 +38,7 @@ const startSimulation = () => {
 	AB.bonuses.Extra_Limbs.level = 100; // For safety
 	sets();
 	calcBuildCost();
-	runSimulation(2); // 100000
+	runSimulation(100000);
 	wrapup();
 };
 
