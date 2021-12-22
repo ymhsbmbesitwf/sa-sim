@@ -67,7 +67,7 @@ const wrapup = () => {
 	let trimpsKilled = AB.sessionTrimpsKilled;
 	elements.trimpsKilled.innerHTML =
 		trimpsKilled + " [" + 100 * format(WR) + "%]";
-	
+
 	let clearingTime = ((toKill / AB.sessionEnemiesKilled) * AB.lootAvg.counter) / 1000;
 
 	elements.clearingTime.innerHTML = convertTime(clearingTime);
@@ -164,10 +164,8 @@ function makeOneTimersBtns() {
 				let dropDown = document.createElement("select");
 				rightDiv.appendChild(dropDown);
 				dropDown.id = "ringModSelect";
-				let empty = document.createElement("option");
-				empty.value = "";
-				empty.text = Array(0);
-				dropDown.appendChild(empty);
+				dropDown.multiple = "multiple";
+				dropDown.size = Object.keys(AB.ringStats).length;
 				for (const mod in AB.ringStats) {
 					let option = document.createElement("option");
 					option.value = mod;
@@ -274,8 +272,12 @@ function setOneTimers() {
 			AB.oneTimers[name].owned = true;
 			if (name === "The_Ring") {
 				let mod = oneTimer.previousSibling;
-				if (mod.value) AB.rings.mods = Array(mod.value);
-				else AB.rings.mods = Array(0);
+				AB.rings.mods = [];
+				for (let option of mod.options) {
+					if (option.selected) {
+						AB.rings.mods.push(option.value);
+					}
+				}
 				let val = mod.previousSibling;
 				AB.rings.level = val.value;
 			}
@@ -336,7 +338,9 @@ function setItemsInHtml(
 			if (oneTimersList[OT]) box.checked = true;
 			if (OT === "The_Ring") {
 				let mod = box.previousSibling;
-				mod.value = rings.mods;
+				for (let option of mod.options) {
+					option.selected = rings.mods.includes(option.value);
+				}
 				let lvl = mod.previousSibling;
 				lvl.value = rings.level;
 			}
