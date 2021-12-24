@@ -157,12 +157,6 @@ function makeOneTimersBtns() {
 			rightDiv.className = "inputAndCheckRingDiv";
 			div.appendChild(rightDiv);
 
-			let checkBox = document.createElement("input");
-			checkBox.type = "checkBox";
-			checkBox.className = "oneTimerInput";
-			checkBox.id = oneTimer + "_Input";
-			rightDiv.appendChild(checkBox);
-
 			if (oneTimer === "The_Ring") {
 				let input = document.createElement("input");
 				input.type = "number";
@@ -181,10 +175,18 @@ function makeOneTimersBtns() {
 					option.text = mod;
 					dropDown.appendChild(option);
 				}
-				checkBox.addEventListener("change", () => {
-					calcBuildCost();
-				});
 			}
+
+			let checkBox = document.createElement("input");
+			checkBox.type = "checkBox";
+			checkBox.className = "oneTimerInput";
+			checkBox.id = oneTimer + "_Input";
+
+			// Only for ring really :/
+			checkBox.addEventListener("change", () => {
+				calcBuildCost();
+			});
+			rightDiv.appendChild(checkBox);
 		}
 	}
 }
