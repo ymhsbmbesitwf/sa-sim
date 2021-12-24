@@ -299,13 +299,13 @@ function calcBuildCost() {
 	for (let itemID in AB.items) {
 		let item = AB.items[itemID];
 		if (item.equipped) {
-			cost = (AB.items[item].startPrice || 5) *
+			cost = (item.startPrice || 5) *
 				((1 -
 					Math.pow(
-						AB.items[item].priceMod || 3,
-						AB.items[item].level - 1
+						item.priceMod || 3,
+						item.level - 1
 					)) /
-					(1 - (AB.items[item].priceMod || 3)));
+					(1 - (item.priceMod || 3)));
 			if (item.dustType === "shards") {
 				shardCost += cost;
 			} else {
