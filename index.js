@@ -164,7 +164,23 @@ function makeOneTimersBtns() {
 			rightDiv.appendChild(checkBox);
 
 			if (oneTimer === "The_Ring") {
-				setupRingInput(rightDiv);
+				let input = document.createElement("input");
+				input.type = "number";
+				input.value = 1;
+				input.id = "The_Ring_Input";
+				rightDiv.appendChild(input);
+
+				let dropDown = document.createElement("select");
+				rightDiv.appendChild(dropDown);
+				dropDown.id = "ringModSelect";
+				dropDown.multiple = "multiple";
+				dropDown.size = Object.keys(AB.ringStats).length;
+				for (const mod in AB.ringStats) {
+					let option = document.createElement("option");
+					option.value = mod;
+					option.text = mod;
+					dropDown.appendChild(option);
+				}
 				checkBox.addEventListener("change", () => {
 					calcBuildCost();
 				});
@@ -636,24 +652,4 @@ function countLimbsUsed() {
 		}
 	}
 	return count;
-}
-
-function setupRingInput(div) {
-	let input = document.createElement("input");
-	input.type = "number";
-	input.value = 1;
-	input.id = "The_Ring_Input";
-	div.appendChild(input);
-
-	let dropDown = document.createElement("select");
-	div.appendChild(dropDown);
-	dropDown.id = "ringModSelect";
-	dropDown.multiple = "multiple";
-	dropDown.size = Object.keys(AB.ringStats).length;
-	for (const mod in AB.ringStats) {
-		let option = document.createElement("option");
-		option.value = mod;
-		option.text = mod;
-		dropDown.appendChild(option);
-	}
 }
