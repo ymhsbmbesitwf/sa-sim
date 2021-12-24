@@ -18,6 +18,9 @@
 				<div id="oneTimersDiv">
 					<span>Ctrl+click to select multiple ring modifiers.</span>
 				</div>
+				<div id="limbsDiv">
+					<span>Limbs used: <span id="limbsUsed">0</span></span>
+				</div>
 				<div id="otherInputs">
 					<span class="levelInp"><span class="levelInpSpan">Set level:</span>
 						<input type="number" id="currentLevel" /></span>
@@ -28,11 +31,12 @@
 		</div>
 
 		<div id="rightSideDiv">
-			<span>Import save: <input type="text" id="saveInput" /></span>
+			<span>Import save: <input type="text" id="saveInput" /> <button id="resetToSave">Reset to
+					save!</button></span>
 			<button id="startButton">
 				Press this to run the simulation!
 			</button>
-			<span>Build cost: <span id="buildCost">0</span></span>
+			<span>Build cost: <span id="buildCostDust">0</span> dust. <span id="buildCostShards">0</span> shards.</span>
 			<div id="resultsDiv">
 				<h3>Simulation:</h3>
 				<span>Time spent: <span id="timeSpent"></span></span>

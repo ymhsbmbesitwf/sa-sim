@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
 let AB = autoBattle;
 let LZ = LZString;
 let startTime;
+let save;
 let formatter = new Intl.NumberFormat("en-GB", { minimumFractionDigits: 3 });
 
 function format(num) {
@@ -20,7 +21,8 @@ let elements;
 
 function getElements() {
 	let ele = {
-		buildCost: document.getElementById("buildCost"),
+		buildCostDust: document.getElementById("buildCostDust"),
+		buildCostShards: document.getElementById("buildCostShards"),
 		timeSpent: document.getElementById("timeSpent"),
 		processedTime: document.getElementById("processedTime"),
 		enemiesKilled: document.getElementById("enemiesKilled"),
@@ -30,6 +32,7 @@ function getElements() {
 		averageFightTime: document.getElementById("averageFightTime"),
 		averageKillTime: document.getElementById("averageKillTime"),
 		shardsPs: document.getElementById("shardsPs"),
+		limbsUsed: document.getElementById("limbsUsed"),
 	};
 	elements = ele;
 }
@@ -207,6 +210,10 @@ function addChangeForCheckBox(checkBox) {
 		if (parseInt(lvl.value) > 0) {
 			AB.equip(name);
 		}
+
+		// Set limbs.
+		elements.limbsUsed.innerHTML = countLimbsUsed();
+
 		calcBuildCost();
 	});
 }
@@ -287,20 +294,32 @@ function setOneTimers() {
 
 function calcBuildCost() {
 	sets();
-	let cost = 0;
-	for (let item in AB.items) {
-		if (AB.items[item].equipped) {
-			cost +=
-				(AB.items[item].startPrice || 5) *
+	let dustCost = 0;
+	let shardCost = 0;
+	for (let itemID in AB.items) {
+		let item = AB.items[itemID];
+		if (item.equipped) {
+			cost = (AB.items[item].startPrice || 5) *
 				((1 -
 					Math.pow(
 						AB.items[item].priceMod || 3,
 						AB.items[item].level - 1
 					)) /
 					(1 - (AB.items[item].priceMod || 3)));
+			if (item.dustType === "shards") {
+				shardCost += cost;
+			} else {
+				dustCost += cost;
+			}
 		}
 	}
-	elements.buildCost.innerHTML = prettify(cost);
+	// Check ring.
+	if (AB.oneTimers["The_Ring"].owned) {
+		shardCost += Math.ceil(15 * Math.pow(2, AB.rings.level));
+	}
+
+	elements.buildCostDust.innerHTML = prettify(dustCost);
+	elements.buildCostShards.innerHTML = prettify(shardCost);
 }
 
 function setLevels() {
@@ -352,6 +371,9 @@ function setItemsInHtml(
 
 	target = document.getElementById("highestLevel");
 	target.value = maxLevel;
+
+	// Set limbs
+	elements.limbsUsed.innerHTML = countLimbsUsed();
 }
 
 function orderByUnlock() {
@@ -401,6 +423,12 @@ function addListeners() {
 		onSavePaste(event);
 	});
 
+	// Reset to save button
+	target = document.getElementById("resetToSave");
+	target.addEventListener("click", (event) => {
+		resetToSave();
+	});
+
 	// Calculator buttons
 	document
 		.getElementById("bestUpgradesButton")
@@ -427,7 +455,7 @@ function findBestDpsUpgrade() {
 			let name = items[ind].name;
 			let newDps = dustWithUpgrade(name, speed);
 			let increase = newDps - currDps;
-			increase = (currDps / increase > 10000) ? 0 : increase
+			increase = (currDps / increase > 10000) ? 0 : increase;
 
 			// How long until upgrade is paid back.
 			let upgradeCost = (name == "Ring" ? AB.getRingLevelCost() : AB.upgradeCost(items[ind].name));
@@ -523,14 +551,8 @@ function getEquippedItems() {
 
 function onSavePaste(event) {
 	let paste = event.clipboardData.getData("text");
-	let save = JSON.parse(LZ.decompressFromBase64(paste));
-	let items = save.global.autoBattleData.items;
-	let oneTimers = save.global.autoBattleData.oneTimers;
-	let currentLevel = save.global.autoBattleData.enemyLevel;
-	let maxLevel = save.global.autoBattleData.maxEnemyLevel;
-	let ring = save.global.autoBattleData.rings;
-	setItemsInHtml(items, oneTimers, currentLevel, maxLevel, ring);
-	calcBuildCost();
+	save = JSON.parse(LZ.decompressFromBase64(paste));
+	resetToSave();
 }
 
 function dustWithUpgrade(name, speed) {
@@ -560,7 +582,12 @@ function maxLuck() {
 	sets();
 	let whoDied = AB.oneFight();
 	let span = document.getElementById("theoreticalWinSpan");
+
 	if (span) {
+		// Clear earlier data.
+		while (span.firstChild) {
+			span.removeChild(span.lastChild);
+		}
 		span.innerHTML = "You can theoretically win: " + !whoDied.isTrimp;
 	} else {
 		let parent = document.getElementById("theoreticalWin").parentElement;
@@ -597,4 +624,27 @@ function convertTimeMs(time) {
 	} else {
 		return (time / 86400000).toFixed(1) + "d";
 	}
+}
+
+function resetToSave() {
+	if (save) {
+		// Reset all values to the save.
+		let items = save.global.autoBattleData.items;
+		let oneTimers = save.global.autoBattleData.oneTimers;
+		let currentLevel = save.global.autoBattleData.enemyLevel;
+		let maxLevel = save.global.autoBattleData.maxEnemyLevel;
+		let ring = save.global.autoBattleData.rings;
+		setItemsInHtml(items, oneTimers, currentLevel, maxLevel, ring);
+		calcBuildCost();
+	}
+}
+
+function countLimbsUsed() {
+	let count = 0;
+	for (const item in AB.items) {
+		if (AB.items[item].equipped) {
+			count++;
+		}
+	}
+	return count;
 }
