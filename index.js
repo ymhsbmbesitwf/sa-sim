@@ -373,7 +373,7 @@ function setItemsInHtml(
 	target.value = maxLevel;
 
 	// Set limbs
-	let target = document.getElementById("limbsUsed");
+	target = document.getElementById("limbsUsed");
 	target.innerHTML = countLimbsUsed();
 }
 
