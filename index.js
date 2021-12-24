@@ -299,7 +299,7 @@ function calcBuildCost() {
 	for (let itemID in AB.items) {
 		let item = AB.items[itemID];
 		if (item.equipped) {
-			cost = (item.startPrice || 5) *
+			let cost = (item.startPrice || 5) *
 				((1 -
 					Math.pow(
 						item.priceMod || 3,
