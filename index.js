@@ -337,6 +337,7 @@ function setItemsInHtml(
 	rings
 ) {
 	let itemBoxes = document.querySelectorAll("input.equipInput");
+	let limbsUsed = 0;
 	itemBoxes.forEach((box) => {
 		box.value = 1;
 		let item = box.id.replace("_Input", "");
@@ -344,6 +345,7 @@ function setItemsInHtml(
 			box.value = itemsList[item].level;
 			if (itemsList[item].equipped) {
 				box.nextSibling.checked = true;
+				limbsUsed += 1;
 			} else {
 				box.nextSibling.checked = false;
 			}
@@ -373,9 +375,7 @@ function setItemsInHtml(
 	target.value = maxLevel;
 
 	// Set limbs
-	elements.limbsUsed.innerHTML = countLimbsUsed();
-	console.log(elements.limbsUsed);
-	console.log(countLimbsUsed());
+	elements.limbsUsed.innerHTML = limbsUsed;
 }
 
 function orderByUnlock() {
