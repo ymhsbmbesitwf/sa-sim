@@ -373,8 +373,9 @@ function setItemsInHtml(
 	target.value = maxLevel;
 
 	// Set limbs
-	target = document.getElementById("limbsUsed");
-	target.innerHTML = countLimbsUsed();
+	elements.limbsUsed.innerHTML = countLimbsUsed();
+	console.log(elements.limbsUsed);
+	console.log(countLimbsUsed());
 }
 
 function orderByUnlock() {
