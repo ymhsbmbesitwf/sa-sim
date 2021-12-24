@@ -419,14 +419,18 @@ function findBestDpsUpgrade() {
 		runSimulation(speed);
 		let currDps = AB.getDustPs();
 		let items = getEquippedItems();
+		if (autoBattle.rings?.level) {
+			items.push({ name: "Ring", data: { dustType: "shards" } })
+		}
 		let dustForItems = [];
 		for (const ind in items) {
 			let name = items[ind].name;
 			let newDps = dustWithUpgrade(name, speed);
 			let increase = newDps - currDps;
+			increase = (currDps / increase > 10000) ? 0 : increase
 
 			// How long until upgrade is paid back.
-			let upgradeCost = AB.upgradeCost(items[ind].name);
+			let upgradeCost = (name == "Ring" ? AB.getRingLevelCost() : AB.upgradeCost(items[ind].name));
 			let time = upgradeCost / increase;
 			if (time < 0) {
 				time = Infinity;
@@ -530,10 +534,12 @@ function onSavePaste(event) {
 }
 
 function dustWithUpgrade(name, speed) {
-	AB.items[name].level++;
+	let target = (name == "Ring" ? AB.rings : AB.items[name])
+	target.level++;
 	runSimulationNoSet(speed);
-	AB.items[name].level--;
-	return AB.getDustPs();
+	let dust = AB.getDustPs();
+	target.level--;
+	return dust;
 }
 
 function runSimulation(speed = 100000) {
@@ -546,6 +552,7 @@ function runSimulation(speed = 100000) {
 
 function runSimulationNoSet(speed = 100000) {
 	AB.speed = speed;
+	AB.resetStats()
 	AB.update();
 }
 
