@@ -396,6 +396,9 @@ function setItemsInHtml(
 					if (rings.mods.includes(children[i].innerHTML)) {
 						children[i].classList.add("checkedButton");
 						children[i].classList.remove("uncheckedButton");
+					} else {
+						children[i].classList.add("uncheckedButton");
+						children[i].classList.remove("checkedButton");
 					}
 				}
 				let lvl = box.previousSibling;
