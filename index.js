@@ -610,8 +610,6 @@ function runSimulation(speed = 100000) {
 	AB.resetAll();
 	sets();
 	startTime = Date.now();
-	console.log(AB.trimp);
-	console.log(AB.rings);
 	AB.update();
 }
 
