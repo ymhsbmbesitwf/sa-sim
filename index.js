@@ -108,12 +108,25 @@ function sets() {
 
 function makeEquipBtns() {
 	let equipDiv = document.getElementById("equipDiv");
+	for (let i = 0; i < 2; i++) {
+		let partDiv = partEquipDiv(2, i);
+		equipDiv.appendChild(partDiv);
+	}
+}
+
+function partEquipDiv(parts, ind) {
 	let items = orderByUnlock();
-	for (let i = 0; i < items.length; i++) {
+	let size = Math.round(items.length / parts);
+	let start = size * ind;
+	let end = size * (ind + 1);
+	end = items.length < end ? items.length : end;
+	let partDiv = document.createElement("div");
+	partDiv.className = "partDiv";
+	for (let i = start; i < end; i++) {
 		let item = items[i];
 		let div = document.createElement("div");
 		div.className = "equipInpDiv";
-		equipDiv.appendChild(div);
+		partDiv.appendChild(div);
 
 		let span = document.createElement("span");
 		let name = item.replaceAll("_", " ");
@@ -138,6 +151,7 @@ function makeEquipBtns() {
 		addChangeForCheckBox(checkBox);
 		inpDiv.appendChild(checkBox);
 	}
+	return partDiv;
 }
 
 function makeOneTimersBtns() {

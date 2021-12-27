@@ -19,8 +19,13 @@ body {
 
 #equipDiv {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   margin-right: 1em;
+}
+
+.partDiv {
+  display: flex;
+  flex-direction: column;
 }
 
 .equipInpDiv {
