@@ -187,9 +187,11 @@ function makeOneTimersBtns() {
 					modifier.className = "uncheckedButton";
 					modifier.addEventListener("click", () => {
 						if (modifier.classList.contains("uncheckedButton")) {
-							modifier.className = "checkedButton";
+							modifier.classList.add("checkedButton");
+							modifier.classList.remove("uncheckedButton");
 						} else {
-							modifier.className = "uncheckedButton";
+							modifier.classList.add("uncheckedButton");
+							modifier.classList.remove("checkedButton");
 						}
 					});
 					modDiv.appendChild(modifier);
@@ -388,11 +390,15 @@ function setItemsInHtml(
 		if (oneTimersList.hasOwnProperty(OT)) {
 			if (oneTimersList[OT]) box.checked = true;
 			if (OT === "The_Ring") {
-				let mod = box.previousSibling;
-				for (let option of mod.options) {
-					option.selected = rings.mods.includes(option.value);
+				let children = elements.ringMods.children;
+				for (let i = 0; i < children.length; i++) {
+					// check if mod is selected
+					if (rings.mods.includes(children[i].innerHTML)) {
+						children[i].classList.add("checkedButton");
+						children[i].classList.remove("uncheckedButton");
+					}
 				}
-				let lvl = mod.previousSibling;
+				let lvl = box.previousSibling;
 				lvl.value = rings.level;
 			}
 		}
