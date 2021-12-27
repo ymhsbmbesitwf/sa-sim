@@ -30,7 +30,7 @@ export let autoBattle = {
 	},
 	rings: {
 		level: 1,
-		mods: ["attack"],
+		mods: [],
 	},
 	template: function () {
 		return {
@@ -307,7 +307,7 @@ export let autoBattle = {
 					autoBattle.trimp.bleedTime = 10000;
 				autoBattle.trimp.bleedChance +=
 					autoBattle.enemy.poison.time > 0 ||
-					autoBattle.enemy.shock.time > 0
+						autoBattle.enemy.shock.time > 0
 						? this.bleedChance() * 2
 						: this.bleedChance();
 			},
@@ -334,7 +334,7 @@ export let autoBattle = {
 				autoBattle.trimp.poisonMod += this.effect();
 				autoBattle.trimp.poisonChance +=
 					autoBattle.enemy.shock.time > 0 ||
-					autoBattle.enemy.bleed.time > 0
+						autoBattle.enemy.bleed.time > 0
 						? 50
 						: 25;
 				if (autoBattle.trimp.poisonTime < 10000)
@@ -362,7 +362,7 @@ export let autoBattle = {
 			doStuff: function () {
 				autoBattle.trimp.shockChance +=
 					autoBattle.enemy.bleed.time > 0 ||
-					autoBattle.enemy.poison.time > 0
+						autoBattle.enemy.poison.time > 0
 						? 70
 						: 35;
 				autoBattle.trimp.shockMod += this.shockMod();
@@ -489,7 +489,7 @@ export let autoBattle = {
 					Math.max(
 						0,
 						autoBattle.trimp.lifesteal -
-							autoBattle.enemy.lifestealResist
+						autoBattle.enemy.lifestealResist
 					)
 				);
 			},
@@ -2775,8 +2775,8 @@ export let autoBattle = {
 				case "Defensive":
 					this.enemy.defense += Math.ceil(
 						this.enemy.level *
-							0.75 *
-							Math.pow(1.05, this.enemy.level)
+						0.75 *
+						Math.pow(1.05, this.enemy.level)
 					);
 					break;
 				case "Lifestealing":
@@ -2984,7 +2984,6 @@ export let autoBattle = {
 		else this.dust -= cost;
 
 		itemObj.level++;
-		this.popup(false, false, true);
 	},
 	levelDown: function () {
 		if (this.enemyLevel > 1) {
@@ -3089,7 +3088,6 @@ export let autoBattle = {
 				availableMods[Math.floor(Math.random() * availableMods.length)];
 			this.rings.mods.push(randomMod);
 		}
-		this.popup(false, false, true);
 	},
 	getAvailableRingMods: function () {
 		var availableMods = [];
@@ -3105,7 +3103,6 @@ export let autoBattle = {
 		if (availableMods.indexOf(elem.value) == -1) return;
 		this.rings.mods[slot] = elem.value;
 		this.resetCombat();
-		this.popup(false, false, true);
 	},
 	getRingLevelCost: function () {
 		return Math.ceil(15 * Math.pow(2, this.rings.level));

@@ -1,113 +1,123 @@
 body {
-	background-color: darkgray;
-	color: black;
+  background-color: darkgray;
+  color: black;
 }
 
 #mainDiv {
-	display: flex;
+  display: flex;
 }
 
 #leftSideDiv {
-	display: flex;
+  display: flex;
 }
 
 #rightSideDiv {
-	display: flex;
-	flex-direction: column;
-	margin-left: 1em;
+  display: flex;
+  flex-direction: column;
+  margin-left: 1em;
 }
 
 #equipDiv {
-	display: flex;
-	flex-direction: column;
-	margin-right: 1em;
+  display: flex;
+  flex-direction: column;
+  margin-right: 1em;
 }
 
 .equipInpDiv {
-	display: flex;
-	justify-content: space-between;
-	border-bottom: 1px solid darkslateblue;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid darkslateblue;
 }
 
 .equipInpDiv span {
-	margin-right: 1em;
+  margin-right: 1em;
 }
 
 .inputAndCheckDiv {
-	justify-content: right;
+  justify-content: right;
 }
 
 #oneTimersDiv {
-	display: flex;
-	flex-direction: column;
-	margin-right: 1em;
+  display: flex;
+  flex-direction: column;
+  margin-right: 1em;
 }
 
 .oneTimersInpDiv {
-	display: flex;
-	justify-content: space-between;
-	border-bottom: 1px solid darkslateblue;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid darkslateblue;
 }
 
 .equipInput {
-	width: 2.5em;
-	text-align: right;
+  width: 2.5em;
+  text-align: right;
 }
 
 #resultsDiv {
-	display: flex;
-	flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 #otherInputs {
-	display: flex;
-	flex-direction: column;
-	margin: 1em 1em 0 0;
+  display: flex;
+  flex-direction: column;
+  margin: 1em 1em 0 0;
 }
 
 .levelInp {
-	display: flex;
-	justify-content: space-between;
+  display: flex;
+  justify-content: space-between;
 }
 
 #currentLevel {
-	width: 2.5em;
+  width: 2.5em;
 }
 
 #highestLevel {
-	width: 2.5em;
+  width: 2.5em;
 }
 
 #resultsDiv > span {
-	border-bottom: 1px solid darkslateblue;
+  border-bottom: 1px solid darkslateblue;
 }
 
 #startButton {
-	margin-top: 1em;
-	margin-bottom: 1em;
+  margin-top: 1em;
+  margin-bottom: 1em;
 }
 
 #calcButtons {
-	display: flex;
-	flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 #bestUpgradesDiv {
-	display: flex;
-	flex-direction: vertical;
-	justify-content: space-between;
+  display: flex;
+  flex-direction: vertical;
+  justify-content: space-between;
 }
 
 #bestUpgradesDiv div {
-	display: flex;
-	flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .inputAndCheckRingDiv {
-	display: flex;
-	justify-content: right;
+  display: flex;
+  justify-content: right;
 }
 
 .inputAndCheckRingDiv input {
-	width: 2.5em;
+  width: 2.5em;
+}
+
+#ringModDiv {
+  display: flex;
+  flex-direction: column;
+}
+
+.checkedButton {
+  /* Set background to orange */
+  background-color: rgba(242, 140, 40, 0.5);
 }

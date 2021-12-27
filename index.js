@@ -3,7 +3,7 @@ import { LZString } from "./lz-string.js";
 
 document.addEventListener("DOMContentLoaded", function () {
 	setup();
-	getElements();
+	elements = getElements();
 });
 
 let AB = autoBattle;
@@ -20,7 +20,7 @@ function format(num) {
 let elements;
 
 function getElements() {
-	let ele = {
+	return {
 		buildCostDust: document.getElementById("buildCostDust"),
 		buildCostShards: document.getElementById("buildCostShards"),
 		timeSpent: document.getElementById("timeSpent"),
@@ -33,8 +33,8 @@ function getElements() {
 		averageKillTime: document.getElementById("averageKillTime"),
 		shardsPs: document.getElementById("shardsPs"),
 		limbsUsed: document.getElementById("limbsUsed"),
+		ringMods: document.getElementById("ringModsDiv"),
 	};
-	elements = ele;
 }
 
 const startSimulation = () => {
@@ -164,16 +164,21 @@ function makeOneTimersBtns() {
 				input.id = "The_Ring_Input";
 				rightDiv.appendChild(input);
 
-				let dropDown = document.createElement("select");
-				rightDiv.appendChild(dropDown);
-				dropDown.id = "ringModSelect";
-				dropDown.multiple = "multiple";
-				dropDown.size = Object.keys(AB.ringStats).length;
+				let modDiv = document.createElement("div");
+				modDiv.id = "ringModsDiv";
+				div.appendChild(modDiv);
 				for (const mod in AB.ringStats) {
-					let option = document.createElement("option");
-					option.value = mod;
-					option.text = mod;
-					dropDown.appendChild(option);
+					let modifier = document.createElement("button");
+					modifier.innerHTML = mod;
+					modifier.className = "uncheckedButton";
+					modifier.addEventListener("click", () => {
+						if (modifier.classList.contains("uncheckedButton")) {
+							modifier.className = "checkedButton";
+						} else {
+							modifier.className = "uncheckedButton";
+						}
+					});
+					modDiv.appendChild(modifier);
 				}
 			}
 
@@ -283,14 +288,20 @@ function setOneTimers() {
 			let name = oneTimer.id.replace("_Input", "");
 			AB.oneTimers[name].owned = true;
 			if (name === "The_Ring") {
-				let mod = oneTimer.previousSibling;
 				AB.rings.mods = [];
-				for (let option of mod.options) {
-					if (option.selected) {
-						AB.rings.mods.push(option.value);
+				// Loop through children in div
+				let children = elements.ringMods.children;
+				for (let i = 0; i < children.length; i++) {
+					if (children[i].classList.contains("checkedButton")) {
+						AB.rings.mods.push(children[i].innerHTML);
+					} else {
+						let ind = AB.rings.mods.indexOf(children[i].innerHTML);
+						if (ind >= 0) {
+							AB.rings.mods.splice(ind, 1);
+						}
 					}
 				}
-				let val = mod.previousSibling;
+				let val = oneTimer.previousSibling;
 				AB.rings.level = val.value;
 			}
 		}
@@ -576,6 +587,8 @@ function runSimulation(speed = 100000) {
 	AB.resetAll();
 	sets();
 	startTime = Date.now();
+	console.log(AB.trimp);
+	console.log(AB.rings);
 	AB.update();
 }
 
