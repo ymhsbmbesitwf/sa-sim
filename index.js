@@ -40,7 +40,7 @@ function getElements() {
 const startSimulation = () => {
 	AB.bonuses.Extra_Limbs.level = 100; // For safety
 	sets();
-	calcBuildCost();
+	calcBuildCost(false);
 	runSimulation(100000);
 	wrapup();
 };
@@ -76,14 +76,14 @@ const wrapup = () => {
 	elements.clearingTime.innerHTML = convertTime(clearingTime);
 	elements.dustPs.innerHTML = format(base_dust) + " D/s";
 
-	let fightTime = timeSpent / (enemiesKilled + trimpsKilled);
-	elements.averageFightTime.innerHTML = format(fightTime) + " ms";
-
-	fightTime = timeSpent / enemiesKilled;
-	elements.averageKillTime.innerHTML = format(fightTime) + " ms";
-
 	let base_shards = AB.enemyLevel >= 51 ? base_dust / 1e9 : 0;
 	elements.shardsPs.innerHTML = format(base_shards) + " S/s";
+
+	let fightTime = timeSpent / (enemiesKilled + trimpsKilled);
+	elements.averageFightTime.innerHTML = convertTimeMs(fightTime, 2);
+
+	fightTime = timeSpent / enemiesKilled;
+	elements.averageKillTime.innerHTML = convertTimeMs(fightTime, 2);
 };
 
 function setup() {
@@ -205,7 +205,7 @@ function makeOneTimersBtns() {
 
 			// Only for ring really :/
 			checkBox.addEventListener("change", () => {
-				calcBuildCost();
+				calcBuildCost(true);
 			});
 			rightDiv.appendChild(checkBox);
 		}
@@ -223,7 +223,7 @@ function addChangeForEquip(item) {
 		} else {
 			event.target.value = 1;
 		}
-		calcBuildCost();
+		calcBuildCost(true);
 	});
 }
 
@@ -240,7 +240,7 @@ function addChangeForCheckBox(checkBox) {
 		// Set limbs.
 		elements.limbsUsed.innerHTML = countLimbsUsed();
 
-		calcBuildCost();
+		calcBuildCost(true);
 	});
 }
 
@@ -324,8 +324,8 @@ function setOneTimers() {
 	});
 }
 
-function calcBuildCost() {
-	sets();
+function calcBuildCost(set = false) {
+	if (set) sets();
 	let dustCost = 0;
 	let shardCost = 0;
 	for (let itemID in AB.items) {
@@ -599,7 +599,7 @@ function onSavePaste(event) {
 function dustWithUpgrade(name, speed) {
 	let target = (name == "Ring" ? AB.rings : AB.items[name])
 	target.level++;
-	runSimulationNoSet(speed);
+	runSimulation(speed);
 	let dust = AB.getDustPs();
 	target.level--;
 	return dust;
@@ -608,19 +608,13 @@ function dustWithUpgrade(name, speed) {
 function runSimulation(speed = 100000) {
 	AB.speed = speed;
 	AB.resetAll();
-	sets();
 	startTime = Date.now();
-	AB.update();
-}
-
-function runSimulationNoSet(speed = 100000) {
-	AB.speed = speed;
-	AB.resetStats()
 	AB.update();
 }
 
 function maxLuck() {
 	sets();
+	AB.resetAll();
 	let whoDied = AB.oneFight();
 	let span = document.getElementById("theoreticalWinSpan");
 
@@ -653,17 +647,18 @@ function convertTime(time) {
 	}
 }
 
-function convertTimeMs(time) {
+function convertTimeMs(time, accuracy = 1) {
 	// Return time as milliseconds, seconds, hours or days.
-	time = time.toFixed(1);
-	if (time < 1000) {
+	time = time.toFixed(accuracy);
+	if (time == Infinity) return time;
+	else if (time < 1000) {
 		return time + "ms";
 	} else if (time < 3600000) {
-		return (time / 1000).toFixed(1) + "s";
+		return (time / 1000).toFixed(accuracy) + "s";
 	} else if (time < 86400000) {
-		return (time / 3600000).toFixed(1) + "h";
+		return (time / 3600000).toFixed(accuracy) + "h";
 	} else {
-		return (time / 86400000).toFixed(1) + "d";
+		return (time / 86400000).toFixed(accuracy) + "d";
 	}
 }
 
@@ -676,7 +671,7 @@ function resetToSave() {
 		let maxLevel = save.global.autoBattleData.maxEnemyLevel;
 		let ring = save.global.autoBattleData.rings;
 		setItemsInHtml(items, oneTimers, currentLevel, maxLevel, ring);
-		calcBuildCost();
+		calcBuildCost(true);
 	}
 }
 

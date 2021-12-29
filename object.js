@@ -103,19 +103,14 @@ export let autoBattle = {
 	},
 
 	resetAll: function () {
-		// Don't think this is needed.
-		this.enemyLevel = 1;
-		this.maxEnemyLevel = 1;
-		this.autoLevel = true;
 		this.dust = 0;
 		this.shards = 0;
 		this.trimp = null;
 		this.enemy = null;
 		this.enemiesKilled = 0;
-		this.lastActions = [];
-		this.activeContract = "";
 		this.resetStats();
-		this.rings = this.getFreshRings();
+		//this.rings = this.getFreshRings();
+		/*
 		for (var item in this.items) {
 			item = this.items[item];
 			item.owned = item.zone ? false : true;
@@ -129,9 +124,7 @@ export let autoBattle = {
 		for (var oneTimer in this.oneTimers) {
 			this.oneTimers[oneTimer].owned = false;
 		}
-		for (var setting in this.settings) {
-			this.settings[setting].enabled = this.settings[setting].default;
-		}
+		*/
 		this.resetCombat();
 	},
 
@@ -183,28 +176,6 @@ export let autoBattle = {
 		return Math.ceil(contractPrice * 1000) / 10;
 	},
 
-	toggleSetting: function (which) {
-		var setting = this.settings[which];
-		if (setting.enabled == setting.text.length - 1) setting.enabled = 0;
-		else setting.enabled++;
-		if (setting.onToggle) setting.onToggle();
-	},
-
-	settings: {
-		loadHide: {
-			enabled: 1,
-			default: 1,
-		},
-		practice: {
-			enabled: 0,
-			default: 0,
-			onToggle: function () {
-				if (this.enabled) autoBattle.speed = 10;
-				else autoBattle.speed = 1;
-				autoBattle.resetCombat(true);
-			},
-		},
-	},
 	items: {
 		//Starting items
 		Menacing_Mask: {
@@ -2176,40 +2147,6 @@ export let autoBattle = {
 			price: 100,
 			priceMod: 100,
 		},
-		Radon: {
-			description: function () {
-				return "Increase all Radon earned by +10% per level.<br/>";
-			},
-			getMult: function () {
-				return 1 + this.level * 0.1;
-			},
-			level: 0,
-			price: 30000,
-			priceMod: 3,
-		},
-		Stats: {
-			description: function () {
-				return "Increases Attack and Health in U2 by +10% per level.<br/>";
-			},
-			getMult: function () {
-				return 1 + this.level * 0.1;
-			},
-			level: 0,
-			price: 20000,
-			priceMod: 3,
-		},
-		Scaffolding: {
-			description: function () {
-				return "Each level adds +100% Housing and increases the bonus of all other Scaffolds by 10%.";
-			},
-			getMult: function () {
-				return 1 + this.level * Math.pow(1.1, this.level - 1);
-			},
-			level: 0,
-			price: 50,
-			useShards: true,
-			priceMod: 10,
-		},
 	},
 	oneTimers: {
 		Master_of_Arms: {
@@ -2943,7 +2880,7 @@ export let autoBattle = {
 		var itemObj = this.items[item];
 		if (!itemObj) return;
 		itemObj.equipped = !itemObj.equipped;
-		this.resetCombat(true);
+		// this.resetCombat(true);
 	},
 	countEquippedItems: function () {
 		var count = 0;
@@ -3292,10 +3229,10 @@ export let autoBattle = {
 				}
 			}
 			for (let mod in this.enemy) {
-				if (mod.includes("Chance")) {
+				if (mod.match(/^(bleed|poison|shock)Chance$/)) { // Bleed, Poison, and Shock chance regex by copilot.
 					let val = this.enemy[mod];
 					if (val > 0 && val < 100) {
-						this.enemy[mod] = 100;
+						this.enemy[mod] = 0;
 					}
 				}
 			}
