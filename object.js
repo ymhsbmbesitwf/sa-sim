@@ -3229,7 +3229,7 @@ export let autoBattle = {
 				}
 			}
 			for (let mod in this.enemy) {
-				if (mod.match(/^(bleed|poison|shock)Chance$/)) { // Bleed, Poison, and Shock chance regex by copilot.
+				if (mod.includes("Chance")) {
 					let val = this.enemy[mod];
 					if (val > 0 && val < 100) {
 						this.enemy[mod] = 0;
