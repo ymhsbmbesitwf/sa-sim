@@ -617,9 +617,19 @@ function dustWithUpgrade(name, speed) {
 function runSimulation(speed = 100000) {
 	AB.speed = speed;
 	AB.resetAll();
+	let res;
 	startTime = Date.now();
-	AB.update();
-	let res = {
+	// Check if max and min luck gives the same results.
+	AB.oneFight(1);
+	let maxLuckTime = AB.lootAvg.counter;
+	AB.oneFight(-1);
+	let minLuckTime = AB.lootAvg.counter - maxLuckTime;
+	if (maxLuckTime !== minLuckTime) { // Otherwise run simulation.
+		AB.resetAll();
+		startTime = Date.now();
+		AB.update();
+	}
+	res = {
 		dustPs: AB.getDustPs(),
 	}
 	setABResults(res);
@@ -628,7 +638,7 @@ function runSimulation(speed = 100000) {
 function maxLuck() {
 	sets();
 	AB.resetAll();
-	let whoDied = AB.oneFight();
+	let whoDied = AB.oneFight(1);
 	let span = document.getElementById("theoreticalWinSpan");
 
 	if (span) {
@@ -695,7 +705,6 @@ function resetToSave() {
 		let ring = save.global.autoBattleData.rings;
 		let limbs = save.global.autoBattleData.bonuses.Extra_Limbs;
 		setItemsInHtml(items, oneTimers, currentLevel, maxLevel, ring);
-		calcBuildCost(true);
 
 		sets();
 		AB.bonuses.Extra_Limbs.level = limbs;
@@ -706,6 +715,8 @@ function resetToSave() {
 			shardDust: save.global.autoBattleData.shards,
 		}
 		setABResults(res);
+
+		calcBuildCost(true);
 	}
 }
 

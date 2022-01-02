@@ -17,6 +17,7 @@ export let autoBattle = {
 	enemiesKilled: 0,
 	sessionEnemiesKilled: 0,
 	sessionTrimpsKilled: 0,
+	maxItems: 4,
 	notes: "&nbsp;",
 	popupMode: "items",
 	battleTime: 0,
@@ -108,6 +109,22 @@ export let autoBattle = {
 		this.enemy = null;
 		this.enemiesKilled = 0;
 		this.resetStats();
+		//this.rings = this.getFreshRings();
+		/*
+		for (var item in this.items) {
+			item = this.items[item];
+			item.owned = item.zone ? false : true;
+			item.equipped = false;
+			item.hidden = false;
+			item.level = 1;
+		}
+		for (var bonus in this.bonuses) {
+			this.bonuses[bonus].level = 0;
+		}
+		for (var oneTimer in this.oneTimers) {
+			this.oneTimers[oneTimer].owned = false;
+		}
+		*/
 		this.resetCombat();
 	},
 
@@ -2779,6 +2796,7 @@ export let autoBattle = {
 		// if (this.items.Corrupted_Gem.equipped){
 		//     amt *= (1 + this.items.Corrupted_Gem.dustIncrease());
 		// }
+		console.debug("dustmult:", amt);
 		return amt;
 	},
 	getEnrageMult: function () {
@@ -2800,6 +2818,7 @@ export let autoBattle = {
 		//this.notes += "Enemy Died. "
 		this.sessionEnemiesKilled++;
 		var amt = this.getDustReward();
+		console.debug("dust", amt)
 		this.dust += amt;
 		if (this.enemyLevel > 50) {
 			this.shardDust += amt;
@@ -2832,6 +2851,9 @@ export let autoBattle = {
 			this.battleTime += this.frameTime;
 		}
 	},
+	getMaxItems: function () {
+		return this.maxItems + this.bonuses.Extra_Limbs.level;
+	},
 	getDustPs: function () {
 		var dps = 0;
 		if (this.lootAvg.accumulator == 0) {
@@ -2846,6 +2868,7 @@ export let autoBattle = {
 			dps = 1000 * ((reward * (1 - enPct)) / this.battleTime);
 		} else dps = 1000 * (this.lootAvg.accumulator / this.lootAvg.counter);
 		if (dps < 0.01) dps = 0;
+		console.log(this.lootAvg.accumulator, this.lootAvg.counter)
 		return dps;
 	},
 	resetStats: function () {
@@ -3167,7 +3190,9 @@ export let autoBattle = {
 		this.resetCombat();
 
 		while (this.trimp.health > 0 || this.enemy.health > 0) {
+
 			this.battleTime += this.frameTime;
+
 			this.enemy.maxHealth = this.enemy.baseHealth;
 			this.trimp.maxHealth = this.trimp.baseHealth;
 			this.enemy.attackSpeed = this.enemy.baseAttackSpeed;
@@ -3197,7 +3222,8 @@ export let autoBattle = {
 			this.trimp.lifesteal = 0;
 			this.trimp.damageTakenMult = 1;
 			this.trimp.slowAura = 1;
-			this.trimp.dustMult = 0;
+
+			this.trimp.dustMult = 0;  // NOO NOO OH MY GOD WHY
 
 			this.checkItems();
 
@@ -3206,7 +3232,7 @@ export let autoBattle = {
 				if (mod.includes("Chance")) {
 					let val = this.trimp[mod];
 					if (val > 0 && val < 100) {
-						this.trimp[mod] = (luck === 1) ? 100 : 0;
+						this.trimp[mod] = (luck == 1) ? 100 : 0;
 					}
 				}
 			}
@@ -3214,7 +3240,7 @@ export let autoBattle = {
 				if (mod.includes("Chance")) {
 					let val = this.enemy[mod];
 					if (val > 0 && val < 100) {
-						this.enemy[mod] = (luck === 1) ? 0 : 100;
+						this.enemy[mod] = (luck == 1) ? 0 : 100;
 					}
 				}
 			}
@@ -3263,6 +3289,8 @@ export let autoBattle = {
 				this.enemyDied();
 				return this.enemy;
 			}
+
+
 		}
 		return "error?";
 	},
