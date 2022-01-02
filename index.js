@@ -697,6 +697,7 @@ function resetToSave() {
 		setItemsInHtml(items, oneTimers, currentLevel, maxLevel, ring);
 		calcBuildCost(true);
 
+		sets();
 		AB.bonuses.Extra_Limbs.level = limbs;
 		runSimulation();
 		let res = {
