@@ -127,6 +127,11 @@ body {
   background-color: rgba(242, 140, 40, 0.5);
 }
 
+#affordTimeDiv {
+  display: flex;
+  flex-direction: column;
+}
+
 #affordTimeInputDiv {
   display: flex;
   flex-direction: row;

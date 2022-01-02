@@ -17,7 +17,6 @@ export let autoBattle = {
 	enemiesKilled: 0,
 	sessionEnemiesKilled: 0,
 	sessionTrimpsKilled: 0,
-	maxItems: 4,
 	notes: "&nbsp;",
 	popupMode: "items",
 	battleTime: 0,
@@ -109,22 +108,6 @@ export let autoBattle = {
 		this.enemy = null;
 		this.enemiesKilled = 0;
 		this.resetStats();
-		//this.rings = this.getFreshRings();
-		/*
-		for (var item in this.items) {
-			item = this.items[item];
-			item.owned = item.zone ? false : true;
-			item.equipped = false;
-			item.hidden = false;
-			item.level = 1;
-		}
-		for (var bonus in this.bonuses) {
-			this.bonuses[bonus].level = 0;
-		}
-		for (var oneTimer in this.oneTimers) {
-			this.oneTimers[oneTimer].owned = false;
-		}
-		*/
 		this.resetCombat();
 	},
 
@@ -2848,9 +2831,6 @@ export let autoBattle = {
 			this.fight();
 			this.battleTime += this.frameTime;
 		}
-	},
-	getMaxItems: function () {
-		return this.maxItems + this.bonuses.Extra_Limbs.level;
 	},
 	getDustPs: function () {
 		var dps = 0;

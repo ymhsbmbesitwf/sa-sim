@@ -43,7 +43,6 @@ function getElements() {
 }
 
 const startSimulation = () => {
-	AB.bonuses.Extra_Limbs.level = 100; // For safety
 	sets();
 	calcBuildCost(false);
 	runSimulation(100000);
@@ -694,8 +693,11 @@ function resetToSave() {
 		let currentLevel = save.global.autoBattleData.enemyLevel;
 		let maxLevel = save.global.autoBattleData.maxEnemyLevel;
 		let ring = save.global.autoBattleData.rings;
+		let limbs = save.global.autoBattleData.bonuses.Extra_Limbs;
 		setItemsInHtml(items, oneTimers, currentLevel, maxLevel, ring);
 		calcBuildCost(true);
+
+		AB.bonuses.Extra_Limbs.level = limbs;
 		runSimulation();
 		let res = {
 			dustPs: AB.getDustPs(),
@@ -732,6 +734,12 @@ function addSelectAffordTime() {
 	option.value = "The_Ring";
 	option.innerHTML = "The Ring";
 	select.appendChild(option);
+
+	// Add limbs to select.
+	option = document.createElement("option");
+	option.value = "Extra_Limbs";
+	option.innerHTML = "Next Limb";
+	select.appendChild(option);
 }
 
 function affordTime() {
@@ -741,6 +749,8 @@ function affordTime() {
 	if (item === "The_Ring") {
 		remainingCost = AB.getRingLevelCost() * 1e9;
 		remainingCost -= ABresults.shardDust * 1e9;
+	} else if (item === "Extra_Limbs") {
+		remainingCost = AB.getBonusCost(item) - ABresults.dust;
 	} else if (AB.items[item].dustType === "shards") {
 		remainingCost = AB.upgradeCost(item) * 1e9;
 		remainingCost -= ABresults.shardDust * 1e9;
@@ -755,7 +765,7 @@ function affordTime() {
 
 	if (time > 0) {
 		time = convertTime(time);
-		span.innerHTML = "You can afford this upgrade in " + time;
+		span.innerHTML = "You can afford this upgrade in " + time + ".";
 	} else if (time <= 0) {
 		span.innerHTML = "You can afford this upgrade now.";
 	} else if (isNaN(time)) {
