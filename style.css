@@ -126,3 +126,16 @@ body {
   /* Set background to orange */
   background-color: rgba(242, 140, 40, 0.5);
 }
+
+#affordTimeInputDiv {
+  display: flex;
+  flex-direction: row;
+}
+
+#affordTimeBtn {
+  flex: 1 0 auto;
+}
+
+#affordTimeSelect {
+  flex: 2 0 auto;
+}

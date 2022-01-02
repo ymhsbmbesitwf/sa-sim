@@ -18,6 +18,11 @@ function format(num) {
 }
 
 let elements;
+let ABresults = {
+	dustPs: undefined,
+	dust: undefined,
+	shardDust: undefined,
+};
 
 function getElements() {
 	return {
@@ -90,6 +95,7 @@ function setup() {
 	makeEquipBtns();
 	makeOneTimersBtns();
 	addListeners();
+	addSelectAffordTime();
 }
 
 const prettify = (num) => {
@@ -478,6 +484,10 @@ function addListeners() {
 	document
 		.getElementById("theoreticalWin")
 		.addEventListener("click", maxLuck);
+
+	document
+		.getElementById("affordTimeBtn")
+		.addEventListener("click", affordTime);
 }
 
 function findBestDpsUpgrade() {
@@ -610,6 +620,10 @@ function runSimulation(speed = 100000) {
 	AB.resetAll();
 	startTime = Date.now();
 	AB.update();
+	let res = {
+		dustPs: AB.getDustPs(),
+	}
+	setABResults(res);
 }
 
 function maxLuck() {
@@ -636,14 +650,18 @@ function maxLuck() {
 function convertTime(time) {
 	// Return time as seconds, hours or days.
 	time = time.toFixed(1);
-	if (time == Infinity) {
-		return time;
+	if (time == Infinity) return time;
+	else if (time === NaN) {
+		return "error";
 	} else if (time < 3600) {
 		return time + "s";
 	} else if (time < 86400) {
 		return (time / 3600).toFixed(1) + "h";
 	} else {
-		return (time / 86400).toFixed(1) + "d";
+		time = time / 86400;
+		let days = Math.floor(time);
+		let hours = (time - days) * 24;
+		return days + "d " + hours.toFixed(1) + "h";
 	}
 }
 
@@ -651,6 +669,9 @@ function convertTimeMs(time, accuracy = 1) {
 	// Return time as milliseconds, seconds, hours or days.
 	time = time.toFixed(accuracy);
 	if (time == Infinity) return time;
+	else if (time === NaN) {
+		return "error";
+	}
 	else if (time < 1000) {
 		return time + "ms";
 	} else if (time < 3600000) {
@@ -658,7 +679,10 @@ function convertTimeMs(time, accuracy = 1) {
 	} else if (time < 86400000) {
 		return (time / 3600000).toFixed(accuracy) + "h";
 	} else {
-		return (time / 86400000).toFixed(accuracy) + "d";
+		time = time / 86400000;
+		let days = Math.floor(time);
+		let hours = (time - days) * 24;
+		return days + "d " + hours.toFixed(1) + "h";
 	}
 }
 
@@ -672,6 +696,13 @@ function resetToSave() {
 		let ring = save.global.autoBattleData.rings;
 		setItemsInHtml(items, oneTimers, currentLevel, maxLevel, ring);
 		calcBuildCost(true);
+		runSimulation();
+		let res = {
+			dustPs: AB.getDustPs(),
+			dust: save.global.autoBattleData.dust,
+			shardDust: save.global.autoBattleData.shardDust,
+		}
+		setABResults(res);
 	}
 }
 
@@ -683,4 +714,64 @@ function countLimbsUsed() {
 		}
 	}
 	return count;
+}
+
+function addSelectAffordTime() {
+	let select = document.getElementById("affordTimeSelect");
+	// Add each equip to select.
+	for (let item in AB.items) {
+		if (item === "Doppelganger_Signet") continue;
+		let option = document.createElement("option");
+		option.value = item;
+		item = item.replaceAll("_", " ");
+		option.innerHTML = item;
+		select.appendChild(option);
+	}
+	// Add ring to select.
+	let option = document.createElement("option");
+	option.value = "The Ring";
+	option.innerHTML = "The Ring";
+	select.appendChild(option);
+}
+
+function affordTime() {
+	let item = document.getElementById("affordTimeSelect").value;
+	// If upgrade costs shards.
+	let remainingCost;
+	if (item.dustType === "shards") {
+		if (item === "The_Ring") {
+			remainingCost = AB.getRingLevelCost() * 1e9;
+		} else {
+			remainingCost = AB.upgradeCost(item) * 1e9;
+		}
+		remainingCost -= ABresults.shardDust;
+	} else {
+		remainingCost = AB.upgradeCost(item) - ABresults.dust;
+	}
+	let time = remainingCost / ABresults.dustPs;
+	if (time > 0) {
+		time = convertTime(time);
+	}
+	setAffordTime(time);
+}
+
+function setABResults(res) {
+	for (let item in res) {
+		ABresults[item] = res[item];
+	}
+}
+
+function setAffordTime(time) {
+	let span = document.getElementById("affordTimeSpan");
+	// Clear earlier data.
+	while (span.firstChild) {
+		span.removeChild(span.lastChild);
+	}
+	if (time < 0) {
+		span.innerHTML = "You can afford this item now.";
+	} else if (isNaN(time)) {
+		span.innerHTML = "You can never afford this item.";
+	} else {
+		span.innerHTML = "You can afford this upgrade in: " + time;
+	}
 }
