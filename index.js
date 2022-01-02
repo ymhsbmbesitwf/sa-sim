@@ -700,7 +700,7 @@ function resetToSave() {
 		let res = {
 			dustPs: AB.getDustPs(),
 			dust: save.global.autoBattleData.dust,
-			shardDust: save.global.autoBattleData.shardDust,
+			shardDust: save.global.autoBattleData.shards,
 		}
 		setABResults(res);
 	}
@@ -729,7 +729,7 @@ function addSelectAffordTime() {
 	}
 	// Add ring to select.
 	let option = document.createElement("option");
-	option.value = "The Ring";
+	option.value = "The_Ring";
 	option.innerHTML = "The Ring";
 	select.appendChild(option);
 }
@@ -738,40 +738,35 @@ function affordTime() {
 	let item = document.getElementById("affordTimeSelect").value;
 	// If upgrade costs shards.
 	let remainingCost;
-	if (item.dustType === "shards") {
-		if (item === "The_Ring") {
-			remainingCost = AB.getRingLevelCost() * 1e9;
-		} else {
-			remainingCost = AB.upgradeCost(item) * 1e9;
-		}
-		remainingCost -= ABresults.shardDust;
+	if (item === "The_Ring") {
+		remainingCost = AB.getRingLevelCost() * 1e9;
+		remainingCost -= ABresults.shardDust * 1e9;
+	} else if (AB.items[item].dustType === "shards") {
+		remainingCost = AB.upgradeCost(item) * 1e9;
+		remainingCost -= ABresults.shardDust * 1e9;
 	} else {
 		remainingCost = AB.upgradeCost(item) - ABresults.dust;
 	}
 	let time = remainingCost / ABresults.dustPs;
+	let span = document.getElementById("affordTimeSpan");
+	while (span.firstChild) {
+		span.removeChild(span.lastChild);
+	}
+
 	if (time > 0) {
 		time = convertTime(time);
+		span.innerHTML = "You can afford this upgrade in " + time;
+	} else if (time <= 0) {
+		span.innerHTML = "You can afford this upgrade now.";
+	} else if (isNaN(time)) {
+		span.innerHTML = "You can never afford this upgrade.";
+	} else {
+		span.innerHTML = "Big Bad";
 	}
-	setAffordTime(time);
 }
 
 function setABResults(res) {
 	for (let item in res) {
 		ABresults[item] = res[item];
-	}
-}
-
-function setAffordTime(time) {
-	let span = document.getElementById("affordTimeSpan");
-	// Clear earlier data.
-	while (span.firstChild) {
-		span.removeChild(span.lastChild);
-	}
-	if (time < 0) {
-		span.innerHTML = "You can afford this item now.";
-	} else if (isNaN(time)) {
-		span.innerHTML = "You can never afford this item.";
-	} else {
-		span.innerHTML = "You can afford this upgrade in: " + time;
 	}
 }
