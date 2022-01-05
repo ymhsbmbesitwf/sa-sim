@@ -26,6 +26,7 @@ body {
 .partDiv {
   display: flex;
   flex-direction: column;
+  margin-right: 1em;
 }
 
 .equipInpDiv {
@@ -143,4 +144,8 @@ body {
 
 #affordTimeSelect {
   flex: 2 0 auto;
+}
+
+#verboseEnemyDiv {
+  display: none;
 }
