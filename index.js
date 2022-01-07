@@ -453,6 +453,8 @@ function addListeners() {
 		if (parseInt(maxLvl.value) < value) {
 			maxLvl.value = value;
 		}
+		let effects = document.getElementById("effects");
+		effects.innerHTML = AB.getEffects(value);
 	});
 
 	// SA highest level
@@ -463,15 +465,21 @@ function addListeners() {
 		if (value < 1) event.target.value = 1;
 	});
 
+	// Verbose enemy info
+	/*
+	target = document.getElementById("verboseEnemyButton")
+	target.addEventListener("click", (event) => {
+		displayVerboseEnemy(target);
+	});
+	*/
+
 	// Input for save
-	target = document.getElementById("saveInput");
-	target.addEventListener("paste", (event) => {
+	document.getElementById("saveInput").addEventListener("paste", (event) => {
 		onSavePaste(event);
 	});
 
 	// Reset to save button
-	target = document.getElementById("resetToSave");
-	target.addEventListener("click", (event) => {
+	document.getElementById("resetToSave").addEventListener("click", (event) => {
 		resetToSave();
 	});
 
@@ -790,5 +798,28 @@ function affordTime() {
 function setABResults(res) {
 	for (let item in res) {
 		ABresults[item] = res[item];
+	}
+}
+
+function displayVerboseEnemy(target) {
+	let hiddenDiv = document.getElementById("verboseEnemyDiv");
+	if (target.classList.contains("uncheckedButton")) {
+		// Revmoe all children.
+		while (hiddenDiv.firstChild) {
+			hiddenDiv.removeChild(hiddenDiv.lastChild);
+		}
+		target.classList.remove("uncheckedButton");
+		target.classList.add("checkedButton");
+		hiddenDiv.style.display = "block";
+		sets();
+		runSimulation(1);
+		let effects = AB.profile;
+		let effectsSpan = document.createElement("span");
+		effectsSpan.innerHTML = effects;
+		hiddenDiv.appendChild(effectsSpan);
+	} else {
+		target.classList.remove("checkedButton");
+		target.classList.add("uncheckedButton");
+		hiddenDiv.style.display = "none";
 	}
 }

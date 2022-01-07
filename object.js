@@ -2761,6 +2761,158 @@ export let autoBattle = {
 		}
 		this.profile = this.profile.substring(0, this.profile.length - 2);
 	},
+	getEffects: function (level) {
+		let profile = "";
+		if (level == 1) return;
+		let seed = this.seed;
+
+		seed += 100 * level;
+		if (level >= 51) seed += 3125; //Generated with Shold brain RNG
+		let doubleResist = true;
+		if (level > 50) {
+			doubleResist = getRandomIntSeeded(seed++, 0, 100);
+			doubleResist = doubleResist < 20;
+		}
+		if (level <= 50) doubleResist = true;
+		let effects = ["Healthy", "Fast", "Strong", "Defensive"];
+		if (level > 5) {
+			effects.push(
+				"Poisoning",
+				"Bloodletting",
+				"Shocking",
+				"Lifestealing"
+			);
+		}
+		if (level > 10) {
+			effects.push(
+				"Poison Resistant",
+				"Shock Resistant",
+				"Bleed Resistant"
+			);
+		}
+		if (level > 20) {
+			effects.push("Enraging");
+		}
+		if (level > 50) {
+			effects.push("Explosive", "Berserking", "Slowing", "Ethereal");
+		}
+		let effectsCount;
+		if (level < 25)
+			effectsCount = Math.ceil((level + 1) / 5);
+		else effectsCount = 4 + Math.ceil((level - 19) / 10);
+		let selectedEffects = [];
+		let selectedEffectsCount = [];
+		let maxEffectStack = 1;
+		maxEffectStack += Math.floor(level / 10);
+		for (let x = 0; x < effectsCount; x++) {
+			let roll = getRandomIntSeeded(seed++, 0, effects.length);
+			let effect = effects[roll];
+			if (!doubleResist && effect.search("Resistant") != -1) {
+				let offset = level % 3;
+				roll = getRandomIntSeeded(seed++, 0, 100);
+				if (roll >= 40) {
+					if (offset == 0) effect = "Poison Resistant";
+					if (offset == 1) effect = "Shock Resistant";
+					if (offset == 2) effect = "Bleed Resistant";
+				}
+			}
+			let checkSelected = selectedEffects.indexOf(effect);
+			if (checkSelected == -1) {
+				selectedEffects.push(effect);
+				selectedEffectsCount.push(1);
+				checkSelected = selectedEffects.length - 1;
+			} else {
+				selectedEffectsCount[checkSelected]++;
+			}
+			if (selectedEffectsCount[checkSelected] >= maxEffectStack) {
+				effects.splice(effects.indexOf(effect), 1);
+			}
+			let count;
+			switch (effect) {
+				case "Healthy":
+					if (selectedEffectsCount[checkSelected] >= 4)
+						effects.splice(effects.indexOf(effect), 1);
+					break;
+				case "Strong":
+					if (selectedEffectsCount[checkSelected] >= 4)
+						effects.splice(effects.indexOf(effect), 1);
+					break;
+				case "Fast":
+					if (selectedEffectsCount[checkSelected] >= 2)
+						effects.splice(effects.indexOf(effect), 1);
+					break;
+				case "Poison Resistant":
+					effects.splice(effects.indexOf(effect), 1);
+					if (
+						!doubleResist ||
+						selectedEffects.indexOf("Bleed Resistant") != -1
+					)
+						effects.splice(effects.indexOf("Shock Resistant"), 1);
+					if (
+						!doubleResist ||
+						selectedEffects.indexOf("Shock Resistant") != -1
+					)
+						effects.splice(effects.indexOf("Bleed Resistant"), 1);
+					break;
+				case "Bleed Resistant":
+					effects.splice(effects.indexOf(effect), 1);
+					if (
+						!doubleResist ||
+						selectedEffects.indexOf("Poison Resistant") != -1
+					)
+						effects.splice(effects.indexOf("Shock Resistant"), 1);
+					if (
+						!doubleResist ||
+						selectedEffects.indexOf("Shock Resistant") != -1
+					)
+						effects.splice(effects.indexOf("Poison Resistant"), 1);
+					break;
+				case "Shock Resistant":
+					effects.splice(effects.indexOf(effect), 1);
+					if (
+						!doubleResist ||
+						selectedEffects.indexOf("Bleed Resistant") != -1
+					)
+						effects.splice(effects.indexOf("Poison Resistant"), 1);
+					if (
+						!doubleResist ||
+						selectedEffects.indexOf("Poison Resistant") != -1
+					)
+						effects.splice(effects.indexOf("Bleed Resistant"), 1);
+					break;
+				case "Enraging":
+					if (selectedEffectsCount[checkSelected] >= 2)
+						effects.splice(effects.indexOf(effect), 1);
+					break;
+				case "Explosive":
+					count = selectedEffectsCount[checkSelected];
+					if (count >= 3) effects.splice(effects.indexOf(effect), 1);
+					effects.splice(effects.indexOf("Berserking"));
+					effects.splice(effects.indexOf("Ethereal"));
+					break;
+				case "Berserking":
+					count = selectedEffectsCount[checkSelected];
+					if (count >= 3) effects.splice(effects.indexOf(effect), 1);
+					effects.splice(effects.indexOf("Explosive"));
+					effects.splice(effects.indexOf("Ethereal"));
+					break;
+				case "Ethereal":
+					count = selectedEffectsCount[checkSelected];
+					if (count >= 3) effects.splice(effects.indexOf(effect), 1);
+					effects.splice(effects.indexOf("Explosive"));
+					effects.splice(effects.indexOf("Berserking"));
+					break;
+			}
+		}
+		for (let x = 0; x < selectedEffects.length; x++) {
+			profile += selectedEffects[x];
+			if (selectedEffectsCount[x] > 1)
+				profile += " x" + selectedEffectsCount[x] + "";
+			profile += ", ";
+		}
+		profile = profile.substring(0, profile.length - 2);
+		return profile;
+	},
 	trimpDied: function () {
 		this.sessionTrimpsKilled++;
 		this.lootAvg.counter += this.battleTime;

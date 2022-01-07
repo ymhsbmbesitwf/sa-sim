@@ -23,6 +23,10 @@ body {
   margin-right: 1em;
 }
 
+#otherDiv {
+  max-width: 25em;
+}
+
 .partDiv {
   display: flex;
   flex-direction: column;
@@ -112,6 +116,7 @@ body {
 .inputAndCheckRingDiv {
   display: flex;
   justify-content: right;
+  margin-left: 1em;
 }
 
 .inputAndCheckRingDiv input {
