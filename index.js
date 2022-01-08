@@ -595,6 +595,7 @@ function findBestDpsUpgrade() {
 			}
 		});
 	}
+	runSimulation();
 }
 
 function getEquippedItems() {
