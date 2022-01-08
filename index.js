@@ -173,7 +173,14 @@ function makeOneTimersBtns() {
 			div.appendChild(span);
 
 			let rightDiv = document.createElement("div");
-			rightDiv.className = "inputAndCheckRingDiv";
+
+			// If ring
+			if (oneTimer.includes("Ring")) {
+				rightDiv.id = "inputAndCheckRingDiv";
+				rightDiv.addEventListener("change", () => {
+					calcBuildCost(true);
+				});
+			}
 			div.appendChild(rightDiv);
 
 			if (oneTimer === "The_Ring") {
@@ -208,10 +215,6 @@ function makeOneTimersBtns() {
 			checkBox.className = "oneTimerInput";
 			checkBox.id = oneTimer + "_Input";
 
-			// Only for ring really :/
-			checkBox.addEventListener("change", () => {
-				calcBuildCost(true);
-			});
 			rightDiv.appendChild(checkBox);
 		}
 	}

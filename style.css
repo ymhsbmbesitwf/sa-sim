@@ -113,13 +113,13 @@ body {
   flex-direction: column;
 }
 
-.inputAndCheckRingDiv {
+#inputAndCheckRingDiv {
   display: flex;
   justify-content: right;
   margin-left: 1em;
 }
 
-.inputAndCheckRingDiv input {
+#inputAndCheckRingDiv input {
   width: 2.5em;
 }
 
