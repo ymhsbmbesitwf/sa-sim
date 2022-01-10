@@ -508,7 +508,8 @@ function findBestDpsUpgrade() {
 		runSimulation(speed);
 		let currDps = AB.getDustPs();
 		let items = getEquippedItems();
-		if (autoBattle.rings?.level) {
+		let ringChecked = document.getElementById("The_Ring_Input").nextSibling;
+		if (ringChecked.checked) {
 			items.push({ name: "Ring", data: { dustType: "shards" } })
 		}
 		let dustForItems = [];
