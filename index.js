@@ -358,6 +358,14 @@ function calcBuildCost(set = false) {
 		shardCost += Math.ceil(15 * Math.pow(2, AB.rings.level));
 	}
 
+	// Price for extra limbs.
+	let extraLimbs = countLimbsUsed() - 4;
+	for (let i = 1; i < extraLimbs; i++) {
+		let price = AB.bonuses["Extra_Limbs"].price;
+		let mod = AB.bonuses["Extra_Limbs"].priceMod;
+		dustCost += Math.ceil(price * Math.pow(mod, i))
+	}
+
 	elements.buildCostDust.innerHTML = prettify(dustCost);
 	elements.buildCostShards.innerHTML = prettify(shardCost);
 }
