@@ -3359,7 +3359,7 @@ export let autoBattle = {
 					this.trimp[chance] = this.enemy[res] + 100 * luck;
                 }
                 if (this.enemy[chance] > this.trimp[res]) {
-					this.enemy[chance] = this.trimp[res] + 100 * luck;
+					this.enemy[chance] = this.trimp[res] + -100 * luck;
                 }
             }
 
