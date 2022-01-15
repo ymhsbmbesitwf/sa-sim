@@ -3352,37 +3352,20 @@ export let autoBattle = {
 
 			this.checkItems();
 
-			/*
-			// Set all chances
-			for (let mod in this.trimp) {
-				if (mod.includes("Chance")) {
-					let val = this.trimp[mod];
-					if (val > 0 && val < 100) {
-						this.trimp[mod] = (luck === 1) ? 100 : 0;
-					}
-				}
-			}
-			for (let mod in this.enemy) {
-				if (mod.includes("Chance")) {
-					let val = this.enemy[mod];
-					if (val > 0 && val < 100) {
-						this.enemy[mod] = (luck === 1) ? 0 : 100;
-					}
-				}
-			}
-			*/
+            for (let mod of ["bleed", "poison", "shock"]) {
+                let chance = mod + "Chance";
+                let res = mod + "Resist";
+                if (this.trimp[chance] > this.enemy[res]) {
+					this.trimp[chance] = this.enemy[res] + 100 * luck;
+                }
+                if (this.enemy[chance] > this.trimp[res]) {
+					this.enemy[chance] = this.trimp[res] + 100 * luck;
+                }
+            }
 
-			for (let mod of ["bleed", "poison", "shock", "eth"]) {
-				let chance = mod + "Chance";
-				let res = mod + "Resist";
-				// Why 101?  Not sure, but 100 is wrong and I'm not looking at GS's code to figure out why
-				if (this.trimp[chance] > this.enemy[res]) {
-					this.trimp[chance] = this.enemy[res] + (luck === 1) ? 101 : 0;
-				}
-				if (this.enemy[chance] > this.trimp[res]) {
-					this.enemy[chance] = this.trimp[res] + (luck === 1) ? 0 : 101;
-				}
-			}
+            if (this.enemy.ethChance > 0) {
+                this.enemy.ethChance = (luck === -1) ? 100 : 0;
+            }
 
 			var trimpAttackTime = this.trimp.attackSpeed;
 			this.enemy.lastAttack += this.frameTime;

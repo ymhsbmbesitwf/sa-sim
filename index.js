@@ -640,15 +640,21 @@ function runSimulation(speed = 100000) {
 	AB.resetAll();
 	let res;
 	startTime = Date.now();
+
 	// Check if max and min luck gives the same results.
 	AB.oneFight(1);
 	let maxLuckTime = AB.lootAvg.counter;
+	let maxLuckRewards = AB.lootAvg.accumulator;
 	AB.oneFight(-1);
 	let minLuckTime = AB.lootAvg.counter - maxLuckTime;
-	if (maxLuckTime !== minLuckTime) { // Otherwise run simulation.
+	let minLuckRewards = AB.lootAvg.accumulator - maxLuckRewards;
+
+	// Otherwise run simulation.
+	if (maxLuckTime !== minLuckTime || maxLuckRewards !== minLuckRewards) {
 		AB.resetAll();
 		startTime = Date.now();
 		AB.update();
+		
 	}
 	res = {
 		dustPs: AB.getDustPs(),
