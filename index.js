@@ -647,7 +647,6 @@ function runSimulation(speed = 100000) {
 	AB.eth = 0;
 	AB.total = 0;
 	AB.speed = speed;
-	AB.speed = 10;
 	AB.resetAll();
 	let res;
 	startTime = Date.now();
