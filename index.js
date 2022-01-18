@@ -75,7 +75,8 @@ const wrapup = () => {
 	elements.trimpsKilled.innerHTML =
 		trimpsKilled + " [" + 100 * format(WR) + "%]";
 
-	let clearingTime = ((toKill / AB.sessionEnemiesKilled) * AB.lootAvg.counter) / 1000;
+	let clearingTime =
+		((toKill / AB.sessionEnemiesKilled) * AB.lootAvg.counter) / 1000;
 
 	elements.clearingTime.innerHTML = convertTime(clearingTime);
 	elements.dustPs.innerHTML = format(base_dust) + " D/s";
@@ -339,12 +340,9 @@ function calcBuildCost(set = false) {
 	for (let itemID in AB.items) {
 		let item = AB.items[itemID];
 		if (item.equipped) {
-			let cost = (item.startPrice || 5) *
-				((1 -
-					Math.pow(
-						item.priceMod || 3,
-						item.level - 1
-					)) /
+			let cost =
+				(item.startPrice || 5) *
+				((1 - Math.pow(item.priceMod || 3, item.level - 1)) /
 					(1 - (item.priceMod || 3)));
 			if (item.dustType === "shards") {
 				shardCost += cost;
@@ -363,7 +361,7 @@ function calcBuildCost(set = false) {
 	for (let i = 1; i < extraLimbs; i++) {
 		let price = AB.bonuses["Extra_Limbs"].price;
 		let mod = AB.bonuses["Extra_Limbs"].priceMod;
-		dustCost += Math.ceil(price * Math.pow(mod, i))
+		dustCost += Math.ceil(price * Math.pow(mod, i));
 	}
 
 	elements.buildCostDust.innerHTML = prettify(dustCost);
@@ -490,14 +488,16 @@ function addListeners() {
 	});
 
 	// Reset to save button
-	document.getElementById("resetToSave").addEventListener("click", (event) => {
+	document.getElementById("resetToSave").addEventListener("click", () => {
 		resetToSave();
 	});
 
 	// Calculator buttons
 	document
 		.getElementById("bestUpgradesButton")
-		.addEventListener("click", findBestDpsUpgrade);
+		.addEventListener("click", () => {
+			findBestDpsUpgrade();
+		});
 
 	document
 		.getElementById("theoreticalWin")
@@ -506,29 +506,37 @@ function addListeners() {
 	document
 		.getElementById("affordTimeBtn")
 		.addEventListener("click", affordTime);
+
+	target = document.getElementById("etherealChanceButton");
+	target.addEventListener("click", () => {
+		setEtherealChance(target);
+	});
 }
 
 function findBestDpsUpgrade() {
 	sets();
 
 	if (getEquippedItems().length) {
-		let speed = 200069;
+		let speed = 1000069;
 		runSimulation(speed);
 		let currDps = AB.getDustPs();
 		let items = getEquippedItems();
 		let ringChecked = document.getElementById("The_Ring_Input").nextSibling;
 		if (ringChecked.checked) {
-			items.push({ name: "Ring", data: { dustType: "shards" } })
+			items.push({ name: "Ring", data: { dustType: "shards" } });
 		}
 		let dustForItems = [];
 		for (const ind in items) {
 			let name = items[ind].name;
 			let newDps = dustWithUpgrade(name, speed);
 			let increase = newDps - currDps;
-			increase = (currDps / increase > 10000) ? 0 : increase;
+			increase = currDps / increase > 10000 ? 0 : increase;
 
 			// How long until upgrade is paid back.
-			let upgradeCost = (name == "Ring" ? AB.getRingLevelCost() : AB.upgradeCost(items[ind].name));
+			let upgradeCost =
+				name == "Ring"
+					? AB.getRingLevelCost()
+					: AB.upgradeCost(items[ind].name);
 			let time = upgradeCost / increase;
 			if (time < 0) {
 				time = Infinity;
@@ -627,7 +635,7 @@ function onSavePaste(event) {
 }
 
 function dustWithUpgrade(name, speed) {
-	let target = (name == "Ring" ? AB.rings : AB.items[name])
+	let target = name == "Ring" ? AB.rings : AB.items[name];
 	target.level++;
 	runSimulation(speed);
 	let dust = AB.getDustPs();
@@ -636,7 +644,10 @@ function dustWithUpgrade(name, speed) {
 }
 
 function runSimulation(speed = 100000) {
+	AB.eth = 0;
+	AB.total = 0;
 	AB.speed = speed;
+	AB.speed = 10;
 	AB.resetAll();
 	let res;
 	startTime = Date.now();
@@ -654,11 +665,10 @@ function runSimulation(speed = 100000) {
 		AB.resetAll();
 		startTime = Date.now();
 		AB.update();
-		
 	}
 	res = {
 		dustPs: AB.getDustPs(),
-	}
+	};
 	setABResults(res);
 }
 
@@ -707,8 +717,7 @@ function convertTimeMs(time, accuracy = 1) {
 	if (time == Infinity) return time;
 	else if (time === NaN) {
 		return "error";
-	}
-	else if (time < 1000) {
+	} else if (time < 1000) {
 		return time + "ms";
 	} else if (time < 3600000) {
 		return (time / 1000).toFixed(accuracy) + "s";
@@ -740,7 +749,7 @@ function resetToSave() {
 			dustPs: AB.getDustPs(),
 			dust: save.global.autoBattleData.dust,
 			shardDust: save.global.autoBattleData.shards,
-		}
+		};
 		setABResults(res);
 
 		calcBuildCost(true);
@@ -840,5 +849,18 @@ function displayVerboseEnemy(target) {
 		target.classList.remove("checkedButton");
 		target.classList.add("uncheckedButton");
 		hiddenDiv.style.display = "none";
+	}
+}
+
+function setEtherealChance(button) {
+	// If the button is checked.
+	if (button.classList.contains("checkedButton")) {
+		button.classList.remove("checkedButton");
+		button.classList.add("uncheckedButton");
+		AB.setEthChance = false;
+	} else {
+		button.classList.remove("uncheckedButton");
+		button.classList.add("checkedButton");
+		AB.setEthChance = true;
 	}
 }

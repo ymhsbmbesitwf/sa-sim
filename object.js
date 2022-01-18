@@ -2,6 +2,14 @@ export let autoBattle = {
 	// Manually set thingys
 	usingRealTimeOffline: false,
 
+	// For set ethereal hits.
+	setEthChance: false,
+	ethRolls: [],
+	leftoverChance: 0,
+
+	total: 0,
+	eth: 0,
+
 	// GS stuff
 	frameTime: 300,
 	speed: 1,
@@ -261,7 +269,7 @@ export let autoBattle = {
 					autoBattle.trimp.bleedTime = 10000;
 				autoBattle.trimp.bleedChance +=
 					autoBattle.enemy.poison.time > 0 ||
-						autoBattle.enemy.shock.time > 0
+					autoBattle.enemy.shock.time > 0
 						? this.bleedChance() * 2
 						: this.bleedChance();
 			},
@@ -288,7 +296,7 @@ export let autoBattle = {
 				autoBattle.trimp.poisonMod += this.effect();
 				autoBattle.trimp.poisonChance +=
 					autoBattle.enemy.shock.time > 0 ||
-						autoBattle.enemy.bleed.time > 0
+					autoBattle.enemy.bleed.time > 0
 						? 50
 						: 25;
 				if (autoBattle.trimp.poisonTime < 10000)
@@ -316,7 +324,7 @@ export let autoBattle = {
 			doStuff: function () {
 				autoBattle.trimp.shockChance +=
 					autoBattle.enemy.bleed.time > 0 ||
-						autoBattle.enemy.poison.time > 0
+					autoBattle.enemy.poison.time > 0
 						? 70
 						: 35;
 				autoBattle.trimp.shockMod += this.shockMod();
@@ -443,7 +451,7 @@ export let autoBattle = {
 					Math.max(
 						0,
 						autoBattle.trimp.lifesteal -
-						autoBattle.enemy.lifestealResist
+							autoBattle.enemy.lifestealResist
 					)
 				);
 			},
@@ -2478,10 +2486,29 @@ export let autoBattle = {
 		}
 		if (attacker.berserkMod != -1) attacker.berserkStack++;
 		if (attacker.ethChance > 0) {
-			var ethRoll = Math.floor(Math.random() * 100);
-			if (ethRoll < attacker.ethChance) attacker.isEthereal = true;
-			else attacker.isEthereal = false;
+			this.total += 1;
+			if (this.setEthChance) {
+				if (this.ethRolls.length === 0) {
+					this.ethRolls = rollNewRolls(attacker.ethChance);
+					// console.log(this.ethRolls);
+				}
+				let val = this.ethRolls.pop();
+				if (val) {
+					// console.log(this.ethRolls);
+					attacker.isEthereal = true;
+					this.eth += 1;
+				} else attacker.isEthereal = false;
+			} else {
+				var ethRoll = Math.floor(Math.random() * 100);
+				// console.log(ethRoll);
+				// console.log(attacker.ethChance);
+				if (ethRoll < attacker.ethChance) { attacker.isEthereal = true; this.eth += 1; }
+				else attacker.isEthereal = false;
+			}
+			// if (this.total % 1000 === 0) 
+			// console.log(this.eth/this.total);
 		}
+		
 	},
 	resetCombat: function (resetStats) {
 		this.trimp = this.template();
@@ -2695,8 +2722,8 @@ export let autoBattle = {
 				case "Defensive":
 					this.enemy.defense += Math.ceil(
 						this.enemy.level *
-						0.75 *
-						Math.pow(1.05, this.enemy.level)
+							0.75 *
+							Math.pow(1.05, this.enemy.level)
 					);
 					break;
 				case "Lifestealing":
@@ -2741,11 +2768,13 @@ export let autoBattle = {
 				case "Ethereal":
 					var count = selectedEffectsCount[checkSelected];
 					if (count >= 3) effects.splice(effects.indexOf(effect), 1);
+					// console.log("this is getting updated");
 					if (count == 1) {
 						this.enemy.ethChance = 10;
 					} else {
 						this.enemy.ethChance += 5;
 					}
+					// console.log(this.enemy.ethChance);
 					effects.splice(effects.indexOf("Explosive"));
 					effects.splice(effects.indexOf("Berserking"));
 					break;
@@ -2797,8 +2826,7 @@ export let autoBattle = {
 			effects.push("Explosive", "Berserking", "Slowing", "Ethereal");
 		}
 		let effectsCount;
-		if (level < 25)
-			effectsCount = Math.ceil((level + 1) / 5);
+		if (level < 25) effectsCount = Math.ceil((level + 1) / 5);
 		else effectsCount = 4 + Math.ceil((level - 19) / 10);
 		let selectedEffects = [];
 		let selectedEffectsCount = [];
@@ -3352,20 +3380,20 @@ export let autoBattle = {
 
 			this.checkItems();
 
-            for (let mod of ["bleed", "poison", "shock"]) {
-                let chance = mod + "Chance";
-                let res = mod + "Resist";
-                if (this.trimp[chance] > this.enemy[res]) {
+			for (let mod of ["bleed", "poison", "shock"]) {
+				let chance = mod + "Chance";
+				let res = mod + "Resist";
+				if (this.trimp[chance] > this.enemy[res]) {
 					this.trimp[chance] = this.enemy[res] + 100 * luck;
-                }
-                if (this.enemy[chance] > this.trimp[res]) {
+				}
+				if (this.enemy[chance] > this.trimp[res]) {
 					this.enemy[chance] = this.trimp[res] + -100 * luck;
-                }
-            }
+				}
+			}
 
-            if (this.enemy.ethChance > 0) {
-                this.enemy.ethChance = (luck === -1) ? 100 : 0;
-            }
+			if (this.enemy.ethChance > 0) {
+				this.enemy.ethChance = luck === -1 ? 100 : 0;
+			}
 
 			var trimpAttackTime = this.trimp.attackSpeed;
 			this.enemy.lastAttack += this.frameTime;
@@ -3416,6 +3444,7 @@ export let autoBattle = {
 	},
 };
 
+// Functions from other trimps scripts.
 const prettify = (num) => {
 	return num.toLocaleString("en-US", {
 		maximumSignificantDigits: 4,
@@ -3433,4 +3462,17 @@ const getRandomIntSeeded = (seed, minIncl, maxExcl) => {
 	let toReturn =
 		Math.floor(seededRandom(seed) * (maxExcl - minIncl)) + minIncl;
 	return toReturn === maxExcl ? minIncl : toReturn;
+};
+
+// Custom functions.
+const rollNewRolls = (chance) => {
+	chance += autoBattle.leftoverChance;
+	let accurate = 100 / chance;
+	let rounded = Math.floor(accurate);
+	autoBattle.leftoverChance = accurate - rounded;
+
+	let roll = Math.floor(Math.random() * rounded);
+	let rolls = new Array(rounded).fill(0);
+	rolls[roll] = 1;
+	return rolls;
 };
