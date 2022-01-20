@@ -768,7 +768,8 @@ function countLimbsUsed() {
 function addSelectAffordTime() {
 	let select = document.getElementById("affordTimeSelect");
 	// Add each equip to select.
-	for (let item in AB.items) {
+	let items = orderByUnlock();
+	for (let item in items) {
 		if (item === "Doppelganger_Signet") continue;
 		let option = document.createElement("option");
 		option.value = item;
