@@ -767,11 +767,12 @@ function countLimbsUsed() {
 
 function addSelectAffordTime() {
 	let select = document.getElementById("affordTimeSelect");
+
 	// Add each equip to select.
 	let items = orderByUnlock();
 	let option;
-	// for (let item in items) {
-	for (let item in AB.items) {
+	for (let i = 0; i < items.length; i++) {
+		let item = items[i];
 		if (item === "Doppelganger_Signet") continue;
 		option = document.createElement("option");
 		option.value = item;
@@ -791,7 +792,6 @@ function addSelectAffordTime() {
 	option.innerHTML = "Next Limb";
 	select.appendChild(option);
 
-	/*
 	// Add bonuses to select.
 	for (let bonus in AB.oneTimers) {
 		option = document.createElement("option");
@@ -804,7 +804,6 @@ function addSelectAffordTime() {
 		option.innerHTML = bonus;
 		select.appendChild(option);
 	}
-	*/
 }
 
 function affordTime() {
@@ -825,7 +824,6 @@ function affordTime() {
 		if (ot.useShards) {
 			remainingCost = AB.oneTimerPrice(item) - ABresults.shardDust;
 			// remainingCost -= ABresults.shardDust * 1e9; Needed?
-			console.log(remainingCost);
 		} else remainingCost = AB.oneTimerPrice(item) - ABresults.dust;
 	}else if (AB.items[item].dustType === "shards") {
 		remainingCost = AB.upgradeCost(item) * 1e9;
