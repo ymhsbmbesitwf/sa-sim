@@ -769,16 +769,18 @@ function addSelectAffordTime() {
 	let select = document.getElementById("affordTimeSelect");
 	// Add each equip to select.
 	let items = orderByUnlock();
-	for (let item in items) {
+	let option;
+	// for (let item in items) {
+	for (let item in AB.items) {
 		if (item === "Doppelganger_Signet") continue;
-		let option = document.createElement("option");
+		option = document.createElement("option");
 		option.value = item;
 		item = item.replaceAll("_", " ");
 		option.innerHTML = item;
 		select.appendChild(option);
 	}
 	// Add ring to select.
-	let option = document.createElement("option");
+	option = document.createElement("option");
 	option.value = "The_Ring";
 	option.innerHTML = "The Ring";
 	select.appendChild(option);
@@ -788,6 +790,21 @@ function addSelectAffordTime() {
 	option.value = "Extra_Limbs";
 	option.innerHTML = "Next Limb";
 	select.appendChild(option);
+
+	/*
+	// Add bonuses to select.
+	for (let bonus in AB.oneTimers) {
+		option = document.createElement("option");
+		option.value = bonus;
+		if (bonus === "The_Ring") {
+			bonus = "Unlock the Ring";
+			option.value = "Unlock_The_Ring";
+		}
+		bonus = bonus.replaceAll("_", " ");
+		option.innerHTML = bonus;
+		select.appendChild(option);
+	}
+	*/
 }
 
 function affordTime() {
@@ -799,7 +816,18 @@ function affordTime() {
 		remainingCost -= ABresults.shardDust * 1e9;
 	} else if (item === "Extra_Limbs") {
 		remainingCost = AB.getBonusCost(item) - ABresults.dust;
-	} else if (AB.items[item].dustType === "shards") {
+	} else if (AB.oneTimers[item] || item === "Unlock_The_Ring") { // Check one timers.
+		if (item === "Unlock_The_Ring") {
+			item = "The_Ring";
+		}
+		// console.log("kommer hit da?");
+		let ot = AB.oneTimers[item];
+		if (ot.useShards) {
+			remainingCost = AB.oneTimerPrice(item) - ABresults.shardDust;
+			// remainingCost -= ABresults.shardDust * 1e9; Needed?
+			console.log(remainingCost);
+		} else remainingCost = AB.oneTimerPrice(item) - ABresults.dust;
+	}else if (AB.items[item].dustType === "shards") {
 		remainingCost = AB.upgradeCost(item) * 1e9;
 		remainingCost -= ABresults.shardDust * 1e9;
 	} else {
