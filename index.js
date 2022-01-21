@@ -354,8 +354,8 @@ function calcBuildCost(set = false) {
 		dustCost += Math.ceil(price * Math.pow(mod, i));
 	}
 
-	elements.buildCostDust.innerHTML = prettify(dustCost);
-	elements.buildCostShards.innerHTML = prettify(shardCost);
+	elements.buildCostDust.innerHTML = dustCost.toExponential(2);
+	elements.buildCostShards.innerHTML = shardCost.toExponential(2);
 }
 
 function setLevels() {
