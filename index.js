@@ -135,28 +135,21 @@ function partEquipDiv(parts, ind) {
 		div.className = "equipInpDiv";
 		partDiv.appendChild(div);
 
-		let span = document.createElement("span");
+		let button = document.createElement("button");
 		let name = item.replaceAll("_", " ");
-		span.textContent = name;
-		div.appendChild(span);
-
-		let inpDiv = document.createElement("div");
-		inpDiv.className = "inputAndCheckDiv";
-		div.appendChild(inpDiv);
+		button.innerHTML = name;
+		button.id = item + "_Button";
+		button.className = "uncheckedButton";
+		div.appendChild(button);
+		addChangeForButton(button);
 
 		let input = document.createElement("input");
 		input.type = "number";
 		input.value = 1;
 		input.className = "equipInput";
 		input.id = item + "_Input";
-		addChangeForEquip(input);
-		inpDiv.appendChild(input);
-
-		let checkBox = document.createElement("input");
-		checkBox.type = "checkBox";
-		checkBox.id = item + "_CheckBox";
-		addChangeForCheckBox(checkBox);
-		inpDiv.appendChild(checkBox);
+		addChangeForLevel(input);
+		div.appendChild(input);
 	}
 	return partDiv;
 }
@@ -200,13 +193,7 @@ function makeOneTimersBtns() {
 					modifier.innerHTML = mod;
 					modifier.className = "uncheckedButton";
 					modifier.addEventListener("click", () => {
-						if (modifier.classList.contains("uncheckedButton")) {
-							modifier.classList.add("checkedButton");
-							modifier.classList.remove("uncheckedButton");
-						} else {
-							modifier.classList.add("uncheckedButton");
-							modifier.classList.remove("checkedButton");
-						}
+						swapChecked(modifier);
 					});
 					modDiv.appendChild(modifier);
 				}
@@ -222,7 +209,7 @@ function makeOneTimersBtns() {
 	}
 }
 
-function addChangeForEquip(item) {
+function addChangeForLevel(item) {
 	item.addEventListener("change", (event) => {
 		let value = event.target.value;
 		if (parseInt(Number(value)) >= 1) {
@@ -237,15 +224,17 @@ function addChangeForEquip(item) {
 	});
 }
 
-function addChangeForCheckBox(checkBox) {
-	checkBox.addEventListener("change", (event) => {
+function addChangeForButton(button) {
+	button.addEventListener("click", (event) => {
 		let lvl = document.getElementById(
-			checkBox.id.replace("_CheckBox", "_Input")
+			button.id.replace("_Button", "_Input")
 		);
-		let name = checkBox.id.replace("_CheckBox", "");
+		let name = button.id.replace("_Button", "");
 		if (parseInt(lvl.value) > 0) {
 			AB.equip(name);
 		}
+
+		swapChecked(button);
 
 		// Set limbs.
 		elements.limbsUsed.innerHTML = countLimbsUsed();
@@ -286,7 +275,7 @@ function setItems() {
 			if (ogItem === name && val > 0) {
 				AB.items[name].owned = true;
 				AB.items[name].level = val;
-				if (item.nextSibling.checked) {
+				if (item.previousSibling.classList.contains("checkedButton")) {
 					AB.equip(name);
 				}
 			}
@@ -390,11 +379,14 @@ function setItemsInHtml(
 		let item = box.id.replace("_Input", "");
 		if (itemsList.hasOwnProperty(item)) {
 			box.value = itemsList[item].level;
+			let button = box.previousSibling;
 			if (itemsList[item].equipped) {
-				box.nextSibling.checked = true;
+				button.classList.remove("uncheckedButton");
+				button.classList.add("checkedButton");
 				limbsUsed += 1;
 			} else {
-				box.nextSibling.checked = false;
+				button.classList.remove("checkedButton");
+				button.classList.add("uncheckedButton");
 			}
 		}
 	});
@@ -889,5 +881,16 @@ function setEtherealChance(button) {
 		button.classList.remove("uncheckedButton");
 		button.classList.add("checkedButton");
 		AB.setEthChance = true;
+	}
+}
+
+function swapChecked(item) {
+	// If item is checked, uncheck it.
+	if (item.classList.contains("checkedButton")) {
+		item.classList.remove("checkedButton");
+		item.classList.add("uncheckedButton");
+	} else {
+		item.classList.remove("uncheckedButton");
+		item.classList.add("checkedButton");
 	}
 }

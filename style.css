@@ -39,12 +39,8 @@ body {
   border-bottom: 1px solid darkslateblue;
 }
 
-.equipInpDiv span {
+.equipInpDiv button {
   margin-right: 1em;
-}
-
-.inputAndCheckDiv {
-  justify-content: right;
 }
 
 #oneTimersDiv {
