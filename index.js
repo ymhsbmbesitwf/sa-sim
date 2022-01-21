@@ -72,8 +72,9 @@ const wrapup = () => {
 	elements.enemiesKilled.innerHTML = enemiesKilled;
 
 	let trimpsKilled = AB.sessionTrimpsKilled;
+	let per = 100 * format(WR);
 	elements.trimpsKilled.innerHTML =
-		trimpsKilled + " [" + 100 * format(WR) + "%]";
+		trimpsKilled + " [" + per.toString().slice(0, 4) + "%]";
 
 	let clearingTime =
 		((toKill / AB.sessionEnemiesKilled) * AB.lootAvg.counter) / 1000;

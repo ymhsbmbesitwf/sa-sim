@@ -3383,16 +3383,20 @@ export let autoBattle = {
 			for (let mod of ["bleed", "poison", "shock"]) {
 				let chance = mod + "Chance";
 				let res = mod + "Resist";
-				if (this.trimp[chance] > this.enemy[res]) {
+				let tchance = this.trimp[chance] - this.enemy[res];
+				if (tchance > 0 && tchance < 100) {
+					console.log(this.trimp[chance], this.enemy[res]);
 					this.trimp[chance] = this.enemy[res] + 100 * luck;
 				}
-				if (this.enemy[chance] > this.trimp[res]) {
+
+				let echance = this.enemy[chance] - this.trimp[res];
+				if (echance > 0 && echance < 100) {
 					this.enemy[chance] = this.trimp[res] + -100 * luck;
 				}
 			}
 
 			if (this.enemy.ethChance > 0) {
-				this.enemy.ethChance = luck === -1 ? 100 : 0;
+				this.enemy.ethChance = (luck === -1) ? 100 : 0;
 			}
 
 			var trimpAttackTime = this.trimp.attackSpeed;
