@@ -897,7 +897,7 @@ function swapChecked(item) {
 function toScientific(number, accuracy = 2) {
 	// Convert number to scientific notation.
 	if (number <= 0) return 0;
-	if (number <  Math.pow(10, accuracy + 1)) return number.toFixed(accuracy);
+	if (number <  Math.pow(10, accuracy + 2)) return number.toFixed(accuracy);
 	number = number.toExponential(accuracy);
 	let str = number.toString();
 	str = str.replace("+", "");
