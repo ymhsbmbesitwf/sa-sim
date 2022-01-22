@@ -489,8 +489,12 @@ function addListeners() {
 	document
 		.getElementById("bestUpgradesButton")
 		.addEventListener("click", () => {
-			findBestDpsUpgrade();
+			findBestDps(true);
 		});
+
+	document.getElementById("bestDowngradesButton").addEventListener("click", () => {
+		findBestDps(false);
+	});
 
 	document
 		.getElementById("theoreticalWin")
@@ -506,7 +510,7 @@ function addListeners() {
 	});
 }
 
-function findBestDpsUpgrade() {
+function findBestDps(upgrade = true) {
 	sets();
 
 	if (getEquippedItems().length) {
@@ -521,7 +525,7 @@ function findBestDpsUpgrade() {
 		let dustForItems = [];
 		for (const ind in items) {
 			let name = items[ind].name;
-			let newDps = dustWithUpgrade(name, speed);
+			let newDps = dustWithGrade(name, speed, upgrade);
 			let increase = newDps - currDps;
 			increase = currDps / increase > 10000 ? 0 : increase;
 
@@ -574,7 +578,7 @@ function findBestDpsUpgrade() {
 		div.appendChild(rdiv);
 
 		let text = document.createElement("span");
-		text.innerHTML = "Item +1 level";
+		text.innerHTML = `Item ${upgrade ? "+" : "-"}1 level`;
 		ldiv.appendChild(text);
 
 		let text2 = document.createElement("span");
@@ -627,12 +631,12 @@ function onSavePaste(event) {
 	resetToSave();
 }
 
-function dustWithUpgrade(name, speed) {
-	let target = name == "Ring" ? AB.rings : AB.items[name];
-	target.level++;
+function dustWithGrade(name, speed, upgrade) {
+	let target = name === "Ring" ? AB.rings : AB.items[name];
+	target.level += upgrade ? 1 : -1;
 	runSimulation(speed);
 	let dust = AB.getDustPs();
-	target.level--;
+	target.level += upgrade ? -1 : 1;
 	return dust;
 }
 
