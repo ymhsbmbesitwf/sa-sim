@@ -801,8 +801,9 @@ function addSelectAffordTime() {
 
 function affordTime() {
 	let item = document.getElementById("affordTimeSelect").value;
-	// If upgrade costs shards.
 	let remainingCost;
+	
+	// If upgrade costs shards.
 	if (item === "The_Ring") {
 		remainingCost = AB.getRingLevelCost() * 1e9;
 		remainingCost -= ABresults.shardDust * 1e9;
@@ -812,11 +813,9 @@ function affordTime() {
 		if (item === "Unlock_The_Ring") {
 			item = "The_Ring";
 		}
-		// console.log("kommer hit da?");
 		let ot = AB.oneTimers[item];
 		if (ot.useShards) {
 			remainingCost = AB.oneTimerPrice(item) - ABresults.shardDust;
-			// remainingCost -= ABresults.shardDust * 1e9; Needed?
 		} else remainingCost = AB.oneTimerPrice(item) - ABresults.dust;
 	}else if (AB.items[item].dustType === "shards") {
 		remainingCost = AB.upgradeCost(item) * 1e9;

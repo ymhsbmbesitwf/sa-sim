@@ -3385,7 +3385,6 @@ export let autoBattle = {
 				let res = mod + "Resist";
 				let tchance = this.trimp[chance] - this.enemy[res];
 				if (tchance > 0 && tchance < 100) {
-					console.log(this.trimp[chance], this.enemy[res]);
 					this.trimp[chance] = this.enemy[res] + 100 * luck;
 				}
 
