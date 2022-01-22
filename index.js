@@ -492,9 +492,11 @@ function addListeners() {
 			findBestDps(true);
 		});
 
-	document.getElementById("bestDowngradesButton").addEventListener("click", () => {
-		findBestDps(false);
-	});
+	document
+		.getElementById("bestDowngradesButton")
+		.addEventListener("click", () => {
+			findBestDps(false);
+		});
 
 	document
 		.getElementById("theoreticalWin")
@@ -523,6 +525,8 @@ function findBestDps(upgrade = true) {
 			items.push({ name: "Ring", data: { dustType: "shards" } });
 		}
 		let dustForItems = [];
+
+		AB.getRingLevelCost();
 		for (const ind in items) {
 			let name = items[ind].name;
 			let newDps = dustWithGrade(name, speed, upgrade);
@@ -531,16 +535,17 @@ function findBestDps(upgrade = true) {
 
 			// How long until upgrade is paid back.
 			let upgradeCost =
-				name == "Ring"
+				name === "Ring"
 					? AB.getRingLevelCost()
 					: AB.upgradeCost(items[ind].name);
+
 			let time = upgradeCost / increase;
 			if (time < 0) {
 				time = Infinity;
 			}
 
 			// Check if upgrade costs shards.
-			let shard = items[ind].data.dustType == "shards";
+			let shard = items[ind].data.dustType === "shards";
 			if (shard) time *= 1e9;
 			if (name === "Doppelganger_Signet") {
 				time = Infinity;
@@ -553,16 +558,6 @@ function findBestDps(upgrade = true) {
 				time: time,
 			});
 		}
-
-		// Find the best upgrade.
-		let bestUpgrade = dustForItems.reduce((a, b) =>
-			a.increase > b.increase ? a : b
-		);
-
-		// Find the lowest payback time.
-		let bestPayback = dustForItems.reduce((a, b) =>
-			a.time < b.time ? a : b
-		);
 
 		let div = document.getElementById("bestUpgradesDiv");
 		// Clear earlier data.
@@ -589,6 +584,36 @@ function findBestDps(upgrade = true) {
 		text3.innerHTML = "Time until profit";
 		rdiv.appendChild(text3);
 
+		// Split into dust and shards items.
+		let dustItems = [];
+		let shardItems = [];
+		let copyDFI = [...dustForItems];
+
+		for (const ind in copyDFI) {
+			let item = items[ind];
+			if (item.data.dustType === "shards") {
+				shardItems.push(item);
+			} else {
+				dustItems.push(item);
+			}
+		}
+
+		// Find best dust upgrades.
+		let bestUpgradeDust = dustItems.reduce((a, b) =>
+			a.increase > b.increase ? a : b
+		);
+		let bestPaybackDust = dustItems.reduce((a, b) =>
+			a.time < b.time ? a : b
+		);
+
+		// Find best shards upgrades.
+		let bestUpgradeShards = shardItems.reduce((a, b) =>
+			a.increase > b.increase ? a : b
+		);
+		let bestPaybackShards = shardItems.reduce((a, b) =>
+			a.time < b.time ? a : b
+		);
+
 		dustForItems.forEach((item) => {
 			let name = item.name.replaceAll("_", " ");
 			let span1 = document.createElement("span");
@@ -601,14 +626,24 @@ function findBestDps(upgrade = true) {
 			mdiv.appendChild(span2);
 			rdiv.appendChild(span3);
 
-			if (item.name === bestUpgrade.name) {
-				// Bold the best upgradeCost
+			if (item.name === bestUpgradeDust.name) {
+				// Bold the best dust upgradeCost
 				span2.style.fontWeight = "bold";
 			}
 
-			if (item.name === bestPayback.name) {
-				// Add astrix to the best payback time
+			if (item.name === bestPaybackShards.name) {
+				// Italic the best shard upgradeCost
+				span2.style.fontStyle = "italic";
+			}
+
+			if (item.name === bestPaybackDust.name) {
+				// Add bold to the best payback time
 				span3.style.fontWeight = "bold";
+			}
+
+			if (item.name === bestUpgradeShards.name) {
+				// Add italics to the best shard payback time
+				span3.style.fontStyle = "italic";
 			}
 		});
 	}
@@ -633,10 +668,12 @@ function onSavePaste(event) {
 
 function dustWithGrade(name, speed, upgrade) {
 	let target = name === "Ring" ? AB.rings : AB.items[name];
-	target.level += upgrade ? 1 : -1;
+	if (upgrade) target.level++;
+	else target.level--;
 	runSimulation(speed);
 	let dust = AB.getDustPs();
-	target.level += upgrade ? -1 : 1;
+	if (upgrade) target.level--;
+	else target.level++;
 	return dust;
 }
 
@@ -813,7 +850,8 @@ function affordTime() {
 		remainingCost -= ABresults.shardDust * 1e9;
 	} else if (item === "Extra_Limbs") {
 		remainingCost = AB.getBonusCost(item) - ABresults.dust;
-	} else if (AB.oneTimers[item] || item === "Unlock_The_Ring") { // Check one timers.
+	} else if (AB.oneTimers[item] || item === "Unlock_The_Ring") {
+		// Check one timers.
 		if (item === "Unlock_The_Ring") {
 			item = "The_Ring";
 		}
@@ -821,7 +859,7 @@ function affordTime() {
 		if (ot.useShards) {
 			remainingCost = AB.oneTimerPrice(item) - ABresults.shardDust;
 		} else remainingCost = AB.oneTimerPrice(item) - ABresults.dust;
-	}else if (AB.items[item].dustType === "shards") {
+	} else if (AB.items[item].dustType === "shards") {
 		remainingCost = AB.upgradeCost(item) * 1e9;
 		remainingCost -= ABresults.shardDust * 1e9;
 	} else {
@@ -901,7 +939,7 @@ function swapChecked(item) {
 function toScientific(number, accuracy = 2) {
 	// Convert number to scientific notation.
 	if (number <= 0) return 0;
-	if (number <  Math.pow(10, accuracy + 2)) return number.toFixed(accuracy);
+	if (number < Math.pow(10, accuracy + 2)) return number.toFixed(accuracy);
 	number = number.toExponential(accuracy);
 	let str = number.toString();
 	str = str.replace("+", "");
