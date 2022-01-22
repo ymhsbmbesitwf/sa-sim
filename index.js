@@ -80,10 +80,10 @@ const wrapup = () => {
 		((toKill / AB.sessionEnemiesKilled) * AB.lootAvg.counter) / 1000;
 
 	elements.clearingTime.innerHTML = convertTime(clearingTime);
-	elements.dustPs.innerHTML = format(base_dust) + " D/s";
+	elements.dustPs.innerHTML = toScientific(base_dust) + " D/s";
 
 	let base_shards = AB.enemyLevel >= 51 ? base_dust / 1e9 : 0;
-	elements.shardsPs.innerHTML = format(base_shards) + " S/s";
+	elements.shardsPs.innerHTML = toScientific(base_shards) + " S/s";
 
 	let fightTime = timeSpent / (enemiesKilled + trimpsKilled);
 	elements.averageFightTime.innerHTML = convertTimeMs(fightTime, 2);
