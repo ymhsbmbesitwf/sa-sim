@@ -556,6 +556,7 @@ function findBestDps(upgrade = true) {
 				name: name,
 				increase: increase,
 				time: time,
+				data: items[ind].data,
 			});
 		}
 
@@ -590,7 +591,7 @@ function findBestDps(upgrade = true) {
 		let copyDFI = [...dustForItems];
 
 		for (const ind in copyDFI) {
-			let item = items[ind];
+			let item = copyDFI[ind];
 			if (item.data.dustType === "shards") {
 				shardItems.push(item);
 			} else {
@@ -630,18 +631,18 @@ function findBestDps(upgrade = true) {
 				// Bold the best dust upgradeCost
 				span2.style.fontWeight = "bold";
 			}
-
-			if (item.name === bestPaybackShards.name) {
-				// Italic the best shard upgradeCost
-				span2.style.fontStyle = "italic";
-			}
-
+			
 			if (item.name === bestPaybackDust.name) {
 				// Add bold to the best payback time
 				span3.style.fontWeight = "bold";
 			}
 
 			if (item.name === bestUpgradeShards.name) {
+				// Italic the best shard upgradeCost
+				span2.style.fontStyle = "italic";
+			}
+
+			if (item.name === bestPaybackShards.name) {
 				// Add italics to the best shard payback time
 				span3.style.fontStyle = "italic";
 			}
