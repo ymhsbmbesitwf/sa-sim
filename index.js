@@ -354,8 +354,8 @@ function calcBuildCost(set = false) {
 		dustCost += Math.ceil(price * Math.pow(mod, i));
 	}
 
-	elements.buildCostDust.innerHTML = dustCost.toExponential(2);
-	elements.buildCostShards.innerHTML = shardCost.toExponential(2);
+	elements.buildCostDust.innerHTML = toScientific(dustCost);
+	elements.buildCostShards.innerHTML = toScientific(shardCost);
 }
 
 function setLevels() {
@@ -802,7 +802,7 @@ function addSelectAffordTime() {
 function affordTime() {
 	let item = document.getElementById("affordTimeSelect").value;
 	let remainingCost;
-	
+
 	// If upgrade costs shards.
 	if (item === "The_Ring") {
 		remainingCost = AB.getRingLevelCost() * 1e9;
@@ -892,4 +892,13 @@ function swapChecked(item) {
 		item.classList.remove("uncheckedButton");
 		item.classList.add("checkedButton");
 	}
+}
+
+function toScientific(number, accuracy = 2) {
+	// Convert number to scientific notation.
+	if (number === 0) return 0;
+	number = number.toExponential(accuracy);
+	let str = number.toString();
+	str = str.replace("+", "");
+	return str;
 }
