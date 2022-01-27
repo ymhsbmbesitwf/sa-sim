@@ -635,24 +635,28 @@ function findBestDps(upgrade = true) {
 			mdiv.appendChild(span2);
 			rdiv.appendChild(span3);
 
-			if (item.name === bestUpgradeDust.name) {
-				// Bold the best dust upgradeCost
-				span2.style.fontWeight = "bold";
+			if (dustItems.length) {
+				if (item.name === bestUpgradeDust.name) {
+					// Bold the best dust upgradeCost
+					span2.style.fontWeight = "bold";
+				}
+
+				if (item.name === bestPaybackDust.name) {
+					// Add bold to the best payback time
+					span3.style.fontWeight = "bold";
+				}
 			}
 
-			if (item.name === bestPaybackDust.name) {
-				// Add bold to the best payback time
-				span3.style.fontWeight = "bold";
-			}
+			if (shardItems.length) {
+				if (item.name === bestUpgradeShards.name) {
+					// Italic the best shard upgradeCost
+					span2.style.fontStyle = "italic";
+				}
 
-			if (item.name === bestUpgradeShards.name) {
-				// Italic the best shard upgradeCost
-				span2.style.fontStyle = "italic";
-			}
-
-			if (item.name === bestPaybackShards.name) {
-				// Add italics to the best shard payback time
-				span3.style.fontStyle = "italic";
+				if (item.name === bestPaybackShards.name) {
+					// Add italics to the best shard payback time
+					span3.style.fontStyle = "italic";
+				}
 			}
 		});
 	}
