@@ -600,21 +600,25 @@ function findBestDps(upgrade = true) {
 		}
 
 		// Find best dust upgrades.
+		let bestUpgradeDust;
+		let bestPaybackDust;
 		if (dustItems.length) {
-			let bestUpgradeDust = dustItems.reduce((a, b) =>
+			bestUpgradeDust = dustItems.reduce((a, b) =>
 				a.increase > b.increase ? a : b
 			);
-			let bestPaybackDust = dustItems.reduce((a, b) =>
+			bestPaybackDust = dustItems.reduce((a, b) =>
 				a.time < b.time ? a : b
 			);
 		}
 
 		// Find best shards upgrades.
+		let bestUpgradeShards;
+		let bestPaybackShards;
 		if (shardItems.length) {
-			let bestUpgradeShards = shardItems.reduce((a, b) =>
+			bestUpgradeShards = shardItems.reduce((a, b) =>
 				a.increase > b.increase ? a : b
 			);
-			let bestPaybackShards = shardItems.reduce((a, b) =>
+			bestPaybackShards = shardItems.reduce((a, b) =>
 				a.time < b.time ? a : b
 			);
 		}
