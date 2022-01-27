@@ -635,7 +635,7 @@ function findBestDps(upgrade = true) {
 			mdiv.appendChild(span2);
 			rdiv.appendChild(span3);
 
-			if (dustItems.length) {
+			if (bestUpgradeDust) {
 				if (item.name === bestUpgradeDust.name) {
 					// Bold the best dust upgradeCost
 					span2.style.fontWeight = "bold";
@@ -647,7 +647,7 @@ function findBestDps(upgrade = true) {
 				}
 			}
 
-			if (shardItems.length) {
+			if (bestUpgradeShards) {
 				if (item.name === bestUpgradeShards.name) {
 					// Italic the best shard upgradeCost
 					span2.style.fontStyle = "italic";
