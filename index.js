@@ -574,7 +574,7 @@ function findBestDps(upgrade = true) {
 		div.appendChild(rdiv);
 
 		let text = document.createElement("span");
-		text.innerHTML = `Item ${upgrade ? "+" : "-"}1 level`;
+		text.innerHTML = `Item ${upgrade }±1 level`;
 		ldiv.appendChild(text);
 
 		let text2 = document.createElement("span");
