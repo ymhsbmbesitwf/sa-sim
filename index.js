@@ -578,11 +578,11 @@ function findBestDps(upgrade = true) {
 		ldiv.appendChild(text);
 
 		let text2 = document.createElement("span");
-		text2.innerHTML = "~+DpS";
+		text2.innerHTML = "shenanigans" // "~+DpS";
 		mdiv.appendChild(text2);
 
 		let text3 = document.createElement("span");
-		text3.innerHTML = "Time until profit";
+		text3.innerHTML = "nonsense" // "Time until profit";
 		rdiv.appendChild(text3);
 
 		// Split into dust and shards items.
