@@ -689,7 +689,6 @@ function dustWithGrade(name, speed, upgrade) {
 function runSimulation(speed = 100000) {
 	AB.eth = 0;
 	AB.total = 0;
-	speed *= 4;
 	AB.speed = speed;
 	AB.resetAll();
 	let res;
