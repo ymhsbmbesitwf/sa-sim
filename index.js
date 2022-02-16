@@ -424,6 +424,33 @@ function setItemsInHtml(
 	elements.limbsUsed.innerHTML = limbsUsed;
 }
 
+function resetItemsInHtml() {
+	let itemBoxes = document.querySelectorAll("input.equipInput");
+	itemBoxes.forEach((box) => {
+		box.value = 1;
+		let button = box.previousSibling;
+		button.classList.remove("checkedButton");
+		button.classList.add("uncheckedButton");
+	});
+
+	let OTBoxes = document.querySelectorAll("input.oneTimerInput");
+	OTBoxes.forEach((box) => {
+		box.checked = false;
+		let button = box.previousSibling;
+		button.classList.remove("checkedButton");
+		button.classList.add("uncheckedButton");
+	});
+
+	let target = document.getElementById("currentLevel");
+	target.value = 1;
+
+	target = document.getElementById("highestLevel");
+	target.value = 1;
+
+	// Set limbs
+	elements.limbsUsed.innerHTML = 0;
+}
+
 function orderByUnlock() {
 	let order = AB.getItemOrder();
 	let sorted = [];
@@ -775,6 +802,8 @@ function convertTimeMs(time, accuracy = 1) {
 
 function resetToSave() {
 	if (save) {
+		// Reset all values in Html.
+		resetItemsInHtml();
 		// Reset all values to the save.
 		let items = save.global.autoBattleData.items;
 		let oneTimers = save.global.autoBattleData.oneTimers;
