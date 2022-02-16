@@ -436,9 +436,6 @@ function resetItemsInHtml() {
 	let OTBoxes = document.querySelectorAll("input.oneTimerInput");
 	OTBoxes.forEach((box) => {
 		box.checked = false;
-		let button = box.previousSibling;
-		button.classList.remove("checkedButton");
-		button.classList.add("uncheckedButton");
 	});
 
 	let target = document.getElementById("currentLevel");
