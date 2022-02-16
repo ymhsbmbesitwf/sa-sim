@@ -343,7 +343,7 @@ function calcBuildCost(set = false) {
 	}
 	// Check ring.
 	if (AB.oneTimers["The_Ring"].owned) {
-		shardCost += Math.ceil(15 * Math.pow(2, AB.rings.level));
+		shardCost += Math.ceil(15 * Math.pow(2, AB.rings.level) - 17);	// Subtracting first level and 2 shard cost for contract.
 	}
 
 	// Price for extra limbs.
