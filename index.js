@@ -341,9 +341,24 @@ function calcBuildCost(set = false) {
 			}
 		}
 	}
-	// Check ring.
-	if (AB.oneTimers["The_Ring"].owned) {
-		shardCost += Math.ceil(15 * Math.pow(2, AB.rings.level) - 17);	// Subtracting first level and 2 shard cost for contract.
+
+	// Price for contracts.
+	let oneTimers = document.querySelectorAll("input.oneTimerInput");
+	for (let i = 0; i < oneTimers.length; i++) {
+		if (oneTimers[i].checked) {
+			let name = oneTimers[i].id.replace("_Input", "");
+			let cost = AB.oneTimerPrice(name);
+			if (AB.oneTimers[name].useShards) {
+				shardCost += cost;
+			} else {
+				dustCost += cost;
+			}
+		}
+	}
+
+	// Price for ring.
+	if (AB.oneTimers["The_Ring"].owned && AB.rings.level > 1) {
+		shardCost += Math.ceil(15 * Math.pow(2, AB.rings.level) - 30);	// Subtracting 30 for the first level or something.
 	}
 
 	// Price for extra limbs.
