@@ -570,7 +570,7 @@ function findBestDps(upgrade = true) {
 			let name = items[ind].name;
 			let newDps = dustWithGrade(name, speed, upgrade);
 			let increase = newDps - currDps;
-			increase = currDps / increase > 10000 ? 0 : increase;
+			let percentage = increase / currDps * 100;
 
 			// How long until upgrade is paid back.
 			let upgradeCost =
@@ -593,7 +593,7 @@ function findBestDps(upgrade = true) {
 
 			dustForItems.push({
 				name: name,
-				increase: increase,
+				increase: percentage,
 				time: time,
 				data: items[ind].data,
 			});
@@ -617,7 +617,7 @@ function findBestDps(upgrade = true) {
 		ldiv.appendChild(text);
 
 		let text2 = document.createElement("span");
-		text2.innerHTML = "~+DpS";
+		text2.innerHTML = "~+%";
 		mdiv.appendChild(text2);
 
 		let text3 = document.createElement("span");
@@ -668,7 +668,7 @@ function findBestDps(upgrade = true) {
 			let span2 = document.createElement("span");
 			let span3 = document.createElement("span");
 			span1.innerHTML = name;
-			span2.innerHTML = toScientific(item.increase);
+			span2.innerHTML = toScientific(item.increase, 4, true);
 			span3.innerHTML = convertTime(item.time);
 			ldiv.appendChild(span1);
 			mdiv.appendChild(span2);
@@ -986,10 +986,12 @@ function swapChecked(item) {
 	}
 }
 
-function toScientific(number, accuracy = 2) {
+function toScientific(number, accuracy = 2, negative = false) {
 	// Convert number to scientific notation.
-	if (number <= 0) return 0;
-	if (number < Math.pow(10, accuracy + 2)) return number.toFixed(accuracy);
+	number = Number(number);
+	if (!negative && number <= 0) return 0;
+	console.log(number.toFixed(accuracy));
+	if (Math.abs(number) < Math.pow(10, accuracy + 2)) return number.toFixed(accuracy);
 	number = number.toExponential(accuracy);
 	let str = number.toString();
 	str = str.replace("+", "");
