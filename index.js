@@ -668,7 +668,7 @@ function findBestDps(upgrade = true) {
 			let span2 = document.createElement("span");
 			let span3 = document.createElement("span");
 			span1.innerHTML = name;
-			span2.innerHTML = toScientific(item.increase, 4, true);
+			span2.innerHTML = toScientific(item.increase, 2, true);
 			span3.innerHTML = convertTime(item.time);
 			ldiv.appendChild(span1);
 			mdiv.appendChild(span2);
