@@ -990,7 +990,6 @@ function toScientific(number, accuracy = 2, negative = false) {
 	// Convert number to scientific notation.
 	number = Number(number);
 	if (!negative && number <= 0) return 0;
-	console.log(number.toFixed(accuracy));
 	if (Math.abs(number) < Math.pow(10, accuracy + 2)) return number.toFixed(accuracy);
 	number = number.toExponential(accuracy);
 	let str = number.toString();
