@@ -24,6 +24,8 @@ let ABresults = {
 	shardDust: undefined,
 };
 
+let autoRunChecked = false;
+
 function getElements() {
 	return {
 		buildCostDust: document.getElementById("buildCostDust"),
@@ -221,6 +223,7 @@ function addChangeForLevel(item) {
 			event.target.value = 1;
 		}
 		calcBuildCost(true);
+		if (autoRunChecked) startSimulation();
 	});
 }
 
@@ -240,6 +243,7 @@ function addChangeForButton(button) {
 		elements.limbsUsed.innerHTML = countLimbsUsed();
 
 		calcBuildCost(true);
+		if (autoRunChecked) startSimulation();
 	});
 }
 
@@ -496,6 +500,8 @@ function addListeners() {
 		}
 		let effects = document.getElementById("effects");
 		effects.innerHTML = AB.getEffects(value);
+
+		if (autoRunChecked) startSimulation();
 	});
 
 	// SA highest level
@@ -504,6 +510,7 @@ function addListeners() {
 	target.addEventListener("change", (event) => {
 		let value = parseInt(event.target.value);
 		if (value < 1) event.target.value = 1;
+		if (autoRunChecked) startSimulation();
 	});
 
 	// Verbose enemy info
@@ -522,6 +529,7 @@ function addListeners() {
 	// Reset to save button
 	document.getElementById("resetToSave").addEventListener("click", () => {
 		resetToSave();
+		if (autoRunChecked) startSimulation();
 	});
 
 	// Calculator buttons
@@ -548,6 +556,11 @@ function addListeners() {
 	target = document.getElementById("etherealChanceButton");
 	target.addEventListener("click", () => {
 		setEtherealChance(target);
+	});
+
+	target = document.getElementById("autoRun");
+	target.addEventListener("click", () => {
+		autoRunChecked = !autoRunChecked;
 	});
 }
 

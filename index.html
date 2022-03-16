@@ -42,9 +42,12 @@
 		<div id="rightSideDiv">
 			<span>Import save: <input type="text" id="saveInput" /> <button id="resetToSave">Reset to
 					save!</button></span>
-			<button id="startButton">
-				Press this to run the simulation!
-			</button>
+			<div id="run">
+				<button id="startButton">
+					Press this to run the simulation!
+				</button>
+				<span>Auto run: <input type="checkbox" id="autoRun"></span>
+			</div>
 			<span>Build cost: <span id="buildCostDust">0</span> dust, <span id="buildCostShards">0</span> shards.</span>
 			<div id="resultsDiv">
 				<h3>Simulation:</h3>
