@@ -157,3 +157,8 @@ body {
   flex-direction: row;
   align-items: center;
 }
+
+#affordDiv {
+  display: flex;
+  flex-direction: column;
+}

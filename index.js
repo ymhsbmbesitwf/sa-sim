@@ -789,9 +789,9 @@ function maxLuck() {
 
 function convertTime(time) {
 	// Return time as seconds, hours or days.
+	if (time === Infinity) return time;
 	time = time.toFixed(1);
-	if (time == Infinity) return time;
-	else if (time === NaN) {
+	if (time === NaN) {
 		return "error";
 	} else if (time < 3600) {
 		return time + "s";
@@ -807,9 +807,9 @@ function convertTime(time) {
 
 function convertTimeMs(time, accuracy = 1) {
 	// Return time as milliseconds, seconds, hours or days.
-	time = time.toFixed(accuracy);
 	if (time == Infinity) return time;
-	else if (time === NaN) {
+	time = time.toFixed(accuracy);
+	if (time === NaN) {
 		return "error";
 	} else if (time < 1000) {
 		return time + "ms";
@@ -905,14 +905,18 @@ function addSelectAffordTime() {
 
 function affordTime() {
 	let item = document.getElementById("affordTimeSelect").value;
+	let totalCost;
 	let remainingCost;
+	let usesShards = false;
 
 	// If upgrade costs shards.
 	if (item === "The_Ring") {
-		remainingCost = AB.getRingLevelCost() * 1e9;
-		remainingCost -= ABresults.shardDust * 1e9;
+		usesShards = true;
+		totalCost = AB.getRingLevelCost() * 1e9;
+		remainingCost = totalCost - ABresults.shardDust * 1e9;
 	} else if (item === "Extra_Limbs") {
-		remainingCost = AB.getBonusCost(item) - ABresults.dust;
+		totalCost = AB.getLimbsCost();
+		remainingCost = totalCost - ABresults.dust;
 	} else if (AB.oneTimers[item] || item === "Unlock_The_Ring") {
 		// Check one timers.
 		if (item === "Unlock_The_Ring") {
@@ -920,21 +924,31 @@ function affordTime() {
 		}
 		let ot = AB.oneTimers[item];
 		if (ot.useShards) {
-			remainingCost = AB.oneTimerPrice(item) - ABresults.shardDust;
-		} else remainingCost = AB.oneTimerPrice(item) - ABresults.dust;
+			usesShards = true;
+			totalCost = AB.oneTimerPrice(item);
+			remainingCost = totalCost - ABresults.shardDust;
+		} else {
+			totalCost = AB.oneTimerPrice(item);
+			remainingCost = totalCost - ABresults.dust;
+		}
 	} else if (AB.items[item].dustType === "shards") {
-		remainingCost = AB.upgradeCost(item) * 1e9;
-		remainingCost -= ABresults.shardDust * 1e9;
+		usesShards = true;
+		totalCost = AB.upgradeCost(item) * 1e9;
+		remainingCost = totalCost - ABresults.shardDust * 1e9;
 	} else {
-		remainingCost = AB.upgradeCost(item) - ABresults.dust;
+		totalCost = AB.upgradeCost(item);
+		remainingCost = totalCost - ABresults.dust;
 	}
+	
 	let time = remainingCost / ABresults.dustPs;
 	let span = document.getElementById("affordTimeSpan");
 	while (span.firstChild) {
 		span.removeChild(span.lastChild);
 	}
 
-	if (time > 0) {
+	if (time === Infinity || isNaN(time)) {
+		span.innerHTML = "You can never afford this upgrade.";
+	} else if (time > 0) {
 		time = convertTime(time);
 		span.innerHTML = "You can afford this upgrade in " + time + ".";
 	} else if (time <= 0) {
@@ -943,6 +957,18 @@ function affordTime() {
 		span.innerHTML = "You can never afford this upgrade.";
 	} else {
 		span.innerHTML = "Big Bad";
+	}
+
+	let totalTime = totalCost / ABresults.dustPs;
+	span = document.getElementById("affordNilDustTimeSpan");
+	while (span.firstChild) {
+		span.removeChild(span.lastChild);
+	}
+
+	if (totalTime > 0 && totalTime !== Infinity) {
+		totalTime = convertTime(totalTime);
+		let type = usesShards ? "shards" : "dust";
+		span.innerHTML = "You can afford this upgrade in " + totalTime + " from 0 " + type + ".";
 	}
 }
 
