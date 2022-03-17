@@ -243,7 +243,7 @@ function addChangeForButton(button) {
 		elements.limbsUsed.innerHTML = countLimbsUsed();
 
 		calcBuildCost(true);
-		if (autoRunChecked) startSimulation();
+		if (autoRunChecked && button.classList.contains("checkedButton")) startSimulation();
 	});
 }
 
