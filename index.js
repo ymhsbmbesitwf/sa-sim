@@ -150,7 +150,7 @@ function partEquipDiv(parts, ind) {
 		button.id = item + "_Button";
 		button.className = "uncheckedButton";
 		div.appendChild(button);
-		addChangeForButton(button);
+		addChangeForButton(button, true);
 
 		let input = document.createElement("input");
 		input.type = "number";
@@ -170,24 +170,25 @@ function makeOneTimersBtns() {
 			let div = document.createElement("div");
 			div.className = "oneTimersInpDiv";
 			parDir.appendChild(div);
-
-			let span = document.createElement("span");
+			
+			let button = document.createElement("button");
 			let name = oneTimer.replaceAll("_", " ");
-			span.innerHTML = name;
-			div.appendChild(span);
+			button.innerHTML = name;
+			button.id = oneTimer + "_Button";
+			button.classList.add("uncheckedButton", "oneTimerButton");
+			div.appendChild(button);
+			
 
-			let rightDiv = document.createElement("div");
 
 			// If ring
-			if (oneTimer.includes("Ring")) {
+			if (oneTimer === "The_Ring") {
+				addChangeForButton(button, true);
+				let rightDiv = document.createElement("div");
 				rightDiv.id = "inputAndCheckRingDiv";
 				rightDiv.addEventListener("change", () => {
 					calcBuildCost(true);
 				});
-			}
-			div.appendChild(rightDiv);
-
-			if (oneTimer === "The_Ring") {
+				div.appendChild(rightDiv);
 				let input = document.createElement("input");
 				input.type = "number";
 				input.value = 1;
@@ -206,14 +207,9 @@ function makeOneTimersBtns() {
 					});
 					modDiv.appendChild(modifier);
 				}
+			} else {
+				addChangeForButton(button);
 			}
-
-			let checkBox = document.createElement("input");
-			checkBox.type = "checkBox";
-			checkBox.className = "oneTimerInput";
-			checkBox.id = oneTimer + "_Input";
-
-			rightDiv.appendChild(checkBox);
 		}
 	}
 }
@@ -234,14 +230,16 @@ function addChangeForLevel(item) {
 	});
 }
 
-function addChangeForButton(button) {
+function addChangeForButton(button, hasVal = false) {
 	button.addEventListener("click", (event) => {
-		let lvl = document.getElementById(
-			button.id.replace("_Button", "_Input")
-		);
-		let name = button.id.replace("_Button", "");
-		if (parseInt(lvl.value) > 0) {
-			AB.equip(name);
+		if (hasVal) {
+			let lvl = document.getElementById(
+				button.id.replace("_Button", "_Input")
+			);
+			let name = button.id.replace("_Button", "");
+			if (parseInt(lvl.value) > 0) {
+				AB.equip(name);
+			}
 		}
 
 		swapChecked(button);
@@ -308,10 +306,10 @@ function clearOneTimers() {
 }
 
 function setOneTimers() {
-	let oneTimers = document.querySelectorAll("input.oneTimerInput");
+	let oneTimers = document.querySelectorAll("button.oneTimerButton");
 	oneTimers.forEach((oneTimer) => {
-		if (oneTimer.checked) {
-			let name = oneTimer.id.replace("_Input", "");
+		if (oneTimer.classList.contains("checkedButton")) {
+			let name = oneTimer.id.replace("_Button", "");
 			AB.oneTimers[name].owned = true;
 			if (name === "The_Ring") {
 				AB.rings.mods = [];
@@ -327,7 +325,8 @@ function setOneTimers() {
 						}
 					}
 				}
-				let val = oneTimer.previousSibling;
+				let input = document.getElementById("The_Ring_Input");
+				let val = input.value;
 				AB.rings.level = val.value;
 			}
 		}
@@ -561,8 +560,8 @@ function addListeners() {
 		.addEventListener("click", affordTime);
 
 	target = document.getElementById("etherealChanceButton");
-	target.addEventListener("click", () => {
-		setEtherealChance(target);
+	target.addEventListener("click", (event) => {
+		setEtherealChance(event.target);
 	});
 
 	target = document.getElementById("autoRun");
@@ -761,19 +760,25 @@ function runSimulation(speed = 100000) {
 	let res;
 	startTime = Date.now();
 
-	// Check if max and min luck gives the same results.
-	AB.oneFight(1);
-	let maxLuckTime = AB.lootAvg.counter;
-	let maxLuckRewards = AB.lootAvg.accumulator;
-	AB.oneFight(-1);
-	let minLuckTime = AB.lootAvg.counter - maxLuckTime;
-	let minLuckRewards = AB.lootAvg.accumulator - maxLuckRewards;
-
-	// Otherwise run simulation.
-	if (maxLuckTime !== minLuckTime || maxLuckRewards !== minLuckRewards) {
+	// Check if max and min luck gives the same results and that setEthChance is disabled.
+	if (AB.setEthChance) {
 		AB.resetAll();
-		startTime = Date.now();
-		AB.update();
+			startTime = Date.now();
+			AB.update();
+	} else {
+		AB.oneFight(1);
+		let maxLuckTime = AB.lootAvg.counter;
+		let maxLuckRewards = AB.lootAvg.accumulator;
+		AB.oneFight(-1);
+		let minLuckTime = AB.lootAvg.counter - maxLuckTime;
+		let minLuckRewards = AB.lootAvg.accumulator - maxLuckRewards;
+
+		// Otherwise run simulation.
+		if (maxLuckTime !== minLuckTime || maxLuckRewards !== minLuckRewards) {
+			AB.resetAll();
+			startTime = Date.now();
+			AB.update();
+		}
 	}
 	res = {
 		dustPs: AB.getDustPs(),
@@ -1031,14 +1036,11 @@ function displayVerboseEnemy(target) {
 function setEtherealChance(button) {
 	// If the button is checked.
 	if (button.classList.contains("checkedButton")) {
-		button.classList.remove("checkedButton");
-		button.classList.add("uncheckedButton");
 		AB.setEthChance = false;
 	} else {
-		button.classList.remove("uncheckedButton");
-		button.classList.add("checkedButton");
 		AB.setEthChance = true;
 	}
+	swapChecked(button);
 }
 
 function swapChecked(item) {
