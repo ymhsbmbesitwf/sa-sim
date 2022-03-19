@@ -23,8 +23,15 @@ let ABresults = {
 	dust: undefined,
 	shardDust: undefined,
 };
-
 let autoRunChecked = false;
+let colours = {
+	dust: "rgb(229,204,201)",
+	shard: "rgb(53,88,104)",
+	oneTimer: "rgb(231,209,86)",
+	selected: "rgba(242, 140, 40, 0.5)",
+	unlock: "rgb(0, 255, 127)",
+	theRing: "rgb(7,123,143)",
+}
 
 function getElements() {
 	return {
@@ -562,6 +569,14 @@ function addListeners() {
 	target.addEventListener("click", () => {
 		autoRunChecked = !autoRunChecked;
 	});
+
+	// Colours for afford time select.
+	target = document.getElementById("affordTimeSelect");
+	target.addEventListener("change", (event) => {
+		let select = event.target;
+		let option = select.querySelector(`option[value=${select.value}]`);
+		target.style.backgroundColor = option.style.backgroundColor;
+	});
 }
 
 function findBestDps(upgrade = true) {
@@ -864,6 +879,7 @@ function countLimbsUsed() {
 
 function addSelectAffordTime() {
 	let select = document.getElementById("affordTimeSelect");
+	select.style.backgroundColor = colours.dust;
 
 	// Add each equip to select.
 	let items = orderByUnlock();
@@ -873,20 +889,30 @@ function addSelectAffordTime() {
 		if (item === "Doppelganger_Signet") continue;
 		option = document.createElement("option");
 		option.value = item;
-		item = item.replaceAll("_", " ");
-		option.innerHTML = item;
+		option.innerHTML = item.replaceAll("_", " ");
 		select.appendChild(option);
+
+		let type = AB.items[item].dustType;
+		switch (type) {
+			case "shards":
+				option.style.backgroundColor = colours.shard;
+				break;
+			default:
+				option.style.backgroundColor = colours.dust;
+		}
 	}
 	// Add ring to select.
 	option = document.createElement("option");
 	option.value = "The_Ring";
 	option.innerHTML = "The Ring";
+	option.style.backgroundColor = colours.theRing;
 	select.appendChild(option);
 
 	// Add limbs to select.
 	option = document.createElement("option");
 	option.value = "Extra_Limbs";
 	option.innerHTML = "Next Limb";
+	option.style.backgroundColor = colours.unlock;
 	select.appendChild(option);
 
 	// Add bonuses to select.
@@ -899,6 +925,7 @@ function addSelectAffordTime() {
 		}
 		bonus = bonus.replaceAll("_", " ");
 		option.innerHTML = bonus;
+		option.style.backgroundColor = colours.oneTimer;
 		select.appendChild(option);
 	}
 }
