@@ -178,8 +178,6 @@ function makeOneTimersBtns() {
 			button.classList.add("uncheckedButton", "oneTimerButton");
 			div.appendChild(button);
 			
-
-
 			// If ring
 			if (oneTimer === "The_Ring") {
 				addChangeForButton(button, true);
@@ -416,11 +414,11 @@ function setItemsInHtml(
 		}
 	});
 
-	let OTBoxes = document.querySelectorAll("input.oneTimerInput");
-	OTBoxes.forEach((box) => {
-		let OT = box.id.replace("_Input", "");
+	let OTButtons = document.querySelectorAll("button.oneTimerButton");
+	OTButtons.forEach((OTButton) => {
+		let OT = OTButton.id.replace("_Button", "");
 		if (oneTimersList.hasOwnProperty(OT)) {
-			if (oneTimersList[OT]) box.checked = true;
+			if (oneTimersList[OT]) swapChecked(OTButton);
 			if (OT === "The_Ring") {
 				let children = elements.ringMods.children;
 				for (let i = 0; i < children.length; i++) {
@@ -433,8 +431,8 @@ function setItemsInHtml(
 						children[i].classList.remove("checkedButton");
 					}
 				}
-				let lvl = box.previousSibling;
-				lvl.value = rings.level;
+				let inputLvl = document.getElementById("The_Ring_Input");
+				inputLvl.value = rings.level;
 			}
 		}
 	});
