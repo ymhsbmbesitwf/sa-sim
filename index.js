@@ -170,28 +170,27 @@ function makeOneTimersBtns() {
 			let div = document.createElement("div");
 			div.className = "oneTimersInpDiv";
 			parDir.appendChild(div);
-			
-			let button = document.createElement("button");
-			let name = oneTimer.replaceAll("_", " ");
-			button.innerHTML = name;
-			button.id = oneTimer + "_Button";
-			button.classList.add("uncheckedButton", "oneTimerButton");
-			div.appendChild(button);
-			
+
 			// If ring
 			if (oneTimer === "The_Ring") {
+				let topDiv = document.createElement("div");
+				topDiv.id = "topDiv";
+				let button = document.createElement("button");
+				button.innerHTML = "The Ring";
+				button.id = "The_Ring_Button";
+				button.classList.add("uncheckedButton", "oneTimerButton");
 				addChangeForButtonRing(button);
-				let rightDiv = document.createElement("div");
-				rightDiv.id = "inputAndCheckRingDiv";
-				rightDiv.addEventListener("change", () => {
-					calcBuildCost(true);
-				});
-				div.appendChild(rightDiv);
+				topDiv.appendChild(button);
+
 				let input = document.createElement("input");
 				input.type = "number";
 				input.value = 1;
 				input.id = "The_Ring_Input";
-				rightDiv.appendChild(input);
+				input.addEventListener("change", () => {
+					calcBuildCost(true);
+				})
+				topDiv.appendChild(input);
+				div.appendChild(topDiv);
 
 				let modDiv = document.createElement("div");
 				modDiv.id = "ringModsDiv";
@@ -206,6 +205,12 @@ function makeOneTimersBtns() {
 					modDiv.appendChild(modifier);
 				}
 			} else {
+				let button = document.createElement("button");
+				let name = oneTimer.replaceAll("_", " ");
+				button.innerHTML = name;
+				button.id = oneTimer + "_Button";
+				button.classList.add("uncheckedButton", "oneTimerButton");
+				div.appendChild(button);
 				addChangeForButton(button);
 			}
 		}

@@ -53,6 +53,21 @@ body {
   display: flex;
   justify-content: space-between;
   border-bottom: 1px solid darkslateblue;
+  flex-direction: column;
+}
+
+#topDiv {
+  display: flex;
+  flex-direction: row;
+}
+
+#The_Ring_Button {
+  flex-grow: 2;
+}
+
+#The_Ring_Input {
+  width: 2.5em;
+  text-align: right;
 }
 
 .equipInput {
