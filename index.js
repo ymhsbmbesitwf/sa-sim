@@ -579,8 +579,9 @@ function addListeners() {
 	});
 
 	target = document.getElementById("autoRun");
-	target.addEventListener("click", () => {
+	target.addEventListener("click", (event) => {
 		autoRunChecked = !autoRunChecked;
+		swapChecked(event.target);
 	});
 
 	// Colours for afford time select.
