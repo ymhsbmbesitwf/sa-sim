@@ -199,9 +199,7 @@ function makeOneTimersBtns() {
 					let modifier = document.createElement("button");
 					modifier.innerHTML = mod;
 					modifier.className = "uncheckedButton";
-					modifier.addEventListener("click", () => {
-						swapChecked(modifier);
-					});
+					addChangeForButton(modifier);
 					modDiv.appendChild(modifier);
 				}
 			} else {
@@ -236,9 +234,6 @@ function addChangeForLevel(item) {
 function addChangeForButton(button) {
 	button.addEventListener("click", (event) => {
 		swapChecked(button);
-
-		
-
 		calcBuildCost(true);
 		if (autoRunChecked && button.classList.contains("checkedButton")) startSimulation();
 	});
