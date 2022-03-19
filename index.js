@@ -150,7 +150,7 @@ function partEquipDiv(parts, ind) {
 		button.id = item + "_Button";
 		button.className = "uncheckedButton";
 		div.appendChild(button);
-		addChangeForButton(button, true);
+		addChangeForButtonEquip(button);
 
 		let input = document.createElement("input");
 		input.type = "number";
@@ -180,7 +180,7 @@ function makeOneTimersBtns() {
 			
 			// If ring
 			if (oneTimer === "The_Ring") {
-				addChangeForButton(button, true);
+				addChangeForButtonRing(button);
 				let rightDiv = document.createElement("div");
 				rightDiv.id = "inputAndCheckRingDiv";
 				rightDiv.addEventListener("change", () => {
@@ -228,26 +228,43 @@ function addChangeForLevel(item) {
 	});
 }
 
-function addChangeForButton(button, hasVal = false) {
+function addChangeForButton(button) {
 	button.addEventListener("click", (event) => {
-		if (hasVal) {
-			let lvl = document.getElementById(
-				button.id.replace("_Button", "_Input")
-			);
-			let name = button.id.replace("_Button", "");
-			if (parseInt(lvl.value) > 0) {
-				AB.equip(name);
-			}
-		}
-
 		swapChecked(button);
 
-		// Set limbs.
-		elements.limbsUsed.innerHTML = countLimbsUsed();
+		
 
 		calcBuildCost(true);
 		if (autoRunChecked && button.classList.contains("checkedButton")) startSimulation();
 	});
+}
+
+function addChangeForButtonEquip(button) {
+	button.addEventListener("click", (event) => {
+		let lvl = document.getElementById(
+			button.id.replace("_Button", "_Input")
+		);
+		let name = button.id.replace("_Button", "");
+		if (parseInt(lvl.value) > 0) {
+			AB.equip(name);
+		}
+		
+		// Set limbs.
+		elements.limbsUsed.innerHTML = countLimbsUsed();
+	});
+	addChangeForButton(button);
+}
+
+function addChangeForButtonRing(button) {
+	button.addEventListener("click", (event) => {
+		let lvl = document.getElementById(
+			button.id.replace("_Button", "_Input")
+		);
+		if (parseInt(lvl.value) > 0) {
+			AB.rings.lvl = lvl.value;
+		}
+	});
+	addChangeForButton(button);
 }
 
 function isInt(value) {
@@ -324,8 +341,7 @@ function setOneTimers() {
 					}
 				}
 				let input = document.getElementById("The_Ring_Input");
-				let val = input.value;
-				AB.rings.level = val.value;
+				AB.rings.level = input.value;
 			}
 		}
 	});
@@ -764,6 +780,7 @@ function runSimulation(speed = 100000) {
 			startTime = Date.now();
 			AB.update();
 	} else {
+		/*
 		AB.oneFight(1);
 		let maxLuckTime = AB.lootAvg.counter;
 		let maxLuckRewards = AB.lootAvg.accumulator;
@@ -773,10 +790,10 @@ function runSimulation(speed = 100000) {
 
 		// Otherwise run simulation.
 		if (maxLuckTime !== minLuckTime || maxLuckRewards !== minLuckRewards) {
+			*/
 			AB.resetAll();
 			startTime = Date.now();
 			AB.update();
-		}
 	}
 	res = {
 		dustPs: AB.getDustPs(),
@@ -858,7 +875,7 @@ function resetToSave() {
 
 		sets();
 		AB.bonuses.Extra_Limbs.level = limbs;
-		runSimulation();
+		startSimulation();
 		let res = {
 			dustPs: AB.getDustPs(),
 			dust: save.global.autoBattleData.dust,
