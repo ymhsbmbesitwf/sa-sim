@@ -780,7 +780,6 @@ function runSimulation(speed = 100000) {
 			startTime = Date.now();
 			AB.update();
 	} else {
-		/*
 		AB.oneFight(1);
 		let maxLuckTime = AB.lootAvg.counter;
 		let maxLuckRewards = AB.lootAvg.accumulator;
@@ -790,10 +789,10 @@ function runSimulation(speed = 100000) {
 
 		// Otherwise run simulation.
 		if (maxLuckTime !== minLuckTime || maxLuckRewards !== minLuckRewards) {
-			*/
 			AB.resetAll();
 			startTime = Date.now();
 			AB.update();
+		}
 	}
 	res = {
 		dustPs: AB.getDustPs(),

@@ -3007,7 +3007,13 @@ export let autoBattle = {
 		return 190 + 15 * (this.enemyLevel - 19);
 	},
 	update: function () {
-		for (var x = 0; x < this.speed; x++) {
+		let X = 100;
+		for (var x = 0; x < this.speed; x += X) {
+			setInterval(this.sim10Fights(X), 0);
+		}
+	},
+	simXFights: function (X) {
+		for (let x = 0; x < X; x++) {
 			this.fight();
 			this.battleTime += this.frameTime;
 		}
