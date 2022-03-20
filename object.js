@@ -3011,7 +3011,7 @@ export let autoBattle = {
 	update: function () {
 		let X = 100;
 		for (var x = 0; x < this.speed; x += X) {
-			setInterval(this.simXFights(X), 0);
+			setTimeout(this.simXFights(X), 0);
 		}
 	},
 	simXFights: function (X) {
