@@ -601,12 +601,11 @@ function findBestDps(upgrade = true) {
 		runSimulation(speed);
 		let currDps = AB.getDustPs();
 		let items = getEquippedItems();
-		let ringChecked = document.getElementById("The_Ring_Input").nextSibling;
+		let ringChecked = document.getElementById("The_Ring_Button").classList.contains("checkedButton");
 		if (ringChecked.checked) {
 			items.push({ name: "Ring", data: { dustType: "shards" } });
 		}
 		let dustForItems = [];
-
 		AB.getRingLevelCost();
 		for (const ind in items) {
 			let name = items[ind].name;
