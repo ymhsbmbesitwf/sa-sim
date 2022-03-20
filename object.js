@@ -2502,8 +2502,10 @@ export let autoBattle = {
 				var ethRoll = Math.floor(Math.random() * 100);
 				// console.log(ethRoll);
 				// console.log(attacker.ethChance);
-				if (ethRoll < attacker.ethChance) { attacker.isEthereal = true; this.eth += 1; }
-				else attacker.isEthereal = false;
+				if (ethRoll < attacker.ethChance) { 
+					attacker.isEthereal = true; 
+					this.eth += 1; 
+				} else attacker.isEthereal = false;
 			}
 			// if (this.total % 1000 === 0) 
 			// console.log(this.eth/this.total);
