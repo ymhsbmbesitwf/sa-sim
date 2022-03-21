@@ -774,12 +774,13 @@ function runSimulation(speed = 100000) {
 	let res;
 	startTime = Date.now();
 
-	// Check if max and min luck gives the same results and that setEthChance is disabled.
+	// Check for less random eth chance
 	if (AB.setEthChance) {
 		AB.resetAll();
 			startTime = Date.now();
 			AB.update();
 	} else {
+		// Check if max and min luck gives the same results
 		AB.oneFight(1);
 		let maxLuckTime = AB.lootAvg.counter;
 		let maxLuckRewards = AB.lootAvg.accumulator;
