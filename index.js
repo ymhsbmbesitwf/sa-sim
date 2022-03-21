@@ -964,7 +964,7 @@ function affordTime() {
 		totalCost = AB.getRingLevelCost() * 1e9;
 		remainingCost = totalCost - ABresults.shardDust * 1e9;
 	} else if (item === "Extra_Limbs") {
-		totalCost = AB.getLimbsCost();
+		totalCost = AB.getBonusCost(item);
 		remainingCost = totalCost - ABresults.dust;
 	} else if (AB.oneTimers[item] || item === "Unlock_The_Ring") {
 		// Check one timers.
