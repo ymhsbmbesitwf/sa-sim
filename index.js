@@ -179,16 +179,14 @@ function makeOneTimersBtns() {
 				button.innerHTML = "The Ring";
 				button.id = "The_Ring_Button";
 				button.classList.add("uncheckedButton", "oneTimerButton");
-				addChangeForButtonRing(button);
+				addChangeForButton(button);
 				topDiv.appendChild(button);
 
 				let input = document.createElement("input");
 				input.type = "number";
 				input.value = 1;
 				input.id = "The_Ring_Input";
-				input.addEventListener("change", () => {
-					calcBuildCost(true);
-				})
+				addChangeForRingInput(input);
 				topDiv.appendChild(input);
 				div.appendChild(topDiv);
 
@@ -255,16 +253,19 @@ function addChangeForButtonEquip(button) {
 	addChangeForButton(button);
 }
 
-function addChangeForButtonRing(button) {
-	button.addEventListener("click", (event) => {
-		let lvl = document.getElementById(
-			button.id.replace("_Button", "_Input")
-		);
-		if (parseInt(lvl.value) > 0) {
-			AB.rings.lvl = lvl.value;
+function addChangeForRingInput(input) {
+	input.addEventListener("change", (event) => {
+		let value = event.target.value;
+		if (parseInt(Number(value)) >= 1) {
+			value = Number(value).toString();
+			event.target.value = value;
+			AB.rings.lvl = value;
+		} else {
+			event.target.value = 1;
 		}
-	});
-	addChangeForButton(button);
+		calcBuildCost(true);
+		if (autoRunChecked && button.classList.contains("checkedButton")) startSimulation();
+	})
 }
 
 function isInt(value) {
@@ -472,9 +473,10 @@ function resetItemsInHtml() {
 		button.classList.add("uncheckedButton");
 	});
 
-	let OTBoxes = document.querySelectorAll("input.oneTimerInput");
-	OTBoxes.forEach((box) => {
-		box.checked = false;
+	let OTBoxes = document.querySelectorAll("button.oneTimerButton");
+	OTBoxes.forEach((button) => {
+		button.classList.remove("checkedButton");
+		button.classList.add("uncheckedButton");
 	});
 
 	let target = document.getElementById("currentLevel");
