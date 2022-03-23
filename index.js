@@ -25,12 +25,12 @@ let ABresults = {
 };
 let autoRunChecked = false;
 let colours = {
-	dust: "rgb(229,204,201)",
-	shard: "rgb(53,88,104)",
-	oneTimer: "rgb(231,209,86)",
+	dust: "rgb(229, 204, 201)",
+	shard: "rgb(53, 88, 104)",
+	oneTimer: "rgb(231, 209, 86)",
 	selected: "rgba(242, 140, 40, 0.5)",
 	unlock: "rgb(0, 255, 127)",
-	theRing: "rgb(7,123,143)",
+	theRing: "rgb(119, 165, 187)",
 }
 
 function getElements() {
