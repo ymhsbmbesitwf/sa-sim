@@ -1081,3 +1081,46 @@ function toScientific(number, accuracy = 2, negative = false) {
 	str = str.replace("+", "");
 	return str;
 }
+
+const sheetspan = document.createElement("span");
+sheetspan.append("Import spreadsheet (whole line):");
+const sheetInput = document.createElement("input");
+sheetspan.append(sheetInput);
+document.querySelector("#rightSideDiv>span").insertAdjacentElement("afterend", sheetspan);
+
+sheetInput.addEventListener("paste", (event) => {
+  const paste = event.clipboardData.getData("text");
+  const itemLevels = paste.split("\t");
+  itemLevels.splice(0, 2);
+  const autorunButton = document.querySelector("#autoRun");
+  const wasAutorun = autorunButton.className === "checkedButton";
+  if (wasAutorun) {
+    autorunButton.click();
+  }
+
+  const equipInpDivs = document.querySelectorAll("div.equipInpDiv");
+  for (let i = 0; i < equipInpDivs.length; i++) {
+    const equipDiv = equipInpDivs[i];
+    const [equipButton, equipInput] = equipDiv.childNodes;
+    if (itemLevels[i]) {
+      if (!(/^\d+$/.test(itemLevels[i]))) {
+        console.log(`time to bail at ${i} from '${itemLevels[i]}'`);
+        break;
+      }
+
+      if (equipButton.className === "uncheckedButton") {
+        equipButton.click();
+      }
+      equipInput.value = itemLevels[i];
+    } else {
+      if (equipButton.className === "checkedButton") {
+        equipButton.click();
+      }
+    }
+  }
+
+  document.querySelector("#startButton").click();
+  if (wasAutorun) {
+    autorunButton.click();
+  }
+});
