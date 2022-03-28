@@ -259,7 +259,7 @@ function addChangeForRingInput(input) {
 		if (parseInt(Number(value)) >= 1) {
 			value = Number(value).toString();
 			event.target.value = value;
-			AB.rings.lvl = value;
+			AB.rings.level = value;
 		} else {
 			event.target.value = 1;
 		}
