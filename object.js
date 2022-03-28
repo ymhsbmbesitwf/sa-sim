@@ -3363,6 +3363,23 @@ export let autoBattle = {
 				this.attack(this.enemy, this.trimp, luck * -1);
 			}
 
+			if (!this.enemy.noSlow) this.enemy.attackSpeed *= this.trimp.slowAura;
+			var enemyAttackTime = this.enemy.attackSpeed;
+			if (this.enemy.lastAttack >= enemyAttackTime) {
+				this.enemy.lastAttack -= enemyAttackTime;
+				this.attack(this.enemy, this.trimp);
+			}
+			if (this.enemy.explodeFreq != -1) {
+				this.enemy.lastExplode += this.frameTime;
+				if (this.enemy.lastExplode >= this.enemy.explodeFreq) {
+					this.enemy.lastExplode -= this.enemy.explodeFreq;
+					var dmg =
+						this.enemy.explodeDamage * this.getAttack(this.enemy) -
+						this.trimp.defense;
+					this.damageCreature(this.trimp, dmg);
+				}
+			}
+
 			this.checkPoison(this.enemy);
 			if (this.enemy.bleed.time > 0)
 				this.enemy.bleed.time -= this.frameTime;
