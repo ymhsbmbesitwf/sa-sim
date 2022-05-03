@@ -31,7 +31,7 @@ let colours = {
 	selected: "rgba(242, 140, 40, 0.5)",
 	unlock: "rgb(0, 255, 127)",
 	theRing: "rgb(119, 165, 187)",
-}
+};
 
 function getElements() {
 	return {
@@ -233,7 +233,8 @@ function addChangeForButton(button) {
 	button.addEventListener("click", (event) => {
 		swapChecked(button);
 		calcBuildCost(true);
-		if (autoRunChecked && button.classList.contains("checkedButton")) startSimulation();
+		if (autoRunChecked && button.classList.contains("checkedButton"))
+			startSimulation();
 	});
 }
 
@@ -246,7 +247,7 @@ function addChangeForButtonEquip(button) {
 		if (parseInt(lvl.value) > 0) {
 			AB.equip(name);
 		}
-		
+
 		// Set limbs.
 		elements.limbsUsed.innerHTML = countLimbsUsed();
 	});
@@ -264,8 +265,9 @@ function addChangeForRingInput(input) {
 			event.target.value = 1;
 		}
 		calcBuildCost(true);
-		if (autoRunChecked && button.classList.contains("checkedButton")) startSimulation();
-	})
+		if (autoRunChecked && button.classList.contains("checkedButton"))
+			startSimulation();
+	});
 }
 
 function isInt(value) {
@@ -383,7 +385,7 @@ function calcBuildCost(set = false) {
 
 	// Price for ring.
 	if (AB.oneTimers["The_Ring"].owned && AB.rings.level > 1) {
-		shardCost += Math.ceil(15 * Math.pow(2, AB.rings.level) - 30);	// Subtracting 30 for the first level or something.
+		shardCost += Math.ceil(15 * Math.pow(2, AB.rings.level) - 30); // Subtracting 30 for the first level or something.
 	}
 
 	// Price for extra limbs.
@@ -603,7 +605,9 @@ function findBestDps(upgrade = true) {
 		runSimulation(speed);
 		let currDps = AB.getDustPs();
 		let items = getEquippedItems();
-		let ringChecked = document.getElementById("The_Ring_Button").classList.contains("checkedButton");
+		let ringChecked = document
+			.getElementById("The_Ring_Button")
+			.classList.contains("checkedButton");
 		if (ringChecked.checked) {
 			items.push({ name: "Ring", data: { dustType: "shards" } });
 		}
@@ -613,7 +617,7 @@ function findBestDps(upgrade = true) {
 			let name = items[ind].name;
 			let newDps = dustWithGrade(name, speed, upgrade);
 			let increase = newDps - currDps;
-			let percentage = increase / currDps * 100;
+			let percentage = (increase / currDps) * 100;
 
 			// How long until upgrade is paid back.
 			let upgradeCost =
@@ -656,7 +660,7 @@ function findBestDps(upgrade = true) {
 		div.appendChild(rdiv);
 
 		let text = document.createElement("span");
-		text.innerHTML = `Item ${upgrade }±1 level`;
+		text.innerHTML = `Item ${upgrade}±1 level`;
 		ldiv.appendChild(text);
 
 		let text2 = document.createElement("span");
@@ -753,8 +757,12 @@ function getEquippedItems() {
 
 function onSavePaste(event) {
 	let paste = event.clipboardData.getData("text");
-	save = JSON.parse(LZ.decompressFromBase64(paste));
-	resetToSave();
+	if (paste.includes("||")) {
+		importFromSheet(paste);
+	} else {
+		save = JSON.parse(LZ.decompressFromBase64(paste));
+		resetToSave();
+	}
 }
 
 function dustWithGrade(name, speed, upgrade) {
@@ -779,16 +787,19 @@ function runSimulation(speed = 100000) {
 	// Check for less random eth chance
 	if (AB.setEthChance) {
 		AB.resetAll();
-			startTime = Date.now();
-			AB.update();
+		startTime = Date.now();
+		AB.update();
 	} else {
 		// Check if max and min luck gives the same results
-		AB.oneFight(1);
-		let maxLuckTime = AB.lootAvg.counter;
-		let maxLuckRewards = AB.lootAvg.accumulator;
-		AB.oneFight(-1);
-		let minLuckTime = AB.lootAvg.counter - maxLuckTime;
-		let minLuckRewards = AB.lootAvg.accumulator - maxLuckRewards;
+		if (false) {
+			// Temp disable because bugged
+			AB.oneFight(1);
+			let maxLuckTime = AB.lootAvg.counter;
+			let maxLuckRewards = AB.lootAvg.accumulator;
+			AB.oneFight(-1);
+			let minLuckTime = AB.lootAvg.counter - maxLuckTime;
+			let minLuckRewards = AB.lootAvg.accumulator - maxLuckRewards;
+		}
 
 		// Otherwise run simulation.
 		if (maxLuckTime !== minLuckTime || maxLuckRewards !== minLuckRewards) {
@@ -988,7 +999,7 @@ function affordTime() {
 		totalCost = AB.upgradeCost(item);
 		remainingCost = totalCost - ABresults.dust;
 	}
-	
+
 	let time = remainingCost / ABresults.dustPs;
 	let span = document.getElementById("affordTimeSpan");
 	while (span.firstChild) {
@@ -1017,7 +1028,12 @@ function affordTime() {
 	if (totalTime > 0 && totalTime !== Infinity) {
 		totalTime = convertTime(totalTime);
 		let type = usesShards ? "shards" : "dust";
-		span.innerHTML = "You can afford this upgrade in " + totalTime + " from 0 " + type + ".";
+		span.innerHTML =
+			"You can afford this upgrade in " +
+			totalTime +
+			" from 0 " +
+			type +
+			".";
 	}
 }
 
@@ -1075,52 +1091,67 @@ function toScientific(number, accuracy = 2, negative = false) {
 	// Convert number to scientific notation.
 	number = Number(number);
 	if (!negative && number <= 0) return 0;
-	if (Math.abs(number) < Math.pow(10, accuracy + 2)) return number.toFixed(accuracy);
+	if (Math.abs(number) < Math.pow(10, accuracy + 2))
+		return number.toFixed(accuracy);
 	number = number.toExponential(accuracy);
 	let str = number.toString();
 	str = str.replace("+", "");
 	return str;
 }
 
+function importFromSheet(input) {
+	let data = input.split("||")[1];
+	data = data.split(",");
+	let equips = {};
+	data.forEach((equip) => {
+		equip = equip.trim();
+		equip = equip.match(/[a-zA-Z]+|[0-9]+/g); // Split into words and numbers. Regex is uglier than your mom.
+		console.log(equip);
+	});
+}
+
 const sheetspan = document.createElement("span");
 sheetspan.append("Import spreadsheet (whole line):");
 const sheetInput = document.createElement("input");
 sheetspan.append(sheetInput);
-document.querySelector("#rightSideDiv>span").insertAdjacentElement("afterend", sheetspan);
+document
+	.querySelector("#rightSideDiv>span")
+	.insertAdjacentElement("afterend", sheetspan);
 
 sheetInput.addEventListener("paste", (event) => {
-  const paste = event.clipboardData.getData("text");
-  const itemLevels = paste.split("\t");
-  itemLevels.splice(0, 2);
-  const autorunButton = document.querySelector("#autoRun");
-  const wasAutorun = autorunButton.className === "checkedButton";
-  if (wasAutorun) {
-    autorunButton.click();
-  }
+	const paste = event.clipboardData.getData("text");
+	const itemLevels = paste.split("\t");
+	itemLevels.splice(0, 2);
+	console.log(itemLevels);
+	const autorunButton = document.querySelector("#autoRun");
+	const wasAutorun = autorunButton.className === "checkedButton";
+	if (wasAutorun) {
+		autorunButton.click();
+	}
 
-  const equipInpDivs = document.querySelectorAll("div.equipInpDiv");
-  for (let i = 0; i < equipInpDivs.length; i++) {
-    const equipDiv = equipInpDivs[i];
-    const [equipButton, equipInput] = equipDiv.childNodes;
-    if (itemLevels[i]) {
-      if (!(/^\d+$/.test(itemLevels[i]))) {
-        console.log(`time to bail at ${i} from '${itemLevels[i]}'`);
-        break;
-      }
+	const equipInpDivs = document.querySelectorAll("div.equipInpDiv");
+	for (let i = 0; i < equipInpDivs.length; i++) {
+		const equipDiv = equipInpDivs[i];
+		const [equipButton, equipInput] = equipDiv.childNodes;
+		if (itemLevels[i]) {
+			if (!/^\d+$/.test(itemLevels[i])) {
+				console.log(`time to bail at ${i} from '${itemLevels[i]}'`);
+				break;
+			}
 
-      if (equipButton.className === "uncheckedButton") {
-        equipButton.click();
-      }
-      equipInput.value = itemLevels[i];
-    } else {
-      if (equipButton.className === "checkedButton") {
-        equipButton.click();
-      }
-    }
-  }
+			if (equipButton.className === "uncheckedButton") {
+				equipButton.click();
+			}
+			equipInput.value = itemLevels[i];
+		} else {
+			if (equipButton.className === "checkedButton") {
+				equipButton.click();
+			}
+		}
+	}
 
-  document.querySelector("#startButton").click();
-  if (wasAutorun) {
-    autorunButton.click();
-  }
+	document.querySelector("#startButton").click();
+	if (wasAutorun) {
+		autorunButton.click();
+	}
 });
