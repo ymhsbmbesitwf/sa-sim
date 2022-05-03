@@ -802,11 +802,11 @@ function runSimulation(speed = 100000) {
 		}
 
 		// Otherwise run simulation.
-		if (maxLuckTime !== minLuckTime || maxLuckRewards !== minLuckRewards) {
-			AB.resetAll();
-			startTime = Date.now();
-			AB.update();
-		}
+		// if (maxLuckTime !== minLuckTime || maxLuckRewards !== minLuckRewards) {
+		AB.resetAll();
+		startTime = Date.now();
+		AB.update();
+		// }
 	}
 	res = {
 		dustPs: AB.getDustPs(),
