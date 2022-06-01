@@ -43,11 +43,13 @@
 			<span>Import save: <input type="text" id="saveInput" /> <button id="resetToSave">Reset to
 					save!</button></span>
 			<div id="run">
-				<button id="startButton">
-					Press this to run the simulation!
-				</button>
-				<button id="autoRun" class="uncheckedButton">Auto run!</button>
+        <button id="startButton">&#x25B6; Run the simulation!</button>
+        <button id="stopButton">&#x25A0; Stop!</button>
+        <button id="autoRun" class="uncheckedButton">Auto run!</button>
 			</div>
+			<div>
+        <input id="simHours" max="8761" min="1" type="number" value="8" /> hour(s)
+      </div>
 			<span>Build cost: <span id="buildCostDust">0</span> dust, <span id="buildCostShards">0</span> shards.</span>
 			<div id="resultsDiv">
 				<h3>Simulation:</h3>
