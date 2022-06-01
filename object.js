@@ -2993,7 +2993,7 @@ export let autoBattle = {
 		}
 		this.lootAvg.accumulator += amt;
 		this.lootAvg.counter += this.battleTime;
-		if (this.enemy.level == this.maxEnemyLevel && this.speed == 1) {
+		/*if (this.enemy.level == this.maxEnemyLevel && this.speed == 1) {
 			this.enemiesKilled++;
 			if (this.enemiesKilled >= this.nextLevelCount()) {
 				this.maxEnemyLevel++;
@@ -3001,7 +3001,7 @@ export let autoBattle = {
 				this.enemiesKilled = 0;
 				this.resetStats();
 			}
-		}
+		}*/
 		this.resetCombat();
 	},
 	nextLevelCount: function () {
@@ -3009,16 +3009,8 @@ export let autoBattle = {
 		return 190 + 15 * (this.enemyLevel - 19);
 	},
 	update: function () {
-		let X = 100;
-		for (var x = 0; x < this.speed; x += X) {
-			setTimeout(this.simXFights(X), 0);
-		}
-	},
-	simXFights: function (X) {
-		for (let x = 0; x < X; x++) {
-			this.fight();
-			this.battleTime += this.frameTime;
-		}
+    this.fight();
+    this.battleTime += this.frameTime;
 	},
 	getDustPs: function () {
 		var dps = 0;

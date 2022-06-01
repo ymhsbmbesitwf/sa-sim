@@ -1,6 +1,16 @@
 import { autoBattle } from "./object.js";
 import { LZString } from "./lz-string.js";
 
+import ABC from "./controller.js";
+
+let simConfig = ABC.defaultConfig();
+simConfig.framesPerChunk = 1000;
+simConfig.onUpdate = null; // function to call
+simConfig.seconds = 8 * 60 * 60; // default 8h
+simConfig.updateInterval = 1000; // ms
+ABC.init(autoBattle, simConfig);
+// ABC.modifiedAB(); needed whenever equip or level change is done
+
 document.addEventListener("DOMContentLoaded", function () {
 	setup();
 	elements = getElements();
@@ -54,9 +64,13 @@ function getElements() {
 const startSimulation = () => {
 	sets();
 	calcBuildCost(false);
-	runSimulation(100000);
-	wrapup();
+	runSimulation();
+	//wrapup();
 };
+
+const stopSimulation = () => {
+  ABC.stop();
+}
 
 const enemyCount = (level) => {
 	if (level < 20) return 10 * level;
@@ -64,18 +78,19 @@ const enemyCount = (level) => {
 };
 
 const wrapup = () => {
-	const endTime = Date.now();
-	const time = endTime - startTime;
+	const time = ABC.getTimeUsed();
 	const WR =
 		AB.sessionEnemiesKilled /
 		(AB.sessionEnemiesKilled + AB.sessionTrimpsKilled);
 	const toKill = enemyCount(AB.enemyLevel);
 	const base_dust = AB.getDustPs();
 
+	setABResults({dustPs: base_dust,});
+
 	elements.timeSpent.innerHTML = time + " ms";
 
 	let timeSpent = AB.lootAvg.counter;
-	elements.processedTime.innerHTML = convertTimeMs(timeSpent);
+	elements.processedTime.innerHTML = convertTimeMs(timeSpent) + (ABC.isRunning() ? "/" + (ABC.seconds / 3600) + "h" : " (stopped)");
 
 	let enemiesKilled = AB.sessionEnemiesKilled;
 	elements.enemiesKilled.innerHTML = enemiesKilled;
@@ -221,6 +236,7 @@ function addChangeForLevel(item) {
 			value = Number(value).toString();
 			event.target.value = value;
 			AB.items[name].level = value;
+      ABC.modifiedAB();
 		} else {
 			event.target.value = 1;
 		}
@@ -246,6 +262,7 @@ function addChangeForButtonEquip(button) {
 		let name = button.id.replace("_Button", "");
 		if (parseInt(lvl.value) > 0) {
 			AB.equip(name);
+      ABC.modifiedAB();
 		}
 
 		// Set limbs.
@@ -261,6 +278,7 @@ function addChangeForRingInput(input) {
 			value = Number(value).toString();
 			event.target.value = value;
 			AB.rings.level = value;
+      ABC.modifiedAB();
 		} else {
 			event.target.value = 1;
 		}
@@ -290,6 +308,7 @@ function clearItems() {
 		AB.items[item].hidden = false;
 		AB.items[item].level = 1;
 	}
+  ABC.modifiedAB();
 }
 
 function setItems() {
@@ -308,6 +327,7 @@ function setItems() {
 			}
 		});
 	}
+  ABC.modifiedAB();
 }
 
 function setActiveOneTimers() {
@@ -321,6 +341,7 @@ function clearOneTimers() {
 			AB.oneTimers[oneTimer].owned = false;
 		}
 	}
+  ABC.modifiedAB();
 }
 
 function setOneTimers() {
@@ -348,6 +369,7 @@ function setOneTimers() {
 			}
 		}
 	});
+  ABC.modifiedAB();
 }
 
 function calcBuildCost(set = false) {
@@ -405,6 +427,7 @@ function setLevels() {
 	AB.enemyLevel = parseInt(curr.value);
 	let maxLvl = document.getElementById("highestLevel");
 	AB.maxEnemyLevel = parseInt(maxLvl.value);
+  ABC.modifiedAB();
 }
 
 function setItemsInHtml(
@@ -509,6 +532,15 @@ function addListeners() {
 		.getElementById("startButton")
 		.addEventListener("click", startSimulation);
 
+  // Stop button
+  document.getElementById("stopButton").addEventListener("click", stopSimulation);
+  
+  // Config
+  document.getElementById("simHours").addEventListener("change", (event) => {
+      simConfig.seconds = parseInt(event.target.value) * 60 * 60;
+      ABC.reconfigure(simConfig);
+  });
+
 	// SA level
 	target = document.getElementById("currentLevel");
 	target.value = AB.enemyLevel;
@@ -601,8 +633,7 @@ function findBestDps(upgrade = true) {
 	sets();
 
 	if (getEquippedItems().length) {
-		let speed = 200069;
-		runSimulation(speed);
+		runSimulation();
 		let currDps = AB.getDustPs();
 		let items = getEquippedItems();
 		let ringChecked = document
@@ -615,7 +646,7 @@ function findBestDps(upgrade = true) {
 		AB.getRingLevelCost();
 		for (const ind in items) {
 			let name = items[ind].name;
-			let newDps = dustWithGrade(name, speed, upgrade);
+			let newDps = dustWithGrade(name, upgrade);
 			let increase = newDps - currDps;
 			let percentage = (increase / currDps) * 100;
 
@@ -765,53 +796,26 @@ function onSavePaste(event) {
 	}
 }
 
-function dustWithGrade(name, speed, upgrade) {
+function dustWithGrade(name, upgrade) {
 	let target = name === "Ring" ? AB.rings : AB.items[name];
 	if (upgrade) target.level++;
 	else target.level--;
-	runSimulation(speed);
+  ABC.modifiedAB();
+	runSimulation();
 	let dust = AB.getDustPs();
 	if (upgrade) target.level--;
 	else target.level++;
 	return dust;
 }
 
-function runSimulation(speed = 100000) {
+function runSimulation() {
 	AB.eth = 0;
 	AB.total = 0;
-	AB.speed = speed;
-	AB.resetAll();
-	let res;
-	startTime = Date.now();
-
-	// Check for less random eth chance
-	if (AB.setEthChance) {
-		AB.resetAll();
-		startTime = Date.now();
-		AB.update();
-	} else {
-		// Check if max and min luck gives the same results
-		if (false) {
-			// Temp disable because bugged
-			AB.oneFight(1);
-			let maxLuckTime = AB.lootAvg.counter;
-			let maxLuckRewards = AB.lootAvg.accumulator;
-			AB.oneFight(-1);
-			let minLuckTime = AB.lootAvg.counter - maxLuckTime;
-			let minLuckRewards = AB.lootAvg.accumulator - maxLuckRewards;
-		}
-
-		// Otherwise run simulation.
-		// if (maxLuckTime !== minLuckTime || maxLuckRewards !== minLuckRewards) {
-		AB.resetAll();
-		startTime = Date.now();
-		AB.update();
-		// }
-	}
-	res = {
-		dustPs: AB.getDustPs(),
-	};
-	setABResults(res);
+  
+  
+  simConfig.onUpdate = wrapup;
+  ABC.reconfigure(simConfig);
+  ABC.start();
 }
 
 function maxLuck() {
@@ -888,7 +892,7 @@ function resetToSave() {
 
 		sets();
 		AB.bonuses.Extra_Limbs.level = limbs;
-		startSimulation();
+		//startSimulation();
 		let res = {
 			dustPs: AB.getDustPs(),
 			dust: save.global.autoBattleData.dust,
@@ -897,6 +901,7 @@ function resetToSave() {
 		setABResults(res);
 
 		calcBuildCost(true);
+    ABC.modifiedAB();
 	}
 }
 
@@ -1073,6 +1078,7 @@ function setEtherealChance(button) {
 	} else {
 		AB.setEthChance = true;
 	}
+  ABC.modifiedAB();
 	swapChecked(button);
 }
 
