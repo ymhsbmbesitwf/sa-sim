@@ -1,97 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script src="index.js" type="module"></script>
+        <link rel="stylesheet" href="style.css" />
+        <title>SA Simulator (5.6.5)</title>
+    </head>
 
-<head>
-	<meta charset="UTF-8" />
-	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<script src="index.js" type="module"></script>
-	<link rel="stylesheet" href="style.css" />
-	<title>SA Simulator (5.6.5)</title>
-</head>
-
-<body>
-	<div id="mainDiv">
-		<div id="leftSideDiv">
-			<div id="equipDiv"></div>
-			<div id="otherDiv">
-				<div id="oneTimersDiv">
-				</div>
-				<div id="limbsDiv">
-					<span>Limbs used: <span id="limbsUsed">0</span></span>
-				</div>
-				<div id="otherInputs">
-					<span class="levelInp"><span class="levelInpSpan">Max enemy level:</span>
-						<input type="number" id="highestLevel" /></span>
-					<span class="levelInp"><span class="levelInpSpan">Set level:</span>
-						<input type="number" id="currentLevel" /></span>
-				</div>
-				<div>
-					<span id="effects"></span>
-				</div>
-				<!--
+    <body>
+        <div id="mainDiv">
+            <div id="leftSideDiv">
+                <div id="equipDiv"></div>
+                <div id="otherDiv">
+                    <div id="oneTimersDiv"></div>
+                    <div id="limbsDiv">
+                        <span>Limbs used: <span id="limbsUsed">0</span></span>
+                    </div>
+                    <div id="otherInputs">
+                        <span class="levelInp"
+                            ><span class="levelInpSpan">Max enemy level:</span>
+                            <input type="number" id="highestLevel"
+                        /></span>
+                        <span class="levelInp"
+                            ><span class="levelInpSpan">Set level:</span>
+                            <input type="number" id="currentLevel"
+                        /></span>
+                    </div>
+                    <div>
+                        <span id="effects"></span>
+                    </div>
+                    <!--
 				<div id="hideVerboseEnemy">
 					<button id="verboseEnemyButton" class="uncheckedButton">Verbose mode.</button>
 					<div id="verboseEnemyDiv">
 					</div>
 				</div>
 				-->
-			</div>
-		</div>
+                </div>
+            </div>
 
-		<div id="rightSideDiv">
-			<span>Import save: <input type="text" id="saveInput" /> <button id="resetToSave">Reset to
-					save!</button></span>
-			<div id="run">
-        <button id="startButton">&#x25B6; Run the simulation!</button>
-        <button id="stopButton">&#x25A0; Stop!</button>
-        <button id="autoRun" class="uncheckedButton">Auto run!</button>
-			</div>
-			<div>
-        Stop after <input id="simHours" class="simInput" max="8761" min="1" type="number" value="8" /> hour(s) or <input id="simFights" class="simInput" max="100003" min="1" type="number" value="1000" /> fight(s)
-      </div>
-			<span>Build cost: <span id="buildCostDust">0</span> dust, <span id="buildCostShards">0</span> shards.</span>
-			<div id="resultsDiv">
-				<h3>Simulation:</h3>
-				<span>Time spent: <span id="timeSpent"></span></span>
-				<span>Time processed: <span id="processedTime"></span></span>
-				<span>Enemies killed: <span id="enemiesKilled"></span></span>
-				<span>Trimps killed [WR]: <span id="trimpsKilled"></span></span>
-				<span>Clearing time: <span id="clearingTime"></span></span>
-				<span>Dust per second: <span id="dustPs"></span></span>
-				<span>Shards per second: <span id="shardsPs"></span></span>
-				<span>Average fight time: <span id="averageFightTime"></span></span>
-				<span>Average kill time: <span id="averageKillTime"></span></span>
-			</div>
-			<div id="calculationsDiv">
-				<div id="calcButtons">
-					<p>
-						<b>Any of the below buttons might take a while to
-							run!</b>
-					</p>
-					<button id="etherealChanceButton" class="uncheckedButton">Less random Ethereal!</button>
-					<button id="bestUpgradesButton">Best upgrades!</button>
-					<button id="bestDowngradesButton">Best downgrades!</button>
-					<!--<button id="theoreticalWin">Max luck!</button>-->
-				</div>
-				<div id="calcResults">
-          <span id="bestUpgradesMessage"></span>
-					<div id="bestUpgradesDiv"></div>
-				</div>
-				<div id="affordTimeDiv">
-					<div id="affordTimeInputDiv">
-						<button id="affordTimeBtn">Time to afford!</button>
-						<select id="affordTimeSelect"></select>
-					</div>
-					<span>Uses the results from your latest simulation.</span>
-					<div id="affordDiv">
-						<span id="affordTimeSpan"></span>
-						<span id="affordNilDustTimeSpan"></span>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</body>
-
+            <div id="rightSideDiv">
+                <span
+                    >Import save: <input type="text" id="saveInput" />
+                    <button id="resetToSave">Reset to save!</button></span
+                >
+                <div id="run">
+                    <button id="startButton">
+                        &#x25B6; Run the simulation!
+                    </button>
+                    <button id="stopButton">&#x25A0; Stop!</button>
+                    <button id="autoRun" class="uncheckedButton">
+                        Auto run!
+                    </button>
+                </div>
+                <div>
+                    Stop after
+                    <input
+                        id="simHours"
+                        class="simInput"
+                        min="1"
+                        type="number"
+                        value="8"
+                    />
+                    hour(s) or
+                    <input
+                        id="simFights"
+                        class="simInput"
+                        min="1"
+                        type="number"
+                        value="1000"
+                    />
+                    fight(s)
+                </div>
+                <span
+                    >Build cost: <span id="buildCostDust">0</span> dust,
+                    <span id="buildCostShards">0</span> shards.</span
+                >
+                <div id="resultsDiv">
+                    <h3>Simulation:</h3>
+                    <span>Time spent: <span id="timeSpent"></span></span>
+                    <span
+                        >Time processed: <span id="processedTime"></span
+                    ></span>
+                    <span
+                        >Enemies killed: <span id="enemiesKilled"></span
+                    ></span>
+                    <span
+                        >Trimps killed [WR]: <span id="trimpsKilled"></span
+                    ></span>
+                    <span>Clearing time: <span id="clearingTime"></span></span>
+                    <span>Dust per second: <span id="dustPs"></span></span>
+                    <span>Shards per second: <span id="shardsPs"></span></span>
+                    <span
+                        >Average fight time: <span id="averageFightTime"></span
+                    ></span>
+                    <span
+                        >Average kill time: <span id="averageKillTime"></span
+                    ></span>
+                </div>
+                <div id="calculationsDiv">
+                    <div id="calcButtons">
+                        <p>
+                            <b
+                                >Any of the below buttons might take a while to
+                                run!</b
+                            >
+                        </p>
+                        <button
+                            id="etherealChanceButton"
+                            class="uncheckedButton"
+                        >
+                            Less random Ethereal!
+                        </button>
+                        <button id="bestUpgradesButton">Best upgrades!</button>
+                        <button id="bestDowngradesButton">
+                            Best downgrades!
+                        </button>
+                        <!--<button id="theoreticalWin">Max luck!</button>-->
+                    </div>
+                    <div id="calcResults">
+                        <span id="bestUpgradesMessage"></span>
+                        <div id="bestUpgradesDiv"></div>
+                    </div>
+                    <div id="affordTimeDiv">
+                        <div id="affordTimeInputDiv">
+                            <button id="affordTimeBtn">Time to afford!</button>
+                            <select id="affordTimeSelect"></select>
+                        </div>
+                        <span
+                            >Uses the results from your latest simulation.</span
+                        >
+                        <div id="affordDiv">
+                            <span id="affordTimeSpan"></span>
+                            <span id="affordNilDustTimeSpan"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
 </html>
