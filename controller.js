@@ -1,39 +1,39 @@
+import { autoBattle as sim } from "./object.js";
+
 const controller = {
+  chunk: 100,
+  battles: 1000,
+  battleCount: 0,
+  complete: false,
   interval: null,
   lastFrame: 0,
   halt: false,
+  onFightResult: null,
+  onSimInterrupt: null,
+  onSimComplete: null,
   onUpdate: null,
   seconds: 8 * 60 * 60,
-  sim: null,
-  stuffModified: false,
+  stuffModified: true,
   timeStart: 0,
   timeUsed: 0,
   updateInterval: 1000,
   defaultConfig: function() {
     return {
-      framesPerChunk: 1000,
+      fights: 1000,
+      framesPerChunk: 100,
+      onFightResult: null,
+      onSimInterrupt: null,
+      onSimComplete: null,
       onUpdate: null,
       seconds: 8 * 60 * 60,
       updateInterval: 1000,
     };
   },
+  getProgress: function () {
+    return this.complete ? 1 : Math.max(sim.lootAvg.counter / 1000 / this.seconds, this.battleCount / this.battles);
+  },
   getTimeUsed: function () {
     return this.timeUsed + (this.interval == null ? 0 : Date.now() - this.timeStart);
-  },
-  init: function (autoBattleObject, configuration) {
-    if (this.sim != null || this.interval != null) {
-      console.log("Warning: controller reinitialization attempt");
-      return;
-    }
-    if (autoBattleObject == null || configuration == null) {
-      console.log("Warning: dev error");
-      return;
-    }
-    this.chunk = configuration.framesPerChunk;
-    this.onUpdate = configuration.onUpdate;
-    this.sim = autoBattleObject;
-    this.seconds = configuration.seconds;
-    this.updateInterval = configuration.updateInterval;
   },
   isRunning: function () {
     return this.interval != null;
@@ -43,25 +43,33 @@ const controller = {
     this.stuffModified = true;
   },
   reconfigure: function (configuration) {
-    // TODO: check for garbage input
+    if (!configuration) {
+      return;
+    }
+    // ideally i'd check for garbage input... however, yolo
+    this.battles = configuration.fights;
     this.chunk = configuration.framesPerChunk;
+    this.onFightResult = configuration.onFightResult;
+    this.onSimInterrupt = configuration.onSimInterrupt;
+    this.onSimComplete = configuration.onSimComplete;
     this.onUpdate = configuration.onUpdate;
     this.seconds = configuration.seconds;
     this.updateInterval = configuration.updateInterval;
   },
   resetStats: function () {
-    this.sim.resetAll();
+    sim.resetAll();
     this.timeUsed = 0;
   },
   start: function () {
     if (this.interval != null) {
-      console.log("Warning: trying to start while previous simulation in progress");
       return;
     }
     if (this.stuffModified) {
       this.resetStats();
       this.stuffModified = false;
     }
+    this.battleCount = sim.sessionEnemiesKilled + sim.sessionTrimpsKilled;
+    this.complete = false;
     this.halt = false;
     this.lastUpdate = Date.now();
     this.timeStart = this.lastUpdate;
@@ -71,9 +79,17 @@ const controller = {
     this.halt = true;
   },
   loop: function () {
-    for (let saframe = 0; !controller.halt && saframe < controller.chunk; ++saframe) {
-      controller.sim.update();
-      controller.halt |= controller.sim.lootAvg.counter / 1000 >= controller.seconds;
+    for (let currentBattleCount, saframe = 0; !controller.halt && saframe < controller.chunk; ++saframe) {
+      sim.update();
+      currentBattleCount = sim.sessionEnemiesKilled + sim.sessionTrimpsKilled;
+      if (currentBattleCount > controller.battleCount) {
+        controller.battleCount = currentBattleCount;
+        if (controller.onFightResult) {
+          controller.onFightResult();
+        }
+      }
+      controller.complete = (sim.lootAvg.counter / 1000 >= controller.seconds) || (controller.battleCount >= controller.battles);
+      controller.halt |= controller.complete;
     }
     let now = Date.now();
     if (controller.halt) {
@@ -85,6 +101,15 @@ const controller = {
       controller.lastUpdate = now;
       if (controller.onUpdate) {
         controller.onUpdate();
+      }
+      if (controller.halt) {
+        if (controller.complete) {
+          if (controller.onSimComplete) {
+            controller.onSimComplete();
+          }
+        } else if (controller.onSimInterrupt) {
+          controller.onSimInterrupt();
+        }
       }
     }
   },

@@ -4,12 +4,16 @@ import { LZString } from "./lz-string.js";
 import ABC from "./controller.js";
 
 let simConfig = ABC.defaultConfig();
-simConfig.framesPerChunk = 1000;
+simConfig.fights = 1000; // max enemy/Huffy deaths
+simConfig.framesPerChunk = 200;
+simConfig.onFightResult = null; // function to call
+simConfig.onSimInterrupt = null; // function to call
+simConfig.onSimComplete = null; // function to call
 simConfig.onUpdate = null; // function to call
 simConfig.seconds = 8 * 60 * 60; // default 8h
 simConfig.updateInterval = 1000; // ms
-ABC.init(autoBattle, simConfig);
-// ABC.modifiedAB(); needed whenever equip or level change is done
+ABC.reconfigure(simConfig);
+// ABC.modifiedAB() needed whenever equips or levels change to stop the sim
 
 document.addEventListener("DOMContentLoaded", function () {
 	setup();
@@ -61,17 +65,6 @@ function getElements() {
 	};
 }
 
-const startSimulation = () => {
-	sets();
-	calcBuildCost(false);
-	runSimulation();
-	//wrapup();
-};
-
-const stopSimulation = () => {
-  ABC.stop();
-}
-
 const enemyCount = (level) => {
 	if (level < 20) return 10 * level;
 	return 190 + 15 * (level - 19);
@@ -115,6 +108,27 @@ const wrapup = () => {
 	fightTime = timeSpent / enemiesKilled;
 	elements.averageKillTime.innerHTML = convertTimeMs(fightTime, 2);
 };
+
+const startSimulation = () => {
+  if (ABC.isRunning()) {
+    return;
+  }
+  
+	sets();
+	calcBuildCost(false);
+  
+  simConfig.onFightResult = null;
+  simConfig.onSimInterrupt = null;
+  simConfig.onSimComplete = null;
+  simConfig.onUpdate = wrapup;
+  ABC.reconfigure(simConfig);
+
+	runSimulation();
+};
+
+const stopSimulation = () => {
+  ABC.stop();
+}
 
 function setup() {
 	makeEquipBtns();
@@ -540,6 +554,10 @@ function addListeners() {
       simConfig.seconds = parseInt(event.target.value) * 60 * 60;
       ABC.reconfigure(simConfig);
   });
+  document.getElementById("simFights").addEventListener("change", (event) => {
+      simConfig.fights = parseInt(event.target.value);
+      ABC.reconfigure(simConfig);
+  });
 
 	// SA level
 	target = document.getElementById("currentLevel");
@@ -601,9 +619,11 @@ function addListeners() {
 			findBestDps(false);
 		});
 
+/*
 	document
 		.getElementById("theoreticalWin")
 		.addEventListener("click", maxLuck);
+*/
 
 	document
 		.getElementById("affordTimeBtn")
@@ -629,92 +649,28 @@ function addListeners() {
 	});
 }
 
-function findBestDps(upgrade = true) {
-	sets();
 
-	if (getEquippedItems().length) {
-		runSimulation();
-		let currDps = AB.getDustPs();
-		let items = getEquippedItems();
-		let ringChecked = document
-			.getElementById("The_Ring_Button")
-			.classList.contains("checkedButton");
-		if (ringChecked.checked) {
-			items.push({ name: "Ring", data: { dustType: "shards" } });
-		}
-		let dustForItems = [];
-		AB.getRingLevelCost();
-		for (const ind in items) {
-			let name = items[ind].name;
-			let newDps = dustWithGrade(name, upgrade);
-			let increase = newDps - currDps;
-			let percentage = (increase / currDps) * 100;
-
-			// How long until upgrade is paid back.
-			let upgradeCost =
-				name === "Ring"
-					? AB.getRingLevelCost()
-					: AB.upgradeCost(items[ind].name);
-
-			let time = upgradeCost / increase;
-			if (time < 0) {
-				time = Infinity;
-			}
-
-			// Check if upgrade costs shards.
-			let shard = items[ind].data.dustType === "shards";
-			if (shard) time *= 1e9;
-			if (name === "Doppelganger_Signet") {
-				time = Infinity;
-				increase = 0;
-			}
-
-			dustForItems.push({
-				name: name,
-				increase: percentage,
-				time: time,
-				data: items[ind].data,
-			});
-		}
-
-		let div = document.getElementById("bestUpgradesDiv");
-		// Clear earlier data.
-		while (div.firstChild) {
-			div.removeChild(div.lastChild);
-		}
-
-		let ldiv = document.createElement("div");
-		let mdiv = document.createElement("div");
-		let rdiv = document.createElement("div");
-		div.appendChild(ldiv);
-		div.appendChild(mdiv);
-		div.appendChild(rdiv);
-
-		let text = document.createElement("span");
-		text.innerHTML = `Item ${upgrade}±1 level`;
-		ldiv.appendChild(text);
-
-		let text2 = document.createElement("span");
-		text2.innerHTML = "~+%";
-		mdiv.appendChild(text2);
-
-		let text3 = document.createElement("span");
-		text3.innerHTML = "Time until profit";
-		rdiv.appendChild(text3);
-
+let findBestStorage = {
+  currDps: 0,
+  currentIndex: 0,
+  dustForItems: null,
+  noValue: "-",
+  ldiv: null,
+  mdiv: null,
+  rdiv: null,
+  finalStuff: function (skipMessage = false) {
 		// Split into dust and shards items.
 		let dustItems = [];
 		let shardItems = [];
-		let copyDFI = [...dustForItems];
+		let copyDFI = [...findBestStorage.dustForItems];
 
-		for (const ind in copyDFI) {
-			let item = copyDFI[ind];
-			if (item.data.dustType === "shards") {
-				shardItems.push(item);
-			} else {
-				dustItems.push(item);
-			}
-		}
+    for (let item of copyDFI) {
+      if (item.data.dustType === "shards") {
+        shardItems.push(item);
+      } else {
+        dustItems.push(item);
+      }
+    }
 
 		// Find best dust upgrades.
 		let bestUpgradeDust;
@@ -740,18 +696,11 @@ function findBestDps(upgrade = true) {
 			);
 		}
 
-		dustForItems.forEach((item) => {
-			let name = item.name.replaceAll("_", " ");
-			let span1 = document.createElement("span");
-			let span2 = document.createElement("span");
-			let span3 = document.createElement("span");
-			span1.innerHTML = name;
-			span2.innerHTML = toScientific(item.increase, 2, true);
-			span3.innerHTML = convertTime(item.time);
-			ldiv.appendChild(span1);
-			mdiv.appendChild(span2);
-			rdiv.appendChild(span3);
-
+    for (let index = 0; index < findBestStorage.dustForItems.length; ++index) {
+      let item = findBestStorage.dustForItems[index];
+      let span2 = findBestStorage.mdiv.children[1 + index];
+      let span3 = findBestStorage.rdiv.children[1 + index];
+      
 			if (item.name === bestUpgradeDust?.name) {
 				// Bold the best dust upgradeCost
 				span2.style.fontWeight = "bold";
@@ -771,9 +720,153 @@ function findBestDps(upgrade = true) {
 				// Add italics to the best shard payback time
 				span3.style.fontStyle = "italic";
 			}
+    }
+    
+    if (!skipMessage) {
+      findBestStorage.message("Complete.");
+    }
+  },
+  interruptedStuff: function () {
+    findBestStorage.message("u borked it");
+    for (let item of findBestStorage.dustForItems) {
+      if (item.time == findBestStorage.noValue) {
+        item.time = Infinity;
+      }
+    }
+    findBestStorage.finalStuff(true);
+  },
+  message: function (string) {
+    document.getElementById("bestUpgradesMessage").innerHTML = string;
+  },
+  onUpdate: function () {
+    let item = findBestStorage.dustForItems[findBestStorage.currentIndex];
+    findBestStorage.message("Testing " + item.displayName + " " + Math.floor(ABC.getProgress() * 100) + "%");
+
+    let newDps = AB.getDustPs();
+    let increase = newDps - findBestStorage.currDps;
+    let percentage = (increase / findBestStorage.currDps) * 100;
+
+    // How long until upgrade is paid back.
+		item.time = increase <= 0 ? Infinity : item.upgradeCost / increase;
+
+    // Check if upgrade costs shards.
+    if (item.data.dustType === "shards") item.time *= 1e9;
+
+    item.increase = percentage;
+    let span2 = findBestStorage.mdiv.children[1 + findBestStorage.currentIndex];
+    let span3 = findBestStorage.rdiv.children[1 + findBestStorage.currentIndex];
+    span2.innerHTML = toScientific(item.increase, 2, true);
+    span3.innerHTML = convertTime(item.time);
+  },
+  stage2: function() {
+    findBestStorage.currDps = AB.getDustPs();
+    findBestStorage.currentIndex = 0;
+    findBestStorage.startNextSim(true);
+  },
+  startNextSim: function(firstItem = false) {
+    if (!firstItem) {
+      let item = findBestStorage.dustForItems[findBestStorage.currentIndex];
+      let target = item.name === "Ring" ? AB.rings : AB.items[item.name];
+      if (findBestStorage.upgrade) target.level--;
+      else target.level++;
+      ABC.modifiedAB();
+      ++findBestStorage.currentIndex;
+    }
+
+    if (findBestStorage.currentIndex >= findBestStorage.dustForItems.length) {
+      findBestStorage.finalStuff();
+      return;
+    }
+
+    let item = findBestStorage.dustForItems[findBestStorage.currentIndex];
+    if (item.name === "Doppelganger_Signet") {
+      item.time = Infinity;
+      item.increase = 0;
+      findBestStorage.startNextSim();
+      return;
+    }
+
+    let target = item.name === "Ring" ? AB.rings : AB.items[item.name];
+    if (findBestStorage.upgrade) target.level++;
+    else target.level--;
+    ABC.modifiedAB();
+
+    simConfig.onFightResult = null;
+    simConfig.onSimInterrupt = findBestStorage.interruptedStuff;
+    simConfig.onSimComplete = findBestStorage.startNextSim;
+    simConfig.onUpdate = findBestStorage.onUpdate;
+    ABC.reconfigure(simConfig);
+		runSimulation();
+  },
+  upgrade: true,
+};
+function findBestDps(upgrade = true) {
+  if (ABC.isRunning()) {
+    return;
+  }
+	sets();
+	if (getEquippedItems().length) {
+
+    findBestStorage.upgrade = upgrade;
+		let items = getEquippedItems();
+    if (document.getElementById("The_Ring_Button").classList.contains("checkedButton")) {
+      items.push({name: "Ring", data: {dustType: "shards",},});
+    }
+    findBestStorage.dustForItems = [];
+    for (let item of items) {
+      findBestStorage.dustForItems.push({
+        name: item.name,
+        displayName: item.name.replaceAll("_", " "),
+				increase: 0,
+				time: findBestStorage.noValue,
+        upgradeCost: item.name === "Ring"
+            ? AB.getRingLevelCost()
+            : AB.upgradeCost(item.name),
+				data: item.data,
+			});
+    }
+
+    let div = document.getElementById("bestUpgradesDiv");
+		// Clear earlier data.
+    findBestStorage.ldiv = null;
+    findBestStorage.mdiv = null;
+    findBestStorage.rdiv = null;
+    div.innerHTML = "";
+
+		let ldiv = document.createElement("div");
+		let mdiv = document.createElement("div");
+		let rdiv = document.createElement("div");
+		div.appendChild(ldiv);
+		div.appendChild(mdiv);
+		div.appendChild(rdiv);
+    findBestStorage.ldiv = ldiv;
+    findBestStorage.mdiv = mdiv;
+    findBestStorage.rdiv = rdiv;
+		ldiv.innerHTML = "<span>Item ±1 level</span>";
+    mdiv.innerHTML = "<span>~+%</span>"
+		rdiv.innerHTML = "<span>Time until profit</span>";
+
+		findBestStorage.dustForItems.forEach((item) => {
+			let span1 = document.createElement("span");
+			let span2 = document.createElement("span");
+			let span3 = document.createElement("span");
+			span1.innerHTML = item.displayName;
+			span2.innerHTML = toScientific(item.increase, 2, true);
+			span3.innerHTML = item.time;//convertTime(item.time);
+			ldiv.appendChild(span1);
+			mdiv.appendChild(span2);
+			rdiv.appendChild(span3);
 		});
+
+    findBestStorage.message("Obtaining build stats...");
+
+    simConfig.onFightResult = null;
+    simConfig.onSimInterrupt = null;
+    simConfig.onSimComplete = findBestStorage.stage2;
+    simConfig.onUpdate = wrapup;
+    ABC.reconfigure(simConfig);
+		runSimulation();
 	}
-	runSimulation();
 }
 
 function getEquippedItems() {
@@ -796,25 +889,10 @@ function onSavePaste(event) {
 	}
 }
 
-function dustWithGrade(name, upgrade) {
-	let target = name === "Ring" ? AB.rings : AB.items[name];
-	if (upgrade) target.level++;
-	else target.level--;
-  ABC.modifiedAB();
-	runSimulation();
-	let dust = AB.getDustPs();
-	if (upgrade) target.level--;
-	else target.level++;
-	return dust;
-}
-
 function runSimulation() {
 	AB.eth = 0;
 	AB.total = 0;
   
-  
-  simConfig.onUpdate = wrapup;
-  ABC.reconfigure(simConfig);
   ABC.start();
 }
 
@@ -892,7 +970,7 @@ function resetToSave() {
 
 		sets();
 		AB.bonuses.Extra_Limbs.level = limbs;
-		//startSimulation();
+
 		let res = {
 			dustPs: AB.getDustPs(),
 			dust: save.global.autoBattleData.dust,
@@ -901,7 +979,9 @@ function resetToSave() {
 		setABResults(res);
 
 		calcBuildCost(true);
+
     ABC.modifiedAB();
+    if (autoRunChecked) startSimulation();
 	}
 }
 
@@ -1059,7 +1139,7 @@ function displayVerboseEnemy(target) {
 		target.classList.add("checkedButton");
 		hiddenDiv.style.display = "block";
 		sets();
-		runSimulation(1);
+		AB.setProfile();
 		let effects = AB.profile;
 		let effectsSpan = document.createElement("span");
 		effectsSpan.innerHTML = effects;

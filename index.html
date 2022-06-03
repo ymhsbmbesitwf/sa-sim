@@ -48,7 +48,7 @@
         <button id="autoRun" class="uncheckedButton">Auto run!</button>
 			</div>
 			<div>
-        <input id="simHours" max="8761" min="1" type="number" value="8" /> hour(s)
+        Stop after <input id="simHours" class="simInput" max="8761" min="1" type="number" value="8" /> hour(s) or <input id="simFights" class="simInput" max="100003" min="1" type="number" value="1000" /> fight(s)
       </div>
 			<span>Build cost: <span id="buildCostDust">0</span> dust, <span id="buildCostShards">0</span> shards.</span>
 			<div id="resultsDiv">
@@ -72,9 +72,10 @@
 					<button id="etherealChanceButton" class="uncheckedButton">Less random Ethereal!</button>
 					<button id="bestUpgradesButton">Best upgrades!</button>
 					<button id="bestDowngradesButton">Best downgrades!</button>
-					<button id="theoreticalWin">Max luck!</button>
+					<!--<button id="theoreticalWin">Max luck!</button>-->
 				</div>
 				<div id="calcResults">
+          <span id="bestUpgradesMessage"></span>
 					<div id="bestUpgradesDiv"></div>
 				</div>
 				<div id="affordTimeDiv">

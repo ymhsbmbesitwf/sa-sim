@@ -177,3 +177,11 @@ body {
   display: flex;
   flex-direction: column;
 }
+
+.simInput {
+  width: 5em;
+}
+
+#bestUpgradesMessage {
+  display: block;
+}
