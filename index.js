@@ -355,6 +355,8 @@ function clearOneTimers() {
 			AB.oneTimers[oneTimer].owned = false;
 		}
 	}
+	//ring levels above 10 do stuff even if ring isn't equipped
+	AB.rings.level = 1;
   ABC.modifiedAB();
 }
 
