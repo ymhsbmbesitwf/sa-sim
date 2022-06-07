@@ -1386,7 +1386,7 @@ let ringModsResults = {
 		simConfig.onFightResult = null;
 		simConfig.onSimInterrupt = null;
 		simConfig.onSimComplete = ringModsResults.onComplete;
-		simConfig.onUpdate = simConfig.wrapup;
+		simConfig.onUpdate = ringModsResults.onUpdate;
 		ABC.reconfigure(simConfig);
 		runSimulation();
 
