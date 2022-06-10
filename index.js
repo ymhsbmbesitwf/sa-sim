@@ -59,6 +59,9 @@ function getElements() {
 		dustPs: document.getElementById("dustPs"),
 		averageFightTime: document.getElementById("averageFightTime"),
 		averageKillTime: document.getElementById("averageKillTime"),
+    averageHealthLeft: document.getElementById("averageHealthLeft"),
+    averageHealthLeftLoses: document.getElementById("averageHealthLeftLoses"),
+    bestFight: document.getElementById("bestFight"),
 		shardsPs: document.getElementById("shardsPs"),
 		limbsUsed: document.getElementById("limbsUsed"),
 		ringMods: document.getElementById("ringModsDiv"),
@@ -107,6 +110,14 @@ const wrapup = () => {
 
 	fightTime = timeSpent / enemiesKilled;
 	elements.averageKillTime.innerHTML = convertTimeMs(fightTime, 2);
+  
+  let rc = ABC.resultCounter;
+  elements.averageHealthLeft.innerHTML = Math.round(rc.healthSum / rc.fights * 100 * 10) / 10 + "%";
+  elements.averageHealthLeftLoses.innerHTML = rc.loses > 0 ? Math.round(rc.healthSum / rc.loses * 100 * 10) / 10 + "%" : "-";
+  let rb = ABC.resultBest;
+  elements.bestFight.innerHTML = rb.win
+      ? "win in " + convertTimeMs(rb.time, 2)
+      : "loss in " + convertTimeMs(rb.time, 2) + " with " + Math.round(rb.enemy * 100 * 10) / 10 + "% enemy health left";
 };
 
 const startSimulation = () => {
