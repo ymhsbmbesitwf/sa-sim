@@ -12,6 +12,8 @@ const controller = {
   onSimInterrupt: null,
   onSimComplete: null,
   onUpdate: null,
+  resultBest: null,
+  resultCounter: null,
   seconds: 8 * 60 * 60,
   stuffModified: true,
   timeStart: 0,
@@ -58,6 +60,8 @@ const controller = {
   },
   resetStats: function () {
     sim.resetAll();
+    this.resultBest = {enemy:1, time:0, win: false,};
+    this.resultCounter = {fights: 0, healthSum: 0, loses: 0};
     this.timeUsed = 0;
   },
   start: function () {
@@ -79,15 +83,8 @@ const controller = {
     this.halt = true;
   },
   loop: function () {
-    for (let currentBattleCount, saframe = 0; !controller.halt && saframe < controller.chunk; ++saframe) {
+    for (let saframe = 0; !controller.halt && saframe < controller.chunk; ++saframe) {
       sim.update();
-      currentBattleCount = sim.sessionEnemiesKilled + sim.sessionTrimpsKilled;
-      if (currentBattleCount > controller.battleCount) {
-        controller.battleCount = currentBattleCount;
-        if (controller.onFightResult) {
-          controller.onFightResult();
-        }
-      }
       controller.complete = (sim.lootAvg.counter / 1000 >= controller.seconds) || (controller.battleCount >= controller.battles);
       controller.halt |= controller.complete;
     }
@@ -113,6 +110,42 @@ const controller = {
       }
     }
   },
+  battleSuccess: function() {
+    ++this.resultCounter.fights;
+    if (!this.resultBest.win) {
+      this.resultBest.enemy = 0;
+      this.resultBest.time = sim.battleTime;
+      this.resultBest.win = true;
+    }
+    if (this.resultBest.time > sim.battleTime) {
+      this.resultBest.time = sim.battleTime;
+    }
+    this.battleCommon();
+  },
+  battleFailure: function() {
+    ++this.resultCounter.fights;
+    ++this.resultCounter.loses;
+    let enemyHealthPercentage = Math.max(0, Math.min(sim.enemy.health / sim.enemy.maxHealth, 1));
+    if (!this.resultBest.win) {
+      if (enemyHealthPercentage < this.resultBest.enemy) {
+        this.resultBest.enemy = enemyHealthPercentage;
+        this.resultBest.time = sim.battleTime;
+      } else if (enemyHealthPercentage == this.resultBest.enemy && sim.battleTime > this.resultBest.time) {
+        this.resultBest.time = sim.battleTime;
+      }
+    }
+    this.resultCounter.healthSum += enemyHealthPercentage;
+    this.battleCommon();
+  },
+  battleCommon: function() {
+    this.battleCount = sim.sessionEnemiesKilled + sim.sessionTrimpsKilled;
+    if (this.onFightResult) {
+      this.onFightResult();
+    }
+  },
 };
+
+sim.onEnemyDied = controller.battleSuccess.bind(controller);
+sim.onTrimpDied = controller.battleFailure.bind(controller);
 
 export { controller as default };

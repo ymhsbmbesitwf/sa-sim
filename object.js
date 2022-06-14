@@ -10,6 +10,10 @@ export let autoBattle = {
 	total: 0,
 	eth: 0,
 
+  // Controller stuff, it will change these to something meaningful on import
+  onEnemyDied: function(){},
+  onTrimpDied: function(){},
+
 	// GS stuff
 	frameTime: 300,
 	speed: 1,
@@ -2946,6 +2950,7 @@ export let autoBattle = {
 	trimpDied: function () {
 		this.sessionTrimpsKilled++;
 		this.lootAvg.counter += this.battleTime;
+    this.onTrimpDied(); // notify controller
 		this.resetCombat();
 		//this.notes += "Trimp Died. "
 	},
@@ -3002,6 +3007,7 @@ export let autoBattle = {
 				this.resetStats();
 			}
 		}*/
+    this.onEnemyDied(); // notify controller
 		this.resetCombat();
 	},
 	nextLevelCount: function () {
