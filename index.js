@@ -116,7 +116,9 @@ const wrapup = () => {
     elements.averageKillTime.innerHTML = convertTimeMs(averageFightTime, 2);
 
     if (save) {
-        let remainingTime = averageFightTime * (toKill - save.enemiesKilled);
+        let remainingTime =
+            averageFightTime *
+            (toKill - save.global.autoBattleData.enemiesKilled);
         elements.remainingTime.innerHTML = convertTimeMs(remainingTime, 2);
     }
 
