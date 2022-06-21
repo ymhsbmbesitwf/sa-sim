@@ -56,6 +56,7 @@ function getElements() {
         enemiesKilled: document.getElementById("enemiesKilled"),
         trimpsKilled: document.getElementById("trimpsKilled"),
         clearingTime: document.getElementById("clearingTime"),
+        remainingTime: document.getElementById("remainingTime"),
         dustPs: document.getElementById("dustPs"),
         averageFightTime: document.getElementById("averageFightTime"),
         averageKillTime: document.getElementById("averageKillTime"),
@@ -102,7 +103,6 @@ const wrapup = () => {
 
     let clearingTime =
         ((toKill / AB.sessionEnemiesKilled) * AB.lootAvg.counter) / 1000;
-
     elements.clearingTime.innerHTML = convertTime(clearingTime);
     elements.dustPs.innerHTML = toScientific(base_dust) + " D/s";
 
@@ -112,8 +112,11 @@ const wrapup = () => {
     let fightTime = timeSpent / (enemiesKilled + trimpsKilled);
     elements.averageFightTime.innerHTML = convertTimeMs(fightTime, 2);
 
-    fightTime = timeSpent / enemiesKilled;
-    elements.averageKillTime.innerHTML = convertTimeMs(fightTime, 2);
+    let averageFightTime = timeSpent / enemiesKilled;
+    elements.averageKillTime.innerHTML = convertTimeMs(averageFightTime, 2);
+
+    let remainingTime = averageFightTime * toKill;
+    elements.remainingTime.innerHTML = convertTimeMs(remainingTime, 2);
 
     let rc = ABC.resultCounter;
     elements.averageHealthLeft.innerHTML =
