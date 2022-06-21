@@ -115,8 +115,10 @@ const wrapup = () => {
     let averageFightTime = timeSpent / enemiesKilled;
     elements.averageKillTime.innerHTML = convertTimeMs(averageFightTime, 2);
 
-    let remainingTime = averageFightTime * toKill;
-    elements.remainingTime.innerHTML = convertTimeMs(remainingTime, 2);
+    if (save) {
+        let remainingTime = averageFightTime * (toKill - save.enemiesKilled);
+        elements.remainingTime.innerHTML = convertTimeMs(remainingTime, 2);
+    }
 
     let rc = ABC.resultCounter;
     elements.averageHealthLeft.innerHTML =
