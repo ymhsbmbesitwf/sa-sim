@@ -1452,7 +1452,7 @@ let ringModsResults = {
         let span3 =
             div.children[2].children[1 + ringModsResults.combinationIndex];
         span2.innerHTML = toScientific(dps, 2, true);
-        span3.innerHTML = convertTime(killTime);
+        span3.innerHTML = convertTimeMs(killTime);
 
         if (dps > ringModsResults.bestDPS) {
             ringModsResults.bestDPS = dps;
@@ -1518,7 +1518,7 @@ let ringModsResults = {
         let span3 =
             div.children[2].children[1 + ringModsResults.combinationIndex];
         span2.innerHTML = toScientific(dps, 2, true);
-        span3.innerHTML = convertTime(killTime);
+        span3.innerHTML = convertTimeMs(killTime);
     },
 
     finalStuff: function () {
