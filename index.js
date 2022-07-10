@@ -940,14 +940,13 @@ function getEquippedItems() {
 
 function onSavePaste(event) {
     let paste = event.clipboardData.getData("text");
-    if (paste.slice(-3) === "===") {
+    if (paste.slice(-2) === "==") {
         save = JSON.parse(LZ.decompressFromBase64(paste));
         resetToSave();
     } else if (paste.includes("||")) {
-        importFromSheet(paste);
-    }
-    if (true) {
-        buildObject.loadFromSave(AB);
+        buildObject.loadFromSheet(paste);
+    } else {
+        console.log("Fuck");
     }
 }
 
@@ -1254,7 +1253,6 @@ function importFromSheet(input) {
     data.forEach((equip) => {
         equip = equip.trim();
         equip = equip.match(/[a-zA-Z]+|[0-9]+/g); // Split into words and numbers. Regex is uglier than your mom.
-        console.log(equip);
     });
 }
 
