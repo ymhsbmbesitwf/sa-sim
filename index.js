@@ -1,5 +1,6 @@
-import { autoBattle } from "./object.js";
+import { autoBattle } from "./data/object.js";
 import { LZString } from "./lz-string.js";
+import { build as buildObject } from "./data/buildObject.js";
 
 import ABC from "./controller.js";
 
@@ -939,11 +940,14 @@ function getEquippedItems() {
 
 function onSavePaste(event) {
     let paste = event.clipboardData.getData("text");
-    if (paste.includes("||")) {
-        importFromSheet(paste);
-    } else {
+    if (paste.slice(-3) === "===") {
         save = JSON.parse(LZ.decompressFromBase64(paste));
         resetToSave();
+    } else if (paste.includes("||")) {
+        importFromSheet(paste);
+    }
+    if (true) {
+        buildObject.loadFromSave(AB);
     }
 }
 
@@ -1253,52 +1257,6 @@ function importFromSheet(input) {
         console.log(equip);
     });
 }
-
-const sheetspan = document.createElement("span");
-sheetspan.append("Import spreadsheet (whole line):");
-const sheetInput = document.createElement("input");
-sheetspan.append(sheetInput);
-document
-    .querySelector("#rightSideDiv>span")
-    .insertAdjacentElement("afterend", sheetspan);
-
-sheetInput.addEventListener("paste", (event) => {
-    const paste = event.clipboardData.getData("text");
-    const itemLevels = paste.split("\t");
-    itemLevels.splice(0, 2);
-    console.log(itemLevels);
-    const autorunButton = document.querySelector("#autoRun");
-    const wasAutorun = autorunButton.className === "checkedButton";
-    if (wasAutorun) {
-        autorunButton.click();
-    }
-
-    const equipInpDivs = document.querySelectorAll("div.equipInpDiv");
-    for (let i = 0; i < equipInpDivs.length; i++) {
-        const equipDiv = equipInpDivs[i];
-        const [equipButton, equipInput] = equipDiv.childNodes;
-        if (itemLevels[i]) {
-            if (!/^\d+$/.test(itemLevels[i])) {
-                console.log(`time to bail at ${i} from '${itemLevels[i]}'`);
-                break;
-            }
-
-            if (equipButton.className === "uncheckedButton") {
-                equipButton.click();
-            }
-            equipInput.value = itemLevels[i];
-        } else {
-            if (equipButton.className === "checkedButton") {
-                equipButton.click();
-            }
-        }
-    }
-
-    document.querySelector("#startButton").click();
-    if (wasAutorun) {
-        autorunButton.click();
-    }
-});
 
 function getIndexCombinations(n, x) {
     let max = Math.pow(2, n);

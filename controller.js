@@ -1,4 +1,4 @@
-import { autoBattle as sim } from "./object.js";
+import { autoBattle as sim } from "./data/object.js";
 
 const controller = {
     chunk: 100,
