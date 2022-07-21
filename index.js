@@ -940,7 +940,7 @@ function getEquippedItems() {
 
 function onSavePaste(event) {
     let paste = event.clipboardData.getData("text");
-    if (paste.slice(-1) === "=") {
+    if (paste.slice(-1) === "=" || paste.slice(-1) === "A") {
         save = JSON.parse(LZ.decompressFromBase64(paste));
         resetToSave();
     } else if (paste.includes("||")) {
