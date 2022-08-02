@@ -1068,6 +1068,8 @@ function resetToSave() {
         sets();
         AB.bonuses.Extra_Limbs.level = limbs;
 
+        if (save.global.fluffyExp2 >= 1466015503701000) AB.scruffyLvl21 = true;
+
         let res = {
             dustPs: AB.getDustPs(),
             dust: save.global.autoBattleData.dust,
@@ -1228,7 +1230,7 @@ function setABResults(res) {
 function displayVerboseEnemy(target) {
     let hiddenDiv = document.getElementById("verboseEnemyDiv");
     if (target.classList.contains("uncheckedButton")) {
-        // Revmoe all children.
+        // Remove all children.
         while (hiddenDiv.firstChild) {
             hiddenDiv.removeChild(hiddenDiv.lastChild);
         }
