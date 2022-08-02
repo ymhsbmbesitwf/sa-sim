@@ -1,7 +1,7 @@
 import { autoBattle } from "./data/object.js";
 import { LZString } from "./lz-string.js";
 import { build as buildObject } from "./data/buildObject.js";
-
+import { u2Mutations } from "./data/mutations.js";
 import ABC from "./controller.js";
 
 let simConfig = ABC.defaultConfig();
@@ -271,6 +271,27 @@ function makeOneTimersBtns() {
             }
         }
     }
+
+    let mutationsDiv = document.createElement("div");
+    mutationsDiv.id = "mutationsDiv";
+    mutationsDiv.className = "oneTimersInpDiv";
+    parDir.appendChild(mutationsDiv);
+
+    // Button 1
+    let mutationsButton = document.createElement("button");
+    mutationsButton.innerHTML = "Dusty";
+    mutationsButton.id = "Mutations_Button";
+    mutationsButton.classList.add("uncheckedButton", "button");
+    mutationsDiv.appendChild(mutationsButton);
+    addChangeForMutation(mutationsButton, 1);
+
+    // Button 2
+    mutationsButton = document.createElement("button");
+    mutationsButton.innerHTML = "Dustier";
+    mutationsButton.id = "Mutations_Button_2";
+    mutationsButton.classList.add("uncheckedButton", "button");
+    mutationsDiv.appendChild(mutationsButton);
+    addChangeForMutation(mutationsButton, 2);
 }
 
 function addChangeForLevel(item) {
@@ -333,6 +354,20 @@ function addChangeForRingInput(input) {
     });
 }
 
+function addChangeForMutation(input, version) {
+    input.addEventListener("click", () => {
+        swapChecked(input);
+        calcBuildCost(true);
+        if (version === 1)
+            u2Mutations.tree.Dust.purchased = !u2Mutations.tree.Dust.purchased;
+        else
+            u2Mutations.tree.Dust2.purchased =
+                !u2Mutations.tree.Dust2.purchased;
+        if (autoRunChecked && input.classList.contains("checkedButton"))
+            startSimulation();
+    });
+}
+
 function isInt(value) {
     return (
         !isNaN(value) &&
@@ -388,6 +423,7 @@ function clearOneTimers() {
     }
     //ring levels above 10 do stuff even if ring isn't equipped
     AB.rings.level = 1;
+    AB.rings.mods = [];
     ABC.modifiedAB();
 }
 
@@ -943,7 +979,7 @@ function onSavePaste(event) {
     if (paste.slice(-1) === "=" || paste.slice(-1) === "A") {
         save = JSON.parse(LZ.decompressFromBase64(paste));
         resetToSave();
-    } else if (paste.includes("||")) {
+    } else if (paste.includes("||") || paste.includes("\t")) {
         buildObject.loadFromSheet(paste);
     } else {
         console.log("Fuck");
