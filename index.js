@@ -982,7 +982,7 @@ function onSavePaste(event) {
     } else if (paste.includes("||") || paste.includes("\t")) {
         buildObject.loadFromSheet(paste);
     } else {
-        console.log("Fuck");
+        console.log("Error importing!");
     }
 }
 
