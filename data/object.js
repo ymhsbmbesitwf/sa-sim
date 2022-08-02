@@ -1681,8 +1681,8 @@ export let autoBattle = {
       startPrice: 60000,
       priceMod: 15,
     },
-    //nullifium armor 225
-    //handful of mold 230
+    //nullifium armor 225    
+    //Myco Mitts 230
     Haunted_Harpoon: {
       owned: false,
       equipped: false,
@@ -2244,7 +2244,7 @@ export let autoBattle = {
       dustType: "shards",
     },
     //Final Poison Damage item
-    Handful_of_Mold: {
+    Myco_Mitts: {
       owned: false,
       equipped: false,
       hidden: false,
