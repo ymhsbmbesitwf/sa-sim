@@ -1,3 +1,4 @@
+import { u2Mutations } from "./mutations.js";
 export let autoBattle = {
   // Manually set thingys
   usingRealTimeOffline: false,
