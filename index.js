@@ -1068,7 +1068,7 @@ function resetToSave() {
         sets();
         AB.bonuses.Extra_Limbs.level = limbs;
 
-        if (save.global.fluffyExp2 >= 1466015503701000) AB.scruffyLvl21 = true;
+        AB.scruffyLvl21 = save.global.fluffyExp2 >= 1466015503701000;
 
         let res = {
             dustPs: AB.getDustPs(),
