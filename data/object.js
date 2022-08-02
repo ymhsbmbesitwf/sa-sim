@@ -3028,14 +3028,12 @@ export let autoBattle = {
         this.sessionEnemiesKilled++;
         var amt = this.getDustReward();
         this.dust += amt;
-        game.stats.saDust.value += amt;
         if (this.enemyLevel > 50) {
             this.shardDust += amt;
             if (this.shardDust >= 1e9) {
                 var shardAmt = Math.floor(this.shardDust / 1e9);
                 this.shards += shardAmt;
                 this.shardDust -= 1e9 * shardAmt;
-                game.stats.saShards.value += shardAmt;
             }
         }
         this.lootAvg.accumulator += amt;
