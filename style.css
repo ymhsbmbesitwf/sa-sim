@@ -75,10 +75,14 @@ body {
   text-align: right;
 }
 
-#resultsDiv {
+#resultsDiv, #resultsDiv > fieldset {
   display: flex;
   flex-direction: column;
 }
+
+#baseDustPs, #baseShardsPs {
+  font-weight: bold;
+},
 
 #otherInputs {
   display: flex;
