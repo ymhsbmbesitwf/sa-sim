@@ -125,7 +125,7 @@ const wrapup = () => {
         unmultipliedDust /= 1 + 0.05 * (AB.maxEnemyLevel - 1);
       }
       // <standarization stuff>
-      let assumeTomeLevel = 31;
+      let assumeTomeLevel = 43;
       let assumeDustierLevel = 85;
       // </standarization stuff>
       if (AB.enemyLevel >= assumeTomeLevel) {
@@ -136,7 +136,7 @@ const wrapup = () => {
       }
       elements.baseDustPs.innerHTML = toScientific(unmultipliedDust) + " D/s";
       elements.baseShardsPs.innerHTML = toScientific(AB.enemyLevel >= 51 ? unmultipliedDust / 1e9 : 0) + " S/s";
-      elements.baseInfo.innerHTML = "assuming " + (AB.enemyLevel >= assumeTomeLevel ? "Tome" : "no Tome") + " and " + (AB.enemyLevel >= assumeDustierLevel ? "Dustier" : "no mutatos");
+      elements.baseInfo.innerHTML = "assuming " + (AB.enemyLevel >= assumeTomeLevel ? "Tome (>=" : "no Tome (<") + assumeTomeLevel + ") and " + (AB.enemyLevel >= assumeDustierLevel ? "Dustier (>=" : "no mutatos (<") + assumeDustierLevel + ")";
     } else {
       elements.baseDustPs.innerHTML = "0 D/s";
       elements.baseShardsPs.innerHTML = "0 D/s";
