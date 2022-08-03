@@ -601,6 +601,7 @@ function setItemsInHtml(
     }
 
     mut = mutations[1];
+    mutBtn = document.getElementById("Mutations_Button_2");
     if (mut) {
         u2Mutations.tree.Dust2.purchased = true;
         mutBtn.classList.add("checkedButton");
