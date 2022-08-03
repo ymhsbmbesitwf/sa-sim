@@ -292,6 +292,14 @@ function makeOneTimersBtns() {
     mutationsButton.classList.add("uncheckedButton", "button");
     mutationsDiv.appendChild(mutationsButton);
     addChangeForMutation(mutationsButton, 2);
+
+    // Scruffy 21
+    let scruffyButton = document.createElement("button");
+    scruffyButton.innerHTML = "S21";
+    scruffyButton.id = "S21_Button";
+    scruffyButton.classList.add("uncheckedButton", "button");
+    mutationsDiv.appendChild(scruffyButton);
+    addChangeForScruffy(scruffyButton);
 }
 
 function addChangeForLevel(item) {
@@ -363,6 +371,16 @@ function addChangeForMutation(input, version) {
         else
             u2Mutations.tree.Dust2.purchased =
                 !u2Mutations.tree.Dust2.purchased;
+        if (autoRunChecked && input.classList.contains("checkedButton"))
+            startSimulation();
+    });
+}
+
+function addChangeForScruffy(input) {
+    input.addEventListener("click", () => {
+        swapChecked(input);
+        calcBuildCost(true);
+        AB.scruffyLvl21 = !AB.scruffyLvl21;
         if (autoRunChecked && input.classList.contains("checkedButton"))
             startSimulation();
     });
@@ -518,7 +536,9 @@ function setItemsInHtml(
     oneTimersList,
     currentLevel,
     maxLevel,
-    rings
+    rings,
+    mutations,
+    scruffy
 ) {
     let itemBoxes = document.querySelectorAll("input.equipInput");
     let limbsUsed = 0;
@@ -570,6 +590,29 @@ function setItemsInHtml(
 
     // Set limbs
     elements.limbsUsed.innerHTML = limbsUsed;
+
+    // Set mutations
+    let mutBtn = document.getElementById("Mutations_Button");
+    let mut = mutations[0];
+    if (mut) {
+        u2Mutations.tree.Dust.purchased = true;
+        mutBtn.classList.add("checkedButton");
+        mutBtn.classList.remove("uncheckedButton");
+    }
+
+    mut = mutations[1];
+    if (mut) {
+        u2Mutations.tree.Dust2.purchased = true;
+        mutBtn.classList.add("checkedButton");
+        mutBtn.classList.remove("uncheckedButton");
+    }
+
+    let scruffyBtn = document.getElementById("S21_Button");
+    if (scruffy > 1466015503701000) {
+        AB.scruffyLvl21 = true;
+        scruffyBtn.classList.add("checkedButton");
+        scruffyBtn.classList.remove("uncheckedButton");
+    }
 }
 
 function resetItemsInHtml() {
@@ -1063,12 +1106,22 @@ function resetToSave() {
         let maxLevel = save.global.autoBattleData.maxEnemyLevel;
         let ring = save.global.autoBattleData.rings;
         let limbs = save.global.autoBattleData.bonuses.Extra_Limbs;
-        setItemsInHtml(items, oneTimers, currentLevel, maxLevel, ring);
+        let dusty = save.global.u2MutationData.Dust;
+        let dustier = save.global.u2MutationData.Dust2;
+        let scruffy = save.global.fluffyExp2;
+        let mutations = [dusty, dustier];
+        setItemsInHtml(
+            items,
+            oneTimers,
+            currentLevel,
+            maxLevel,
+            ring,
+            mutations,
+            scruffy
+        );
 
         sets();
         AB.bonuses.Extra_Limbs.level = limbs;
-
-        AB.scruffyLvl21 = save.global.fluffyExp2 >= 1466015503701000;
 
         let res = {
             dustPs: AB.getDustPs(),
