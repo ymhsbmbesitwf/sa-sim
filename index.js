@@ -69,6 +69,9 @@ function getElements() {
         shardsPs: document.getElementById("shardsPs"),
         limbsUsed: document.getElementById("limbsUsed"),
         ringMods: document.getElementById("ringModsDiv"),
+        baseDustPs: document.getElementById("baseDustPs"),
+        baseShardsPs: document.getElementById("baseShardsPs"),
+        baseInfo: document.getElementById("baseInfo"),
     };
 }
 
@@ -109,6 +112,37 @@ const wrapup = () => {
 
     let base_shards = AB.enemyLevel >= 51 ? base_dust / 1e9 : 0;
     elements.shardsPs.innerHTML = toScientific(base_shards) + " S/s";
+    
+    if (base_dust > 0) {
+      let unmultipliedDust = base_dust;
+      if (AB.scruffyLvl21) {
+        unmultipliedDust /= 5;
+      }
+      if (u2Mutations.tree.Dust.purchased) {
+        unmultipliedDust /= 1.25 + (u2Mutations.tree.Dust2.purchased ? 0.25 : 0);
+      }
+      if (AB.oneTimers.Dusty_Tome.owned) {
+        unmultipliedDust /= 1 + 0.05 * (AB.maxEnemyLevel - 1);
+      }
+      // <standarization stuff>
+      let assumeTomeLevel = 43;
+      let assumeDustierLevel = 85;
+      // </standarization stuff>
+      if (AB.enemyLevel >= assumeTomeLevel) {
+        unmultipliedDust *= 1 + 0.05 * AB.enemyLevel;
+      }
+      if (AB.enemyLevel >= assumeDustierLevel) {
+        unmultipliedDust *= 1.5;
+      }
+      elements.baseDustPs.innerHTML = toScientific(unmultipliedDust) + " D/s";
+      elements.baseShardsPs.innerHTML = toScientific(AB.enemyLevel >= 51 ? unmultipliedDust / 1e9 : 0) + " S/s";
+      elements.baseInfo.innerHTML = "Assuming " + (AB.enemyLevel >= assumeTomeLevel ? "Tome (>=" : "no Tome (<") + assumeTomeLevel + ") and " + (AB.enemyLevel >= assumeDustierLevel ? "Dustier (>=" : "no Dustier (<") + assumeDustierLevel + ")";
+    } else {
+      elements.baseDustPs.innerHTML = "0 D/s";
+      elements.baseShardsPs.innerHTML = "0 D/s";
+      elements.baseInfo.innerHTML = "great success.";
+    }
+    
 
     let fightTime = timeSpent / (enemiesKilled + trimpsKilled);
     elements.averageFightTime.innerHTML = convertTimeMs(fightTime, 2);
