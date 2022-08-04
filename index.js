@@ -136,7 +136,7 @@ const wrapup = () => {
       }
       elements.baseDustPs.innerHTML = toScientific(unmultipliedDust) + " D/s";
       elements.baseShardsPs.innerHTML = toScientific(AB.enemyLevel >= 51 ? unmultipliedDust / 1e9 : 0) + " S/s";
-      elements.baseInfo.innerHTML = "assuming " + (AB.enemyLevel >= assumeTomeLevel ? "Tome (>=" : "no Tome (<") + assumeTomeLevel + ") and " + (AB.enemyLevel >= assumeDustierLevel ? "Dustier (>=" : "no mutatos (<") + assumeDustierLevel + ")";
+      elements.baseInfo.innerHTML = "Assuming " + (AB.enemyLevel >= assumeTomeLevel ? "Tome (>=" : "no Tome (<") + assumeTomeLevel + ") and " + (AB.enemyLevel >= assumeDustierLevel ? "Dustier (>=" : "no Dustier (<") + assumeDustierLevel + ")";
     } else {
       elements.baseDustPs.innerHTML = "0 D/s";
       elements.baseShardsPs.innerHTML = "0 D/s";
