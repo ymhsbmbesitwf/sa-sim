@@ -558,6 +558,7 @@ function calcBuildCost(set = false) {
 
     // Price for extra limbs.
     let extraLimbs = countLimbsUsed() - 4;
+    AB.bonuses["Extra_Limbs"].level = extraLimbs
     for (let i = 1; i < extraLimbs; i++) {
         let price = AB.bonuses["Extra_Limbs"].price;
         let mod = AB.bonuses["Extra_Limbs"].priceMod;
