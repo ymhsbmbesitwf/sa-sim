@@ -112,37 +112,48 @@ const wrapup = () => {
 
     let base_shards = AB.enemyLevel >= 51 ? base_dust / 1e9 : 0;
     elements.shardsPs.innerHTML = toScientific(base_shards) + " S/s";
-    
+
     if (base_dust > 0) {
-      let unmultipliedDust = base_dust;
-      if (AB.scruffyLvl21) {
-        unmultipliedDust /= 5;
-      }
-      if (u2Mutations.tree.Dust.purchased) {
-        unmultipliedDust /= 1.25 + (u2Mutations.tree.Dust2.purchased ? 0.25 : 0);
-      }
-      if (AB.oneTimers.Dusty_Tome.owned) {
-        unmultipliedDust /= 1 + 0.05 * (AB.maxEnemyLevel - 1);
-      }
-      // <standarization stuff>
-      let assumeTomeLevel = 43;
-      let assumeDustierLevel = 85;
-      // </standarization stuff>
-      if (AB.enemyLevel >= assumeTomeLevel) {
-        unmultipliedDust *= 1 + 0.05 * AB.enemyLevel;
-      }
-      if (AB.enemyLevel >= assumeDustierLevel) {
-        unmultipliedDust *= 1.5;
-      }
-      elements.baseDustPs.innerHTML = toScientific(unmultipliedDust) + " D/s";
-      elements.baseShardsPs.innerHTML = toScientific(AB.enemyLevel >= 51 ? unmultipliedDust / 1e9 : 0) + " S/s";
-      elements.baseInfo.innerHTML = "Assuming " + (AB.enemyLevel >= assumeTomeLevel ? "Tome (>=" : "no Tome (<") + assumeTomeLevel + ") and " + (AB.enemyLevel >= assumeDustierLevel ? "Dustier (>=" : "no Dustier (<") + assumeDustierLevel + ")";
+        let unmultipliedDust = base_dust;
+        if (AB.scruffyLvl21) {
+            unmultipliedDust /= 5;
+        }
+        if (u2Mutations.tree.Dust.purchased) {
+            unmultipliedDust /=
+                1.25 + (u2Mutations.tree.Dust2.purchased ? 0.25 : 0);
+        }
+        if (AB.oneTimers.Dusty_Tome.owned) {
+            unmultipliedDust /= 1 + 0.05 * (AB.maxEnemyLevel - 1);
+        }
+        // <standarization stuff>
+        let assumeTomeLevel = 43;
+        let assumeDustierLevel = 85;
+        // </standarization stuff>
+        if (AB.enemyLevel >= assumeTomeLevel) {
+            unmultipliedDust *= 1 + 0.05 * AB.enemyLevel;
+        }
+        if (AB.enemyLevel >= assumeDustierLevel) {
+            unmultipliedDust *= 1.5;
+        }
+        elements.baseDustPs.innerHTML = toScientific(unmultipliedDust) + " D/s";
+        elements.baseShardsPs.innerHTML =
+            toScientific(AB.enemyLevel >= 51 ? unmultipliedDust / 1e9 : 0) +
+            " S/s";
+        elements.baseInfo.innerHTML =
+            "Assuming " +
+            (AB.enemyLevel >= assumeTomeLevel ? "Tome (>=" : "no Tome (<") +
+            assumeTomeLevel +
+            ") and " +
+            (AB.enemyLevel >= assumeDustierLevel
+                ? "Dustier (>="
+                : "no Dustier (<") +
+            assumeDustierLevel +
+            ")";
     } else {
-      elements.baseDustPs.innerHTML = "0 D/s";
-      elements.baseShardsPs.innerHTML = "0 D/s";
-      elements.baseInfo.innerHTML = "great success.";
+        elements.baseDustPs.innerHTML = "0 D/s";
+        elements.baseShardsPs.innerHTML = "0 D/s";
+        elements.baseInfo.innerHTML = "great success.";
     }
-    
 
     let fightTime = timeSpent / (enemiesKilled + trimpsKilled);
     elements.averageFightTime.innerHTML = convertTimeMs(fightTime, 2);
@@ -1098,10 +1109,16 @@ function convertTime(time) {
     time = time.toFixed(1);
     if (time === NaN) {
         return "error";
-    } else if (time < 3600) {
+    } else if (time < 60) {
         return time + "s";
+    } else if (time < 3600) {
+        let seconds = time % 60;
+        let minutes = (time - seconds) / 60;
+        return Math.floor(minutes) + "m " + seconds + "s";
     } else if (time < 86400) {
-        return (time / 3600).toFixed(1) + "h";
+        let minutes = time % 3600;
+        let hours = (time - minutes) / 3600;
+        return Math.floor(hours) + "h " + Math.floor(minutes / 60) + "m";
     } else {
         time = time / 86400;
         let days = Math.floor(time);
@@ -1118,10 +1135,16 @@ function convertTimeMs(time, accuracy = 1) {
         return "error";
     } else if (time < 1000) {
         return time + "ms";
-    } else if (time < 3600000) {
+    } else if (time < 60000) {
         return (time / 1000).toFixed(accuracy) + "s";
+    } else if (time < 3600000) {
+        let seconds = time % 60000;
+        let minutes = (time - seconds) / 60000;
+        return Math.floor(minutes) + "m " + seconds + "s";
     } else if (time < 86400000) {
-        return (time / 3600000).toFixed(accuracy) + "h";
+        let minutes = time % 3600000;
+        let hours = (time - minutes) / 3600000;
+        return Math.floor(hours) + "h " + Math.floor(minutes / 60000) + "m";
     } else {
         time = time / 86400000;
         let days = Math.floor(time);
