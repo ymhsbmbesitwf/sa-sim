@@ -558,7 +558,7 @@ function calcBuildCost(set = false) {
 
     // Price for extra limbs.
     let extraLimbs = countLimbsUsed() - 4;
-    AB.bonuses["Extra_Limbs"].level = extraLimbs
+    AB.bonuses["Extra_Limbs"].level = extraLimbs;
     for (let i = 1; i < extraLimbs; i++) {
         let price = AB.bonuses["Extra_Limbs"].price;
         let mod = AB.bonuses["Extra_Limbs"].priceMod;
@@ -1115,7 +1115,7 @@ function convertTime(time) {
     } else if (time < 3600) {
         let seconds = time % 60;
         let minutes = (time - seconds) / 60;
-        return Math.floor(minutes) + "m " + seconds + "s";
+        return Math.floor(minutes) + "m " + Math.floor(seconds) + "s";
     } else if (time < 86400) {
         let minutes = time % 3600;
         let hours = (time - minutes) / 3600;
@@ -1141,7 +1141,7 @@ function convertTimeMs(time, accuracy = 1) {
     } else if (time < 3600000) {
         let seconds = time % 60000;
         let minutes = (time - seconds) / 60000;
-        return Math.floor(minutes) + "m " + seconds + "s";
+        return Math.floor(minutes) + "m " + Math.floor(seconds) + "s";
     } else if (time < 86400000) {
         let minutes = time % 3600000;
         let hours = (time - minutes) / 3600000;
