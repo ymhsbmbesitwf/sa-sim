@@ -1141,7 +1141,7 @@ function convertTimeMs(time, accuracy = 1) {
     } else if (time < 3600000) {
         let seconds = time % 60000;
         let minutes = (time - seconds) / 60000;
-        return Math.floor(minutes) + "m " + Math.floor(seconds) + "s";
+        return Math.floor(minutes) + "m " + Math.floor(seconds / 1000) + "s";
     } else if (time < 86400000) {
         let minutes = time % 3600000;
         let hours = (time - minutes) / 3600000;
