@@ -899,78 +899,78 @@ function findBestDps(upgrade = true) {
     if (ABC.isRunning()) {
         return;
     }
-    setEverythingFromInputs();
-    if (getEquippedItems().length) {
-        findBestStorage.upgrade = upgrade;
-        let items = getEquippedItems();
-        if (
-            document
-                .getElementById("The_Ring_Button")
-                .classList.contains("checkedButton")
-        ) {
-            items.push({ name: "Ring", data: { dustType: "shards" } });
-        }
-        findBestStorage.dustForItems = [];
-        for (let item of items) {
-            findBestStorage.dustForItems.push({
-                name: item.name,
-                displayName: item.name.replaceAll("_", " "),
-                increase: 0,
-                time: findBestStorage.noValue,
-                upgradeCost:
-                    item.name === "Ring"
-                        ? AB.getRingLevelCost()
-                        : AB.upgradeCost(item.name),
-                data: item.data,
-            });
-        }
-
-        let div = document.getElementById("bestUpgradesDiv");
-        // Clear earlier data.
-        findBestStorage.ldiv = null;
-        findBestStorage.mdiv = null;
-        findBestStorage.rdiv = null;
-        div.innerHTML = "";
-
-        let ldiv = document.createElement("div");
-        let mdiv = document.createElement("div");
-        let rdiv = document.createElement("div");
-        div.appendChild(ldiv);
-        div.appendChild(mdiv);
-        div.appendChild(rdiv);
-        findBestStorage.ldiv = ldiv;
-        findBestStorage.mdiv = mdiv;
-        findBestStorage.rdiv = rdiv;
-        ldiv.innerHTML = "<span>Item ±1 level</span>";
-        mdiv.innerHTML = "<span>~+%</span>";
-        rdiv.innerHTML = "<span>Time until profit</span>";
-
-        findBestStorage.dustForItems.forEach((item) => {
-            let span1 = document.createElement("span");
-            let span2 = document.createElement("span");
-            let span3 = document.createElement("span");
-            span1.innerHTML = item.displayName;
-            span2.innerHTML = toScientific(item.increase, 2, true);
-            span3.innerHTML = item.time; //convertTime(item.time);
-            ldiv.appendChild(span1);
-            mdiv.appendChild(span2);
-            rdiv.appendChild(span3);
-        });
-
-        findBestStorage.message("Obtaining build stats...");
-
-        simConfig.onFightResult = null;
-        simConfig.onSimInterrupt = null;
-        simConfig.onSimComplete = findBestStorage.stage2;
-        simConfig.onUpdate = wrapup;
-        ABC.reconfigure(simConfig);
-        runSimulation();
+    let items = getEquippedItems();
+    if (!items.length) {
+        return;
     }
+    findBestStorage.upgrade = upgrade;
+    if (
+        document
+            .getElementById("The_Ring_Button")
+            .classList.contains("checkedButton")
+    ) {
+        items.push({ name: "Ring", data: { dustType: "shards" } });
+    }
+    findBestStorage.dustForItems = [];
+    for (let item of items) {
+        findBestStorage.dustForItems.push({
+            name: item.name,
+            displayName: item.name.replaceAll("_", " "),
+            increase: 0,
+            time: findBestStorage.noValue,
+            upgradeCost:
+                item.name === "Ring"
+                    ? AB.getRingLevelCost()
+                    : AB.upgradeCost(item.name),
+            data: item.data,
+        });
+    }
+
+    let div = document.getElementById("bestUpgradesDiv");
+    // Clear earlier data.
+    findBestStorage.ldiv = null;
+    findBestStorage.mdiv = null;
+    findBestStorage.rdiv = null;
+    div.innerHTML = "";
+
+    let ldiv = document.createElement("div");
+    let mdiv = document.createElement("div");
+    let rdiv = document.createElement("div");
+    div.appendChild(ldiv);
+    div.appendChild(mdiv);
+    div.appendChild(rdiv);
+    findBestStorage.ldiv = ldiv;
+    findBestStorage.mdiv = mdiv;
+    findBestStorage.rdiv = rdiv;
+    ldiv.innerHTML = "<span>Item ±1 level</span>";
+    mdiv.innerHTML = "<span>~+%</span>";
+    rdiv.innerHTML = "<span>Time until profit</span>";
+
+    findBestStorage.dustForItems.forEach((item) => {
+        let span1 = document.createElement("span");
+        let span2 = document.createElement("span");
+        let span3 = document.createElement("span");
+        span1.innerHTML = item.displayName;
+        span2.innerHTML = toScientific(item.increase, 2, true);
+        span3.innerHTML = item.time; //convertTime(item.time);
+        ldiv.appendChild(span1);
+        mdiv.appendChild(span2);
+        rdiv.appendChild(span3);
+    });
+
+    findBestStorage.message("Obtaining build stats...");
+
+    simConfig.onFightResult = null;
+    simConfig.onSimInterrupt = null;
+    simConfig.onSimComplete = findBestStorage.stage2;
+    simConfig.onUpdate = wrapup;
+    ABC.reconfigure(simConfig);
+    runSimulation();
 }
 
 function getEquippedItems() {
     let equipped = [];
-    for (let item in AB.items) {
+    for (let item of orderByUnlock) {
         if (AB.items[item].equipped) {
             equipped.push({ name: item, data: AB.items[item] });
         }
@@ -1296,7 +1296,7 @@ function getRingModCombinations() {
     let max = Math.pow(2, n);
     let indexes = [];
     let names = [];
-    let modCombinations = [[], []];
+    let modCombinations = [];
 
     for (let i = Math.pow(2, slots) - 1; i < max; i++) {
         indexes = getAllIndexes(i.toString(2).padStart(n, "0").split(""), "1");
@@ -1305,8 +1305,7 @@ function getRingModCombinations() {
             for (let j = 0; j < slots; j++)
                 names.push(mods[indexes[j]].innerHTML);
 
-            modCombinations[0].push(indexes);
-            modCombinations[1].push(names);
+            modCombinations.push(names);
         }
     }
 
@@ -1328,7 +1327,6 @@ function formatNames(names) {
 }
 
 let ringModsResults = {
-    modCombinationIndexes: [],
     modCombinationNames: [],
     combinationIndex: 0,
     bestDPS: 0,
@@ -1353,14 +1351,13 @@ let ringModsResults = {
         ringModsResults.startingMods = AB.rings.mods;
         AB.rings.mods = [];
 
-        [
-            ringModsResults.modCombinationIndexes,
-            ringModsResults.modCombinationNames,
-        ] = getRingModCombinations();
-        let currentCombo = ringModsResults.modCombinationIndexes[0];
+        ringModsResults.modCombinationNames = getRingModCombinations();
+        ringModsResults.modCombinationNames.sort(
+            (a, b) => a.indexOf("defense") - b.indexOf("defense"));
+        let currentCombo = ringModsResults.modCombinationNames[0];
 
         for (let j = 0; j < slots; j++)
-            AB.rings.mods.push(mods[currentCombo[j]].innerHTML);
+            AB.rings.mods.push(currentCombo[j]);
         ABC.modifiedAB();
 
         // Clear earlier data.
@@ -1385,7 +1382,7 @@ let ringModsResults = {
         rdiv.innerHTML = "<span>Kill Time</span>";
 
         let names = [];
-        for (let i = 0; i < ringModsResults.modCombinationIndexes.length; i++) {
+        for (let i = 0; i < ringModsResults.modCombinationNames.length; i++) {
             let span1 = document.createElement("span");
             let span2 = document.createElement("span");
             let span3 = document.createElement("span");
@@ -1433,7 +1430,7 @@ let ringModsResults = {
         ringModsResults.combinationIndex++;
         if (
             ringModsResults.combinationIndex >=
-            ringModsResults.modCombinationIndexes.length
+            ringModsResults.modCombinationNames.length
         ) {
             ringModsResults.finalStuff();
             return;
@@ -1445,12 +1442,12 @@ let ringModsResults = {
         AB.rings.mods = [];
 
         let currentCombo =
-            ringModsResults.modCombinationIndexes[
+            ringModsResults.modCombinationNames[
                 ringModsResults.combinationIndex
             ];
 
         for (let j = 0; j < slots; j++)
-            AB.rings.mods.push(mods[currentCombo[j]].innerHTML);
+            AB.rings.mods.push(currentCombo[j]);
         ABC.modifiedAB();
 
         simConfig.onFightResult = null;

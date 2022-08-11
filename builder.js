@@ -441,6 +441,8 @@ const builder = {
       document.getElementById("huffyPoison").innerHTML = builder.huffy.poisonMax == builder.huffy.poisonMin ? (builder.huffy.poisonMax - builder.enemy.resistPoison) + "%" : (builder.huffy.poisonMin - builder.enemy.resistPoison) + "% to " + (builder.huffy.poisonMax - builder.enemy.resistPoison)+ "%";
       document.getElementById("huffyBleed").innerHTML = builder.huffy.bleedMax == builder.huffy.bleedMin ? (builder.huffy.bleedMax - resistBleed) + "%" : (builder.huffy.bleedMin - resistBleed) + "% to " + (builder.huffy.bleedMax - resistBleed) + "%";
       document.getElementById("huffyShock").innerHTML = builder.huffy.shockMax == builder.huffy.shockMin ? (builder.huffy.shockMax - resistShock) + "%" : (builder.huffy.shockMin - resistShock) + "% to " + (builder.huffy.shockMax - resistShock) + "%";
+      builder.visible("huffyShankRow", false);
+      builder.visible("enemyShankRow", false);
     }
     builder.visible("enemyPoisonRow", builder.enemy.poison > 0);
     builder.visible("enemyBleedRow", builder.enemy.bleed > 0);
