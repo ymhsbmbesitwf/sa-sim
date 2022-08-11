@@ -256,6 +256,7 @@ function setEverythingFromInputs() {
             AB.rings.level = parseInt(document.getElementById("The_Ring_Input").value);
         }
     });
+    
     builder.readEquips();
     builder.setMaxEnemyLevel(parseInt(document.getElementById("highestLevel").value));
     builder.setEnemyLevel(parseInt(document.getElementById("currentLevel").value), true);
@@ -365,11 +366,10 @@ function makeOneTimersBtns() {
                     modifier.innerHTML = mod;
                     modifier.className = "uncheckedButton";
                     modifier.addEventListener("click", (event) => {
-                        if (builder.toggleRingSlot(event.target.innerHTML)) {
-                            swapChecked(event.target);
-                            if (autoRunChecked && AB.oneTimers.The_Ring.owned)
-                                startSimulation();
-                        }
+                        builder.toggleRingSlot(event.target.innerHTML)
+                        swapChecked(event.target);
+                        if (autoRunChecked && AB.oneTimers.The_Ring.owned)
+                            startSimulation();
                     });
                     modDiv.appendChild(modifier);
                 }
@@ -438,7 +438,7 @@ function makeOneTimersBtns() {
     scruffyButton.id = "S21_Button";
     scruffyButton.classList.add("uncheckedButton", "button");
     scruffyButton.addEventListener("click", (event) => {
-        swapChecked(event.input);
+        swapChecked(event.target);
         AB.scruffyLvl21 = !AB.scruffyLvl21;
         ABC.modifiedAB();
         if (autoRunChecked)
@@ -474,11 +474,6 @@ function setItemsFromInputs() {
     }
     builder.readEquips();
     builder.updateDisplay();
-}
-
-function setActiveOneTimers() { //TODO remove
-    clearOneTimers();
-    setOneTimers();
 }
 
 function clearOneTimers() {
@@ -572,14 +567,6 @@ function calcBuildCost(set = false) { //TODO REMOVE
     elements.buildCostShards.innerHTML = toScientific(shardCost);
 }
 
-function setLevels() { //TODO ...
-    let curr = document.getElementById("currentLevel");
-    AB.enemyLevel = parseInt(curr.value);
-    let maxLvl = document.getElementById("highestLevel");
-    AB.maxEnemyLevel = parseInt(maxLvl.value);
-    ABC.modifiedAB();
-}
-
 function setItemsInHtml(
     itemsList,
     oneTimersList,
@@ -631,31 +618,6 @@ function setItemsInHtml(
     // Scruffy 21
     AB.scruffyLvl21 = scruffy > 1466015503701000;
     swapChecked(document.getElementById("S21_Button"), AB.scruffyLvl21);
-}
-
-function resetItemsInHtml() {
-    let itemBoxes = document.querySelectorAll("input.equipInput");
-    itemBoxes.forEach((box) => {
-        box.value = 1;
-        let button = box.previousSibling;
-        button.classList.remove("checkedButton");
-        button.classList.add("uncheckedButton");
-    });
-
-    let OTBoxes = document.querySelectorAll("button.oneTimerButton");
-    OTBoxes.forEach((button) => {
-        button.classList.remove("checkedButton");
-        button.classList.add("uncheckedButton");
-    });
-
-    let target = document.getElementById("currentLevel");
-    target.value = 1;
-
-    target = document.getElementById("highestLevel");
-    target.value = 1;
-
-    // Set limbs
-    elements.limbsUsed.innerHTML = 0;
 }
 
 function addListeners() {
@@ -1086,8 +1048,6 @@ function convertTimeMs(time, accuracy = 1) {
 
 function resetToSave() {
     if (save) {
-        // Reset all values in Html.
-        resetItemsInHtml();
         // Reset all values to the save.
         let items = save.global.autoBattleData.items;
         let oneTimers = save.global.autoBattleData.oneTimers;

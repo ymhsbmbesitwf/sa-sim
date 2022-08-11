@@ -114,7 +114,6 @@ const builder = {
     Bag_of_Nails: function () {
       builder.huffy.canBleed = true;
     },
-//    Stormbringer: () => 0,
     Bad_Medkit: function () {
       let chance = sim.items.Bad_Medkit.bleedChance();
       builder.huffy.bleedMin += chance;
@@ -133,7 +132,6 @@ const builder = {
       }
       builder.huffy.shockMax += chance;
     },
-//    Sacrificial_Shank: () => 0,
   },
   readEnemy: function () {
     builder.resetEnemy();
@@ -158,11 +156,16 @@ const builder = {
   },
   readEquips: function () {
     builder.resetHuffy();
+    builder.limbs = 0;
     for (let itemID in sim.items) {
-      if (sim.items[itemID].equipped && builder.modifiers[itemID]) {
-        builder.modifiers[itemID]();
+      if (sim.items[itemID].equipped) {
+        ++builder.limbs;
+        if (builder.modifiers[itemID]) {
+          builder.modifiers[itemID]();
+        }
       }
     }
+    document.getElementById("limbsUsed").innerHTML = builder.limbs;
     if (sim.oneTimers.The_Ring.owned) {
       let ringChance = sim.getRingStatusChance();
       if (ringChance > 0) {
@@ -200,6 +203,7 @@ const builder = {
     }
   },
   setItem: function (itemId, equipped, level, massChange = false) {
+    builder.limbs += equipped - sim.items[itemId].equipped;
     let modified = sim.items[itemId].equipped != equipped || (equipped && sim.items[itemId].level != level);
     sim.items[itemId].equipped = equipped;
     sim.items[itemId].level = level;
@@ -337,17 +341,11 @@ const builder = {
   toggleRingSlot: function (modifier) {
     let modifierIndex = sim.rings.mods.indexOf(modifier);
     if (modifierIndex == -1) {
-      let level = parseInt(document.getElementById("The_Ring_Input").value);
-      let ringSlots = (level >= 5) + (level >= 15);
-      if (sim.rings.mods.length >= ringSlots) {
-        return false;
-      }
       sim.rings.mods.push(modifier);
     } else {
       sim.rings.mods.splice(modifierIndex, 1);
     }
     controller.modifiedAB();
-    return true;
   },
   updateDisplay: function () {
     document.getElementById("enemyResistPoison").innerHTML = builder.enemy.resistPoison + "%";
