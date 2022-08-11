@@ -253,7 +253,7 @@ function setEverythingFromInputs() {
                     AB.rings.mods.push(child.innerHTML);
                 }
             }
-            AB.rings.level = parseInt(document.getElementById("The_Ring_Input").value);
+            builder.setRingLevel(parseInt(document.getElementById("The_Ring_Input").value), true);
         }
     });
     
@@ -261,6 +261,7 @@ function setEverythingFromInputs() {
     builder.setMaxEnemyLevel(parseInt(document.getElementById("highestLevel").value));
     builder.setEnemyLevel(parseInt(document.getElementById("currentLevel").value), true);
     builder.updateDisplay();
+    builder.recalcCost();
 }
 
 function makeEquipBtns() {
@@ -1058,7 +1059,7 @@ function resetToSave() {
         let dusty = save.global.u2MutationData.Dust;
         let dustier = save.global.u2MutationData.Dust2;
         let scruffy = save.global.fluffyExp2;
-        let mutations = [dusty, dustier];
+        let mutations = [!!dusty, !!dustier];
         setItemsInHtml(
             items,
             oneTimers,
@@ -1079,9 +1080,6 @@ function resetToSave() {
         };
         setABResults(res);
 
-//        calcBuildCost(true); //TODO here this actually makes sense
-
-        ABC.modifiedAB();
         if (autoRunChecked) startSimulation();
     }
 }

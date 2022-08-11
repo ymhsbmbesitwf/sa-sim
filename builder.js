@@ -1,7 +1,33 @@
 import { autoBattle as sim } from "./data/object.js";
 import controller from "./controller.js";
 
+function scientificCost (n) {
+  return n < 1e4
+      ? Number(n).toFixed(0)
+      : Number(n).toExponential(2).toString().replace("+", "");
+}
+
 const builder = {
+  addItemCost: function (itemId) {
+    let shards = sim.items[itemId].dustType == "shards";
+    builder.costDust += builder.costCurrent[itemId] * !shards;
+    builder.costShard += builder.costCurrent[itemId] * shards;
+  },
+  addOtherCosts: function () {
+    for (let oneTimerId in sim.oneTimers) {
+      let oneTimer = sim.oneTimers[oneTimerId];
+      if (oneTimer.owned) {
+        builder.costDust += builder.costUnlock[oneTimerId] * !oneTimer.useShards;
+        builder.costShard += builder.costUnlock[oneTimerId] * !!oneTimer.useShards;
+      }
+    }
+    builder.costShard += builder.costCurrent.The_Ring * sim.oneTimers.The_Ring.owned;
+    builder.costDust += builder.limbs > 4 ? 100 * (Math.pow(100, builder.limbs - 4) - 1) / 99 : 0;
+  },
+  costCurrent: {},
+  costDust: 0,
+  costShard: 0,
+  costUnlock: {},
   enemy: {
     bleed: 0,
     poison: 0,
@@ -183,6 +209,20 @@ const builder = {
       builder.shankInfo.shanked = false;
     }
   },
+  recalcCost: function () {
+    builder.resetCost();
+    for (let itemId in sim.items) {
+      if (sim.items[itemId].equipped) {
+        builder.addItemCost(itemId);
+      }
+    }
+    builder.addOtherCosts();
+    builder.updateCostDisplay();
+  },
+  resetCost: function () {
+    builder.costDust = 0;
+    builder.costShard = 0;
+  },
   resetEnemy: function () {
     for (let index in builder.enemy) {
       builder.enemy[index] = 0;
@@ -204,25 +244,34 @@ const builder = {
   },
   setItem: function (itemId, equipped, level, massChange = false) {
     builder.limbs += equipped - sim.items[itemId].equipped;
-    let modified = sim.items[itemId].equipped != equipped || (equipped && sim.items[itemId].level != level);
+    let modifiedLevel = sim.items[itemId].level != level;
+    let modifiedEquipped = sim.items[itemId].equipped != equipped;
     sim.items[itemId].equipped = equipped;
     sim.items[itemId].level = level;
-    if (!massChange && modified) {
+    if (modifiedLevel) {
+      builder.updateItemCost(itemId);
+    }
+    if (!massChange && (modifiedEquipped || (equipped && modifiedLevel))) {
       if (builder.modifiers[itemId]) {
         builder.readEquips();
         builder.updateDisplay();
       }
+      builder.recalcCost();
       controller.modifiedAB();
     }
   },
   setItemLevel: function (itemId, level) {
-    let flag = sim.items[itemId].equipped && sim.items[itemId].level != level;
+    if (sim.items[itemId].level == level) {
+      return;
+    }
     sim.items[itemId].level = level;
-    if (flag) {
+    builder.updateItemCost(itemId);
+    if (sim.items[itemId].equipped) {
       if (builder.modifiers[itemId]) {
         builder.readEquips();
         builder.updateDisplay();
       }
+      builder.recalcCost();
       controller.modifiedAB();
     }
   },
@@ -232,15 +281,22 @@ const builder = {
       controller.modifiedAB();
     }
   },
-  setRingLevel: function (level) {
-    if (sim.oneTimers.The_Ring.owned && sim.rings.level != level) {
+  setRingLevel: function (level, massChange = false) {
+    if (sim.rings.level == level) {
+      return;
+    }
+    if (sim.oneTimers.The_Ring.owned) {
       let flag = (level >= 10) || (sim.rings.level >= 10);
       sim.rings.level = level;
-      if (flag) {
-        builder.readEquips();
-        builder.updateDisplay();
+      builder.updateRingCost();
+      if (!massChange) {
+        if (flag) {
+          builder.readEquips();
+          builder.updateDisplay();
+        }
+        builder.recalcCost();
+        controller.modifiedAB();
       }
-      controller.modifiedAB();
     }
   },
   shank: function () {
@@ -316,10 +372,12 @@ const builder = {
       builder.readEquips();
     }
     builder.updateDisplay();
+    builder.recalcCost();
     controller.modifiedAB();
   },
   toggleOneTimer: function (name) {
     sim.oneTimers[name].owned = !sim.oneTimers[name].owned;
+    builder.recalcCost();
     controller.modifiedAB();
   },
   toggleRing: function () {
@@ -327,15 +385,19 @@ const builder = {
       sim.oneTimers.The_Ring.owned = false;
       if (sim.rings.level >= 10) {
         builder.readEquips();
+        builder.updateDisplay();
       }
       sim.rings.level = 1;
     } else {
       sim.oneTimers.The_Ring.owned = true;
       sim.rings.level = parseInt(document.getElementById("The_Ring_Input").value);
+      builder.updateRingCost();
       if (sim.rings.level >= 10) {
         builder.readEquips();
+        builder.updateDisplay();
       }
     }
+    builder.recalcCost();
     controller.modifiedAB();
   },
   toggleRingSlot: function (modifier) {
@@ -346,6 +408,10 @@ const builder = {
       sim.rings.mods.splice(modifierIndex, 1);
     }
     controller.modifiedAB();
+  },
+  updateCostDisplay: function () {
+    document.getElementById("buildCostDust").innerHTML = scientificCost(builder.costDust);
+    document.getElementById("buildCostShards").innerHTML = scientificCost(builder.costShard);
   },
   updateDisplay: function () {
     document.getElementById("enemyResistPoison").innerHTML = builder.enemy.resistPoison + "%";
@@ -383,9 +449,28 @@ const builder = {
     builder.visible("huffyBleedRow", builder.huffy.canBleed);
     builder.visible("huffyShockRow", builder.huffy.canShock);
   },
+  updateItemCost: function (itemId) {
+    let item = sim.items[itemId];
+    builder.costCurrent[itemId] = builder.costUnlock[itemId]
+        + (item.startPrice || 5)
+        * (1 - Math.pow(item.priceMod || 3, item.level - 1))
+        / (1 - (item.priceMod || 3));
+  },
+  updateRingCost: function () {
+    builder.costCurrent.The_Ring = Math.ceil(15 * Math.pow(2, sim.rings.level) - 30);
+  },
   visible: function (id, flag) {
     document.getElementById(id).setAttribute("class", flag ? "" : "displayNone");
   },
 };
+
+for (let oneTimer in sim.oneTimers) {
+  builder.costUnlock[oneTimer] = sim.oneTimerPrice(oneTimer);
+}
+for (let itemId in sim.items) {
+  builder.costUnlock[itemId] = sim.items[itemId].zone ? sim.contractPrice(itemId) : 0;
+  builder.costCurrent[itemId] = builder.costUnlock[itemId];
+}
+builder.costCurrent.The_Ring = 0;
 
 export { builder as default };
