@@ -50,14 +50,14 @@ let colours = {
 };
 
 const orderByUnlock = (() => {
-  let order = AB.getItemOrder();
-  let sorted = [];
-  let n = order.length;
-  for (let i = 0; i < n; i++) {
-    let item = order[i];
-    sorted.push(item.name);
-  }
-  return sorted;
+    let order = AB.getItemOrder();
+    let sorted = [];
+    let n = order.length;
+    for (let i = 0; i < n; i++) {
+        let item = order[i];
+        sorted.push(item.name);
+    }
+    return sorted;
 })();
 
 function getElements() {
@@ -179,7 +179,7 @@ const wrapup = () => {
             (toKill - save.global.autoBattleData.enemiesKilled);
         elements.remainingTime.innerHTML = convertTimeMs(remainingTime, 2);
     } else {
-      elements.remainingTime.innerHTML = convertTimeMs(averageFightTime, 2);
+        elements.remainingTime.innerHTML = convertTimeMs(averageFightTime, 2);
     }
 
     let rc = ABC.resultCounter;
@@ -235,7 +235,9 @@ const prettify = (num) => {
 function setEverythingFromInputs() {
     ABC.modifiedAB(); // get that out of the way
     for (let itemId in AB.items) {
-        let equipped = document.getElementById(itemId + "_Button").classList.contains("checkedButton");
+        let equipped = document
+            .getElementById(itemId + "_Button")
+            .classList.contains("checkedButton");
         let level = parseInt(document.getElementById(itemId + "_Input").value);
         builder.setItem(itemId, equipped, level, true); // true= don't do stuff yet, wait for all changes
     }
@@ -252,13 +254,21 @@ function setEverythingFromInputs() {
                     AB.rings.mods.push(child.innerHTML);
                 }
             }
-            builder.setRingLevel(parseInt(document.getElementById("The_Ring_Input").value), true);
+            builder.setRingLevel(
+                parseInt(document.getElementById("The_Ring_Input").value),
+                true
+            );
         }
     });
-    
+
     builder.readEquips();
-    builder.setMaxEnemyLevel(parseInt(document.getElementById("highestLevel").value));
-    builder.setEnemyLevel(parseInt(document.getElementById("currentLevel").value), true);
+    builder.setMaxEnemyLevel(
+        parseInt(document.getElementById("highestLevel").value)
+    );
+    builder.setEnemyLevel(
+        parseInt(document.getElementById("currentLevel").value),
+        true
+    );
     builder.updateDisplay();
     builder.recalcCost();
 }
@@ -295,8 +305,7 @@ function partEquipDiv(parts, ind) {
         button.addEventListener("click", (event) => {
             builder.toggleEquip(event.target.getAttribute("data-name"));
             swapChecked(event.target);
-            if (autoRunChecked)
-                startSimulation();
+            if (autoRunChecked) startSimulation();
         });
 
         let input = document.createElement("input");
@@ -310,8 +319,7 @@ function partEquipDiv(parts, ind) {
             value = value >= 1 ? value : 1;
             event.target.value = value;
             builder.setItemLevel(event.target.getAttribute("data-name"), value);
-            if (autoRunChecked)
-                startSimulation();
+            if (autoRunChecked) startSimulation();
         });
         div.appendChild(input);
     }
@@ -338,8 +346,7 @@ function makeOneTimersBtns() {
                 button.addEventListener("click", (event) => {
                     swapChecked(event.target);
                     builder.toggleRing();
-                    if (autoRunChecked)
-                        startSimulation();
+                    if (autoRunChecked) startSimulation();
                 });
                 topDiv.appendChild(button);
 
@@ -366,7 +373,7 @@ function makeOneTimersBtns() {
                     modifier.innerHTML = mod;
                     modifier.className = "uncheckedButton";
                     modifier.addEventListener("click", (event) => {
-                        builder.toggleRingSlot(event.target.innerHTML)
+                        builder.toggleRingSlot(event.target.innerHTML);
                         swapChecked(event.target);
                         if (autoRunChecked && AB.oneTimers.The_Ring.owned)
                             startSimulation();
@@ -382,9 +389,10 @@ function makeOneTimersBtns() {
                 button.setAttribute("data-name", oneTimer);
                 button.addEventListener("click", (event) => {
                     swapChecked(event.target);
-                    builder.toggleOneTimer(event.target.getAttribute("data-name"));
-                    if (autoRunChecked)
-                        startSimulation();
+                    builder.toggleOneTimer(
+                        event.target.getAttribute("data-name")
+                    );
+                    if (autoRunChecked) startSimulation();
                 });
                 div.appendChild(button);
             }
@@ -404,13 +412,15 @@ function makeOneTimersBtns() {
     mutationsButton.addEventListener("click", (event) => {
         swapChecked(event.target);
         u2Mutations.tree.Dust.purchased = !u2Mutations.tree.Dust.purchased;
-        if (!u2Mutations.tree.Dust.purchased && u2Mutations.tree.Dust2.purchased) {
+        if (
+            !u2Mutations.tree.Dust.purchased &&
+            u2Mutations.tree.Dust2.purchased
+        ) {
             u2Mutations.tree.Dust2.purchased = false; // can't have it without the other
             swapChecked(document.getElementById("Mutations_Button_2"), false);
         }
         ABC.modifiedAB(); // always stop sim or someone will get half the run with more income
-        if (autoRunChecked)
-            startSimulation();
+        if (autoRunChecked) startSimulation();
     });
     mutationsDiv.appendChild(mutationsButton);
 
@@ -422,13 +432,15 @@ function makeOneTimersBtns() {
     mutationsButton.addEventListener("click", (event) => {
         swapChecked(event.target);
         u2Mutations.tree.Dust2.purchased = !u2Mutations.tree.Dust2.purchased;
-        if (u2Mutations.tree.Dust2.purchased && !u2Mutations.tree.Dust.purchased) {
-          u2Mutations.tree.Dust.purchased = true; // can't have one without the other
-          swapChecked(document.getElementById("Mutations_Button"), true);
+        if (
+            u2Mutations.tree.Dust2.purchased &&
+            !u2Mutations.tree.Dust.purchased
+        ) {
+            u2Mutations.tree.Dust.purchased = true; // can't have one without the other
+            swapChecked(document.getElementById("Mutations_Button"), true);
         }
         ABC.modifiedAB(); // always stop sim or someone will get half the run with more income
-        if (autoRunChecked)
-            startSimulation();
+        if (autoRunChecked) startSimulation();
     });
     mutationsDiv.appendChild(mutationsButton);
 
@@ -441,8 +453,7 @@ function makeOneTimersBtns() {
         swapChecked(event.target);
         AB.scruffyLvl21 = !AB.scruffyLvl21;
         ABC.modifiedAB();
-        if (autoRunChecked)
-            startSimulation();
+        if (autoRunChecked) startSimulation();
     });
     mutationsDiv.appendChild(scruffyButton);
 }
@@ -468,7 +479,9 @@ function clearItems() {
 function setItemsFromInputs() {
     ABC.modifiedAB(); // get that out of the way
     for (let itemId in AB.items) {
-        let equipped = document.getElementById(itemId + "_Button").classList.contains("checkedButton");
+        let equipped = document
+            .getElementById(itemId + "_Button")
+            .classList.contains("checkedButton");
         let level = parseInt(document.getElementById(itemId + "_Input").value);
         builder.setItem(itemId, equipped, level, true); // true= don't do stuff yet, wait for all changes
     }
@@ -516,7 +529,8 @@ function setOneTimers() {
     ABC.modifiedAB();
 }
 
-function calcBuildCost(set = false) { //TODO REMOVE
+function calcBuildCost(set = false) {
+    //TODO REMOVE
     if (set) setEverythingFromInputs();
     let dustCost = 0;
     let shardCost = 0;
@@ -557,6 +571,7 @@ function calcBuildCost(set = false) { //TODO REMOVE
     // Price for extra limbs.
     let extraLimbs = countLimbsUsed() - 4;
     AB.bonuses["Extra_Limbs"].level = extraLimbs;
+    console.log(extraLimbs);
     for (let i = 1; i < extraLimbs; i++) {
         let price = AB.bonuses["Extra_Limbs"].price;
         let mod = AB.bonuses["Extra_Limbs"].priceMod;
@@ -595,7 +610,10 @@ function setItemsInHtml(
                 let children = elements.ringMods.children;
                 for (let i = 0; i < children.length; i++) {
                     // check if mod is selected
-                    swapChecked(children[i], rings.mods.indexOf(children[i].innerHTML) != -1);
+                    swapChecked(
+                        children[i],
+                        rings.mods.indexOf(children[i].innerHTML) != -1
+                    );
                 }
                 let inputLvl = document.getElementById("The_Ring_Input");
                 inputLvl.value = rings.level;
@@ -669,8 +687,8 @@ function addListeners() {
         builder.setMaxEnemyLevel(value);
         let curLvl = document.getElementById("currentLevel");
         if (parseInt(curLvl.value) > value) {
-          curLvl.value = value;
-          builder.setEnemyLevel(value);
+            curLvl.value = value;
+            builder.setEnemyLevel(value);
         }
         if (autoRunChecked) startSimulation();
     });
@@ -1242,8 +1260,8 @@ function swapChecked(item, checked) {
     // with two arguments use the second to override
     if (item.classList.contains("checkedButton")) {
         if (checked === undefined || !checked) {
-          item.classList.remove("checkedButton");
-          item.classList.add("uncheckedButton");
+            item.classList.remove("checkedButton");
+            item.classList.add("uncheckedButton");
         }
     } else {
         if (checked === undefined || checked) {
@@ -1352,11 +1370,11 @@ let ringModsResults = {
 
         ringModsResults.modCombinationNames = getRingModCombinations();
         ringModsResults.modCombinationNames.sort(
-            (a, b) => a.indexOf("defense") - b.indexOf("defense"));
+            (a, b) => a.indexOf("defense") - b.indexOf("defense")
+        );
         let currentCombo = ringModsResults.modCombinationNames[0];
 
-        for (let j = 0; j < slots; j++)
-            AB.rings.mods.push(currentCombo[j]);
+        for (let j = 0; j < slots; j++) AB.rings.mods.push(currentCombo[j]);
         ABC.modifiedAB();
 
         // Clear earlier data.
@@ -1445,8 +1463,7 @@ let ringModsResults = {
                 ringModsResults.combinationIndex
             ];
 
-        for (let j = 0; j < slots; j++)
-            AB.rings.mods.push(currentCombo[j]);
+        for (let j = 0; j < slots; j++) AB.rings.mods.push(currentCombo[j]);
         ABC.modifiedAB();
 
         simConfig.onFightResult = null;
