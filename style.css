@@ -166,7 +166,7 @@ body {
   flex: 2 0 auto;
 }
 
-#verboseEnemyDiv {
+.displayNone {
   display: none;
 }
 

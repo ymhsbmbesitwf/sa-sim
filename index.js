@@ -3,6 +3,7 @@ import { LZString } from "./lz-string.js";
 import { build as buildObject } from "./data/buildObject.js";
 import { u2Mutations } from "./data/mutations.js";
 import ABC from "./controller.js";
+import builder from "./builder.js";
 
 let simConfig = ABC.defaultConfig();
 simConfig.fights = 1000; // max enemy/Huffy deaths
@@ -47,6 +48,17 @@ let colours = {
     unlock: "rgb(0, 255, 127)",
     theRing: "rgb(119, 165, 187)",
 };
+
+const orderByUnlock = (() => {
+  let order = AB.getItemOrder();
+  let sorted = [];
+  let n = order.length;
+  for (let i = 0; i < n; i++) {
+    let item = order[i];
+    sorted.push(item.name);
+  }
+  return sorted;
+})();
 
 function getElements() {
     return {
@@ -161,11 +173,13 @@ const wrapup = () => {
     let averageFightTime = timeSpent / enemiesKilled;
     elements.averageKillTime.innerHTML = convertTimeMs(averageFightTime, 2);
 
-    if (save) {
+    if (save && AB.enemyLevel == save.global.autoBattleData.enemyLevel) {
         let remainingTime =
             averageFightTime *
             (toKill - save.global.autoBattleData.enemiesKilled);
         elements.remainingTime.innerHTML = convertTimeMs(remainingTime, 2);
+    } else {
+      elements.remainingTime.innerHTML = convertTimeMs(averageFightTime, 2);
     }
 
     let rc = ABC.resultCounter;
@@ -189,9 +203,6 @@ const startSimulation = () => {
     if (ABC.isRunning()) {
         return;
     }
-
-    sets();
-    calcBuildCost(false);
 
     simConfig.onFightResult = null;
     simConfig.onSimInterrupt = null;
@@ -221,10 +232,35 @@ const prettify = (num) => {
     });
 };
 
-function sets() {
-    setActiveItems();
-    setActiveOneTimers();
-    setLevels();
+function setEverythingFromInputs() {
+    ABC.modifiedAB(); // get that out of the way
+    for (let itemId in AB.items) {
+        let equipped = document.getElementById(itemId + "_Button").classList.contains("checkedButton");
+        let level = parseInt(document.getElementById(itemId + "_Input").value);
+        builder.setItem(itemId, equipped, level, true); // true= don't do stuff yet, wait for all changes
+    }
+
+    let oneTimers = document.querySelectorAll("button.oneTimerButton");
+    oneTimers.forEach((oneTimer) => {
+        let name = oneTimer.getAttribute("data-name");
+        AB.oneTimers[name].owned = oneTimer.classList.contains("checkedButton");
+        if (name === "The_Ring") {
+            AB.rings.mods = [];
+            // Loop through children in div
+            for (let child of elements.ringMods.children) {
+                if (child.classList.contains("checkedButton")) {
+                    AB.rings.mods.push(child.innerHTML);
+                }
+            }
+            builder.setRingLevel(parseInt(document.getElementById("The_Ring_Input").value), true);
+        }
+    });
+    
+    builder.readEquips();
+    builder.setMaxEnemyLevel(parseInt(document.getElementById("highestLevel").value));
+    builder.setEnemyLevel(parseInt(document.getElementById("currentLevel").value), true);
+    builder.updateDisplay();
+    builder.recalcCost();
 }
 
 function makeEquipBtns() {
@@ -236,7 +272,7 @@ function makeEquipBtns() {
 }
 
 function partEquipDiv(parts, ind) {
-    let items = orderByUnlock();
+    let items = orderByUnlock;
     let size = Math.round(items.length / parts);
     let start = size * ind;
     let end = size * (ind + 1);
@@ -254,15 +290,29 @@ function partEquipDiv(parts, ind) {
         button.innerHTML = name;
         button.id = item + "_Button";
         button.className = "uncheckedButton";
+        button.setAttribute("data-name", item);
         div.appendChild(button);
-        addChangeForButtonEquip(button);
+        button.addEventListener("click", (event) => {
+            builder.toggleEquip(event.target.getAttribute("data-name"));
+            swapChecked(event.target);
+            if (autoRunChecked)
+                startSimulation();
+        });
 
         let input = document.createElement("input");
         input.type = "number";
         input.value = 1;
         input.className = "equipInput";
         input.id = item + "_Input";
-        addChangeForLevel(input);
+        input.setAttribute("data-name", item);
+        input.addEventListener("change", (event) => {
+            let value = parseInt(event.target.value);
+            value = value >= 1 ? value : 1;
+            event.target.value = value;
+            builder.setItemLevel(event.target.getAttribute("data-name"), value);
+            if (autoRunChecked)
+                startSimulation();
+        });
         div.appendChild(input);
     }
     return partDiv;
@@ -284,25 +334,43 @@ function makeOneTimersBtns() {
                 button.innerHTML = "The Ring";
                 button.id = "The_Ring_Button";
                 button.classList.add("uncheckedButton", "oneTimerButton");
-                addChangeForButton(button);
+                button.setAttribute("data-name", "The_Ring");
+                button.addEventListener("click", (event) => {
+                    swapChecked(event.target);
+                    builder.toggleRing();
+                    if (autoRunChecked)
+                        startSimulation();
+                });
                 topDiv.appendChild(button);
 
                 let input = document.createElement("input");
                 input.type = "number";
                 input.value = 1;
                 input.id = "The_Ring_Input";
-                addChangeForRingInput(input);
+                input.addEventListener("change", (event) => {
+                    let value = parseInt(event.target.value);
+                    value = value >= 1 ? value : 1;
+                    event.target.value = value;
+                    builder.setRingLevel(value);
+                    if (autoRunChecked && AB.oneTimers.The_Ring.owned)
+                        startSimulation();
+                });
                 topDiv.appendChild(input);
                 div.appendChild(topDiv);
 
                 let modDiv = document.createElement("div");
                 modDiv.id = "ringModsDiv";
                 div.appendChild(modDiv);
-                for (const mod in AB.ringStats) {
+                for (let mod in AB.ringStats) {
                     let modifier = document.createElement("button");
                     modifier.innerHTML = mod;
                     modifier.className = "uncheckedButton";
-                    addChangeForButton(modifier);
+                    modifier.addEventListener("click", (event) => {
+                        builder.toggleRingSlot(event.target.innerHTML)
+                        swapChecked(event.target);
+                        if (autoRunChecked && AB.oneTimers.The_Ring.owned)
+                            startSimulation();
+                    });
                     modDiv.appendChild(modifier);
                 }
             } else {
@@ -311,8 +379,14 @@ function makeOneTimersBtns() {
                 button.innerHTML = name;
                 button.id = oneTimer + "_Button";
                 button.classList.add("uncheckedButton", "oneTimerButton");
+                button.setAttribute("data-name", oneTimer);
+                button.addEventListener("click", (event) => {
+                    swapChecked(event.target);
+                    builder.toggleOneTimer(event.target.getAttribute("data-name"));
+                    if (autoRunChecked)
+                        startSimulation();
+                });
                 div.appendChild(button);
-                addChangeForButton(button);
             }
         }
     }
@@ -327,108 +401,50 @@ function makeOneTimersBtns() {
     mutationsButton.innerHTML = "Dusty";
     mutationsButton.id = "Mutations_Button";
     mutationsButton.classList.add("uncheckedButton", "button");
+    mutationsButton.addEventListener("click", (event) => {
+        swapChecked(event.target);
+        u2Mutations.tree.Dust.purchased = !u2Mutations.tree.Dust.purchased;
+        if (!u2Mutations.tree.Dust.purchased && u2Mutations.tree.Dust2.purchased) {
+            u2Mutations.tree.Dust2.purchased = false; // can't have it without the other
+            swapChecked(document.getElementById("Mutations_Button_2"), false);
+        }
+        ABC.modifiedAB(); // always stop sim or someone will get half the run with more income
+        if (autoRunChecked)
+            startSimulation();
+    });
     mutationsDiv.appendChild(mutationsButton);
-    addChangeForMutation(mutationsButton, 1);
 
     // Button 2
     mutationsButton = document.createElement("button");
     mutationsButton.innerHTML = "Dustier";
     mutationsButton.id = "Mutations_Button_2";
     mutationsButton.classList.add("uncheckedButton", "button");
+    mutationsButton.addEventListener("click", (event) => {
+        swapChecked(event.target);
+        u2Mutations.tree.Dust2.purchased = !u2Mutations.tree.Dust2.purchased;
+        if (u2Mutations.tree.Dust2.purchased && !u2Mutations.tree.Dust.purchased) {
+          u2Mutations.tree.Dust.purchased = true; // can't have one without the other
+          swapChecked(document.getElementById("Mutations_Button"), true);
+        }
+        ABC.modifiedAB(); // always stop sim or someone will get half the run with more income
+        if (autoRunChecked)
+            startSimulation();
+    });
     mutationsDiv.appendChild(mutationsButton);
-    addChangeForMutation(mutationsButton, 2);
 
     // Scruffy 21
     let scruffyButton = document.createElement("button");
     scruffyButton.innerHTML = "S21";
     scruffyButton.id = "S21_Button";
     scruffyButton.classList.add("uncheckedButton", "button");
-    mutationsDiv.appendChild(scruffyButton);
-    addChangeForScruffy(scruffyButton);
-}
-
-function addChangeForLevel(item) {
-    item.addEventListener("change", (event) => {
-        let value = event.target.value;
-        if (parseInt(Number(value)) >= 1) {
-            let name = item.id.replace("_Input", "");
-            value = Number(value).toString();
-            event.target.value = value;
-            AB.items[name].level = value;
-            ABC.modifiedAB();
-        } else {
-            event.target.value = 1;
-        }
-        calcBuildCost(true);
-        if (autoRunChecked) startSimulation();
-    });
-}
-
-function addChangeForButton(button) {
-    button.addEventListener("click", (event) => {
-        swapChecked(button);
-        calcBuildCost(true);
-        if (autoRunChecked && button.classList.contains("checkedButton"))
-            startSimulation();
-    });
-}
-
-function addChangeForButtonEquip(button) {
-    button.addEventListener("click", (event) => {
-        let lvl = document.getElementById(
-            button.id.replace("_Button", "_Input")
-        );
-        let name = button.id.replace("_Button", "");
-        if (parseInt(lvl.value) > 0) {
-            AB.equip(name);
-            ABC.modifiedAB();
-        }
-
-        // Set limbs.
-        elements.limbsUsed.innerHTML = countLimbsUsed();
-    });
-    addChangeForButton(button);
-}
-
-function addChangeForRingInput(input) {
-    input.addEventListener("change", (event) => {
-        let value = event.target.value;
-        if (parseInt(Number(value)) >= 1) {
-            value = Number(value).toString();
-            event.target.value = value;
-            AB.rings.level = value;
-            ABC.modifiedAB();
-        } else {
-            event.target.value = 1;
-        }
-        calcBuildCost(true);
-        if (autoRunChecked && button.classList.contains("checkedButton"))
-            startSimulation();
-    });
-}
-
-function addChangeForMutation(input, version) {
-    input.addEventListener("click", () => {
-        swapChecked(input);
-        calcBuildCost(true);
-        if (version === 1)
-            u2Mutations.tree.Dust.purchased = !u2Mutations.tree.Dust.purchased;
-        else
-            u2Mutations.tree.Dust2.purchased =
-                !u2Mutations.tree.Dust2.purchased;
-        if (autoRunChecked && input.classList.contains("checkedButton"))
-            startSimulation();
-    });
-}
-
-function addChangeForScruffy(input) {
-    input.addEventListener("click", () => {
-        swapChecked(input);
-        calcBuildCost(true);
+    scruffyButton.addEventListener("click", (event) => {
+        swapChecked(event.target);
         AB.scruffyLvl21 = !AB.scruffyLvl21;
-        if (autoRunChecked && input.classList.contains("checkedButton"))
+        ABC.modifiedAB();
+        if (autoRunChecked)
             startSimulation();
     });
+    mutationsDiv.appendChild(scruffyButton);
 }
 
 function isInt(value) {
@@ -439,13 +455,8 @@ function isInt(value) {
     );
 }
 
-function setActiveItems() {
-    clearItems();
-    setItems();
-}
-
 function clearItems() {
-    for (const item in AB.items) {
+    for (let item in AB.items) {
         AB.items[item].owned = false;
         if (AB.items[item].equipped) AB.equip(item);
         AB.items[item].hidden = false;
@@ -454,28 +465,15 @@ function clearItems() {
     ABC.modifiedAB();
 }
 
-function setItems() {
-    let items = document.querySelectorAll("input.equipInput");
-    let ogItems = AB.items;
-    for (const ogItem in ogItems) {
-        items.forEach((item) => {
-            let name = item.id.replace("_Input", "");
-            let val = parseInt(item.value);
-            if (ogItem === name && val > 0) {
-                AB.items[name].owned = true;
-                AB.items[name].level = val;
-                if (item.previousSibling.classList.contains("checkedButton")) {
-                    AB.equip(name);
-                }
-            }
-        });
+function setItemsFromInputs() {
+    ABC.modifiedAB(); // get that out of the way
+    for (let itemId in AB.items) {
+        let equipped = document.getElementById(itemId + "_Button").classList.contains("checkedButton");
+        let level = parseInt(document.getElementById(itemId + "_Input").value);
+        builder.setItem(itemId, equipped, level, true); // true= don't do stuff yet, wait for all changes
     }
-    ABC.modifiedAB();
-}
-
-function setActiveOneTimers() {
-    clearOneTimers();
-    setOneTimers();
+    builder.readEquips();
+    builder.updateDisplay();
 }
 
 function clearOneTimers() {
@@ -518,8 +516,8 @@ function setOneTimers() {
     ABC.modifiedAB();
 }
 
-function calcBuildCost(set = false) {
-    if (set) sets();
+function calcBuildCost(set = false) { //TODO REMOVE
+    if (set) setEverythingFromInputs();
     let dustCost = 0;
     let shardCost = 0;
     for (let itemID in AB.items) {
@@ -569,14 +567,6 @@ function calcBuildCost(set = false) {
     elements.buildCostShards.innerHTML = toScientific(shardCost);
 }
 
-function setLevels() {
-    let curr = document.getElementById("currentLevel");
-    AB.enemyLevel = parseInt(curr.value);
-    let maxLvl = document.getElementById("highestLevel");
-    AB.maxEnemyLevel = parseInt(maxLvl.value);
-    ABC.modifiedAB();
-}
-
 function setItemsInHtml(
     itemsList,
     oneTimersList,
@@ -587,21 +577,12 @@ function setItemsInHtml(
     scruffy
 ) {
     let itemBoxes = document.querySelectorAll("input.equipInput");
-    let limbsUsed = 0;
     itemBoxes.forEach((box) => {
         box.value = 1;
         let item = box.id.replace("_Input", "");
         if (itemsList.hasOwnProperty(item)) {
             box.value = itemsList[item].level;
-            let button = box.previousSibling;
-            if (itemsList[item].equipped) {
-                button.classList.remove("uncheckedButton");
-                button.classList.add("checkedButton");
-                limbsUsed += 1;
-            } else {
-                button.classList.remove("checkedButton");
-                button.classList.add("uncheckedButton");
-            }
+            swapChecked(box.previousSibling, itemsList[item].equipped);
         }
     });
 
@@ -609,18 +590,12 @@ function setItemsInHtml(
     OTButtons.forEach((OTButton) => {
         let OT = OTButton.id.replace("_Button", "");
         if (oneTimersList.hasOwnProperty(OT)) {
-            if (oneTimersList[OT]) swapChecked(OTButton);
+            swapChecked(OTButton, oneTimersList[OT]);
             if (OT === "The_Ring") {
                 let children = elements.ringMods.children;
                 for (let i = 0; i < children.length; i++) {
                     // check if mod is selected
-                    if (rings.mods.includes(children[i].innerHTML)) {
-                        children[i].classList.add("checkedButton");
-                        children[i].classList.remove("uncheckedButton");
-                    } else {
-                        children[i].classList.add("uncheckedButton");
-                        children[i].classList.remove("checkedButton");
-                    }
+                    swapChecked(children[i], rings.mods.indexOf(children[i].innerHTML) != -1);
                 }
                 let inputLvl = document.getElementById("The_Ring_Input");
                 inputLvl.value = rings.level;
@@ -634,68 +609,15 @@ function setItemsInHtml(
     target = document.getElementById("highestLevel");
     target.value = maxLevel;
 
-    // Set limbs
-    elements.limbsUsed.innerHTML = limbsUsed;
-
     // Set mutations
-    let mutBtn = document.getElementById("Mutations_Button");
-    let mut = mutations[0];
-    if (mut) {
-        u2Mutations.tree.Dust.purchased = true;
-        mutBtn.classList.add("checkedButton");
-        mutBtn.classList.remove("uncheckedButton");
-    }
+    swapChecked(document.getElementById("Mutations_Button"), mutations[0]);
+    u2Mutations.tree.Dust.purchased = mutations[0];
+    swapChecked(document.getElementById("Mutations_Button_2"), mutations[1]);
+    u2Mutations.tree.Dust2.purchased = mutations[1];
 
-    mut = mutations[1];
-    mutBtn = document.getElementById("Mutations_Button_2");
-    if (mut) {
-        u2Mutations.tree.Dust2.purchased = true;
-        mutBtn.classList.add("checkedButton");
-        mutBtn.classList.remove("uncheckedButton");
-    }
-
-    let scruffyBtn = document.getElementById("S21_Button");
-    if (scruffy > 1466015503701000) {
-        AB.scruffyLvl21 = true;
-        scruffyBtn.classList.add("checkedButton");
-        scruffyBtn.classList.remove("uncheckedButton");
-    }
-}
-
-function resetItemsInHtml() {
-    let itemBoxes = document.querySelectorAll("input.equipInput");
-    itemBoxes.forEach((box) => {
-        box.value = 1;
-        let button = box.previousSibling;
-        button.classList.remove("checkedButton");
-        button.classList.add("uncheckedButton");
-    });
-
-    let OTBoxes = document.querySelectorAll("button.oneTimerButton");
-    OTBoxes.forEach((button) => {
-        button.classList.remove("checkedButton");
-        button.classList.add("uncheckedButton");
-    });
-
-    let target = document.getElementById("currentLevel");
-    target.value = 1;
-
-    target = document.getElementById("highestLevel");
-    target.value = 1;
-
-    // Set limbs
-    elements.limbsUsed.innerHTML = 0;
-}
-
-function orderByUnlock() {
-    let order = AB.getItemOrder();
-    let sorted = [];
-    let n = order.length;
-    for (let i = 0; i < n; i++) {
-        let item = order[i];
-        sorted.push(item.name);
-    }
-    return sorted;
+    // Scruffy 21
+    AB.scruffyLvl21 = scruffy > 1466015503701000;
+    swapChecked(document.getElementById("S21_Button"), AB.scruffyLvl21);
 }
 
 function addListeners() {
@@ -733,8 +655,7 @@ function addListeners() {
         if (parseInt(maxLvl.value) < value) {
             maxLvl.value = value;
         }
-        let effects = document.getElementById("effects");
-        effects.innerHTML = AB.getEffects(value);
+        builder.setEnemyLevel(value);
 
         if (autoRunChecked) startSimulation();
     });
@@ -745,16 +666,14 @@ function addListeners() {
     target.addEventListener("change", (event) => {
         let value = parseInt(event.target.value);
         if (value < 1) event.target.value = 1;
+        builder.setMaxEnemyLevel(value);
+        let curLvl = document.getElementById("currentLevel");
+        if (parseInt(curLvl.value) > value) {
+          curLvl.value = value;
+          builder.setEnemyLevel(value);
+        }
         if (autoRunChecked) startSimulation();
     });
-
-    // Verbose enemy info
-    /*
-	target = document.getElementById("verboseEnemyButton")
-	target.addEventListener("click", (event) => {
-		displayVerboseEnemy(target);
-	});
-	*/
 
     // Input for save
     document.getElementById("saveInput").addEventListener("paste", (event) => {
@@ -785,12 +704,6 @@ function addListeners() {
         .addEventListener("click", () => {
             ringModsResults.startUp();
         });
-
-    /*
-	document
-		.getElementById("theoreticalWin")
-		.addEventListener("click", maxLuck);
-*/
 
     document
         .getElementById("affordTimeBtn")
@@ -985,78 +898,78 @@ function findBestDps(upgrade = true) {
     if (ABC.isRunning()) {
         return;
     }
-    sets();
-    if (getEquippedItems().length) {
-        findBestStorage.upgrade = upgrade;
-        let items = getEquippedItems();
-        if (
-            document
-                .getElementById("The_Ring_Button")
-                .classList.contains("checkedButton")
-        ) {
-            items.push({ name: "Ring", data: { dustType: "shards" } });
-        }
-        findBestStorage.dustForItems = [];
-        for (let item of items) {
-            findBestStorage.dustForItems.push({
-                name: item.name,
-                displayName: item.name.replaceAll("_", " "),
-                increase: 0,
-                time: findBestStorage.noValue,
-                upgradeCost:
-                    item.name === "Ring"
-                        ? AB.getRingLevelCost()
-                        : AB.upgradeCost(item.name),
-                data: item.data,
-            });
-        }
-
-        let div = document.getElementById("bestUpgradesDiv");
-        // Clear earlier data.
-        findBestStorage.ldiv = null;
-        findBestStorage.mdiv = null;
-        findBestStorage.rdiv = null;
-        div.innerHTML = "";
-
-        let ldiv = document.createElement("div");
-        let mdiv = document.createElement("div");
-        let rdiv = document.createElement("div");
-        div.appendChild(ldiv);
-        div.appendChild(mdiv);
-        div.appendChild(rdiv);
-        findBestStorage.ldiv = ldiv;
-        findBestStorage.mdiv = mdiv;
-        findBestStorage.rdiv = rdiv;
-        ldiv.innerHTML = "<span>Item ±1 level</span>";
-        mdiv.innerHTML = "<span>~+%</span>";
-        rdiv.innerHTML = "<span>Time until profit</span>";
-
-        findBestStorage.dustForItems.forEach((item) => {
-            let span1 = document.createElement("span");
-            let span2 = document.createElement("span");
-            let span3 = document.createElement("span");
-            span1.innerHTML = item.displayName;
-            span2.innerHTML = toScientific(item.increase, 2, true);
-            span3.innerHTML = item.time; //convertTime(item.time);
-            ldiv.appendChild(span1);
-            mdiv.appendChild(span2);
-            rdiv.appendChild(span3);
-        });
-
-        findBestStorage.message("Obtaining build stats...");
-
-        simConfig.onFightResult = null;
-        simConfig.onSimInterrupt = null;
-        simConfig.onSimComplete = findBestStorage.stage2;
-        simConfig.onUpdate = wrapup;
-        ABC.reconfigure(simConfig);
-        runSimulation();
+    let items = getEquippedItems();
+    if (!items.length) {
+        return;
     }
+    findBestStorage.upgrade = upgrade;
+    if (
+        document
+            .getElementById("The_Ring_Button")
+            .classList.contains("checkedButton")
+    ) {
+        items.push({ name: "Ring", data: { dustType: "shards" } });
+    }
+    findBestStorage.dustForItems = [];
+    for (let item of items) {
+        findBestStorage.dustForItems.push({
+            name: item.name,
+            displayName: item.name.replaceAll("_", " "),
+            increase: 0,
+            time: findBestStorage.noValue,
+            upgradeCost:
+                item.name === "Ring"
+                    ? AB.getRingLevelCost()
+                    : AB.upgradeCost(item.name),
+            data: item.data,
+        });
+    }
+
+    let div = document.getElementById("bestUpgradesDiv");
+    // Clear earlier data.
+    findBestStorage.ldiv = null;
+    findBestStorage.mdiv = null;
+    findBestStorage.rdiv = null;
+    div.innerHTML = "";
+
+    let ldiv = document.createElement("div");
+    let mdiv = document.createElement("div");
+    let rdiv = document.createElement("div");
+    div.appendChild(ldiv);
+    div.appendChild(mdiv);
+    div.appendChild(rdiv);
+    findBestStorage.ldiv = ldiv;
+    findBestStorage.mdiv = mdiv;
+    findBestStorage.rdiv = rdiv;
+    ldiv.innerHTML = "<span>Item ±1 level</span>";
+    mdiv.innerHTML = "<span>~+%</span>";
+    rdiv.innerHTML = "<span>Time until profit</span>";
+
+    findBestStorage.dustForItems.forEach((item) => {
+        let span1 = document.createElement("span");
+        let span2 = document.createElement("span");
+        let span3 = document.createElement("span");
+        span1.innerHTML = item.displayName;
+        span2.innerHTML = toScientific(item.increase, 2, true);
+        span3.innerHTML = item.time; //convertTime(item.time);
+        ldiv.appendChild(span1);
+        mdiv.appendChild(span2);
+        rdiv.appendChild(span3);
+    });
+
+    findBestStorage.message("Obtaining build stats...");
+
+    simConfig.onFightResult = null;
+    simConfig.onSimInterrupt = null;
+    simConfig.onSimComplete = findBestStorage.stage2;
+    simConfig.onUpdate = wrapup;
+    ABC.reconfigure(simConfig);
+    runSimulation();
 }
 
 function getEquippedItems() {
     let equipped = [];
-    for (const item in AB.items) {
+    for (let item of orderByUnlock) {
         if (AB.items[item].equipped) {
             equipped.push({ name: item, data: AB.items[item] });
         }
@@ -1081,27 +994,6 @@ function runSimulation() {
     AB.total = 0;
 
     ABC.start();
-}
-
-function maxLuck() {
-    sets();
-    AB.resetAll();
-    let whoDied = AB.oneFight(1);
-    let span = document.getElementById("theoreticalWinSpan");
-
-    if (span) {
-        // Clear earlier data.
-        while (span.firstChild) {
-            span.removeChild(span.lastChild);
-        }
-        span.innerHTML = "You can theoretically win: " + !whoDied.isTrimp;
-    } else {
-        let parent = document.getElementById("theoreticalWin").parentElement;
-        let span = document.createElement("span");
-        span.id = "theoreticalWinSpan";
-        span.innerHTML = "You can theoretically win: " + !whoDied.isTrimp;
-        parent.appendChild(span);
-    }
 }
 
 function convertTime(time) {
@@ -1156,8 +1048,6 @@ function convertTimeMs(time, accuracy = 1) {
 
 function resetToSave() {
     if (save) {
-        // Reset all values in Html.
-        resetItemsInHtml();
         // Reset all values to the save.
         let items = save.global.autoBattleData.items;
         let oneTimers = save.global.autoBattleData.oneTimers;
@@ -1168,7 +1058,7 @@ function resetToSave() {
         let dusty = save.global.u2MutationData.Dust;
         let dustier = save.global.u2MutationData.Dust2;
         let scruffy = save.global.fluffyExp2;
-        let mutations = [dusty, dustier];
+        let mutations = [!!dusty, !!dustier];
         setItemsInHtml(
             items,
             oneTimers,
@@ -1179,7 +1069,7 @@ function resetToSave() {
             scruffy
         );
 
-        sets();
+        setEverythingFromInputs();
         AB.bonuses.Extra_Limbs.level = limbs;
 
         let res = {
@@ -1189,9 +1079,6 @@ function resetToSave() {
         };
         setABResults(res);
 
-        calcBuildCost(true);
-
-        ABC.modifiedAB();
         if (autoRunChecked) startSimulation();
     }
 }
@@ -1211,7 +1098,7 @@ function addSelectAffordTime() {
     select.style.backgroundColor = colours.dust;
 
     // Add each equip to select.
-    let items = orderByUnlock();
+    let items = orderByUnlock;
     let option;
     for (let i = 0; i < items.length; i++) {
         let item = items[i];
@@ -1339,29 +1226,6 @@ function setABResults(res) {
     }
 }
 
-function displayVerboseEnemy(target) {
-    let hiddenDiv = document.getElementById("verboseEnemyDiv");
-    if (target.classList.contains("uncheckedButton")) {
-        // Remove all children.
-        while (hiddenDiv.firstChild) {
-            hiddenDiv.removeChild(hiddenDiv.lastChild);
-        }
-        target.classList.remove("uncheckedButton");
-        target.classList.add("checkedButton");
-        hiddenDiv.style.display = "block";
-        sets();
-        AB.setProfile();
-        let effects = AB.profile;
-        let effectsSpan = document.createElement("span");
-        effectsSpan.innerHTML = effects;
-        hiddenDiv.appendChild(effectsSpan);
-    } else {
-        target.classList.remove("checkedButton");
-        target.classList.add("uncheckedButton");
-        hiddenDiv.style.display = "none";
-    }
-}
-
 function setEtherealChance(button) {
     // If the button is checked.
     if (button.classList.contains("checkedButton")) {
@@ -1373,14 +1237,19 @@ function setEtherealChance(button) {
     swapChecked(button);
 }
 
-function swapChecked(item) {
+function swapChecked(item, checked) {
     // If item is checked, uncheck it.
+    // with two arguments use the second to override
     if (item.classList.contains("checkedButton")) {
-        item.classList.remove("checkedButton");
-        item.classList.add("uncheckedButton");
+        if (checked === undefined || !checked) {
+          item.classList.remove("checkedButton");
+          item.classList.add("uncheckedButton");
+        }
     } else {
-        item.classList.remove("uncheckedButton");
-        item.classList.add("checkedButton");
+        if (checked === undefined || checked) {
+            item.classList.remove("uncheckedButton");
+            item.classList.add("checkedButton");
+        }
     }
 }
 
@@ -1426,7 +1295,7 @@ function getRingModCombinations() {
     let max = Math.pow(2, n);
     let indexes = [];
     let names = [];
-    let modCombinations = [[], []];
+    let modCombinations = [];
 
     for (let i = Math.pow(2, slots) - 1; i < max; i++) {
         indexes = getAllIndexes(i.toString(2).padStart(n, "0").split(""), "1");
@@ -1435,8 +1304,7 @@ function getRingModCombinations() {
             for (let j = 0; j < slots; j++)
                 names.push(mods[indexes[j]].innerHTML);
 
-            modCombinations[0].push(indexes);
-            modCombinations[1].push(names);
+            modCombinations.push(names);
         }
     }
 
@@ -1458,7 +1326,6 @@ function formatNames(names) {
 }
 
 let ringModsResults = {
-    modCombinationIndexes: [],
     modCombinationNames: [],
     combinationIndex: 0,
     bestDPS: 0,
@@ -1480,25 +1347,17 @@ let ringModsResults = {
         let mods = elements.ringMods.children;
         let n = elements.ringMods.children.length;
         let slots = AB.getRingSlots();
+        ringModsResults.startingMods = AB.rings.mods;
         AB.rings.mods = [];
-        ringModsResults.startingMods = [];
 
-        for (let i = 0; i < mods.length; i++) {
-            if (mods[i].classList.contains("checkedButton"))
-                ringModsResults.startingMods.push(i);
-            mods[i].className = "uncheckedButton";
-        }
-
-        [
-            ringModsResults.modCombinationIndexes,
-            ringModsResults.modCombinationNames,
-        ] = getRingModCombinations();
-        let currentCombo = ringModsResults.modCombinationIndexes[0];
+        ringModsResults.modCombinationNames = getRingModCombinations();
+        ringModsResults.modCombinationNames.sort(
+            (a, b) => a.indexOf("defense") - b.indexOf("defense"));
+        let currentCombo = ringModsResults.modCombinationNames[0];
 
         for (let j = 0; j < slots; j++)
-            mods[currentCombo[j]].className = "checkedButton";
-
-        sets();
+            AB.rings.mods.push(currentCombo[j]);
+        ABC.modifiedAB();
 
         // Clear earlier data.
         ringModsResults.bestDPS = 0;
@@ -1522,7 +1381,7 @@ let ringModsResults = {
         rdiv.innerHTML = "<span>Kill Time</span>";
 
         let names = [];
-        for (let i = 0; i < ringModsResults.modCombinationIndexes.length; i++) {
+        for (let i = 0; i < ringModsResults.modCombinationNames.length; i++) {
             let span1 = document.createElement("span");
             let span2 = document.createElement("span");
             let span3 = document.createElement("span");
@@ -1538,7 +1397,7 @@ let ringModsResults = {
         }
 
         simConfig.onFightResult = null;
-        simConfig.onSimInterrupt = null;
+        simConfig.onSimInterrupt = ringModsResults.onInterrupt;
         simConfig.onSimComplete = ringModsResults.onComplete;
         simConfig.onUpdate = ringModsResults.onUpdate;
         ABC.reconfigure(simConfig);
@@ -1546,10 +1405,6 @@ let ringModsResults = {
     },
 
     onComplete: function () {
-        if (ABC.isRunning()) {
-            return;
-        }
-
         let dps = AB.getDustPs();
         let killTime = AB.lootAvg.counter / AB.sessionEnemiesKilled;
         let div = document.getElementById("bestUpgradesDiv");
@@ -1574,7 +1429,7 @@ let ringModsResults = {
         ringModsResults.combinationIndex++;
         if (
             ringModsResults.combinationIndex >=
-            ringModsResults.modCombinationIndexes.length
+            ringModsResults.modCombinationNames.length
         ) {
             ringModsResults.finalStuff();
             return;
@@ -1585,25 +1440,26 @@ let ringModsResults = {
         let slots = AB.getRingSlots();
         AB.rings.mods = [];
 
-        for (let i = 0; i < mods.length; i++)
-            mods[i].className = "uncheckedButton";
-
         let currentCombo =
-            ringModsResults.modCombinationIndexes[
+            ringModsResults.modCombinationNames[
                 ringModsResults.combinationIndex
             ];
 
         for (let j = 0; j < slots; j++)
-            mods[currentCombo[j]].className = "checkedButton";
-
-        sets();
+            AB.rings.mods.push(currentCombo[j]);
+        ABC.modifiedAB();
 
         simConfig.onFightResult = null;
-        simConfig.onSimInterrupt = null;
+        simConfig.onSimInterrupt = ringModsResults.onInterrupt;
         simConfig.onSimComplete = ringModsResults.onComplete;
         simConfig.onUpdate = ringModsResults.onUpdate;
         ABC.reconfigure(simConfig);
         runSimulation();
+    },
+
+    onInterrupt: function () {
+        AB.rings.mods = ringModsResults.startingMods;
+        ABC.modifiedAB();
     },
 
     onUpdate: function () {
@@ -1630,11 +1486,8 @@ let ringModsResults = {
     finalStuff: function () {
         let mods = elements.ringMods.children;
 
-        for (let i = 0; i < mods.length; i++)
-            mods[i].className = "uncheckedButton";
-
-        for (let j = 0; j < ringModsResults.startingMods.length; j++)
-            mods[ringModsResults.startingMods[j]].className = "checkedButton";
+        AB.rings.mods = ringModsResults.startingMods;
+        ABC.modifiedAB();
 
         //set mod buttons back to original
         let div = document.getElementById("bestUpgradesDiv");
