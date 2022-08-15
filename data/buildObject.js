@@ -42,6 +42,7 @@ export let build = {
                     equipButton.click();
                 }
                 equipInput.value = itemLevels[i];
+                equipInput.dispatchEvent(new Event("change"));
             } else {
                 if (equipButton.className === "checkedButton") {
                     equipButton.click();

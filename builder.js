@@ -347,9 +347,24 @@ const builder = {
         }
       }
     }
-    builder.shankInfo.poison[1] = shankedPoison ? builder.shankInfo.poison[1] : builder.huffy.poisonMax;
-    builder.shankInfo.bleed[1] = shankedBleed ? builder.shankInfo.bleed[1] : builder.huffy.bleedMax;
-    builder.shankInfo.shock[1] = shankedShock ? builder.shankInfo.shock[1] : builder.huffy.shockMax;
+    if (shankedPoison) {
+      builder.shankInfo.bleed[1] = Math.max(builder.shankInfo.bleed[1], builder.huffy.bleedMax);
+      builder.shankInfo.shock[1] = Math.max(builder.shankInfo.shock[1], builder.huffy.shockMax);
+    } else {
+      builder.shankInfo.poison[1] = builder.huffy.poisonMax;
+    }
+    if (shankedBleed) {
+      builder.shankInfo.poison[1] = Math.max(builder.shankInfo.poison[1], builder.huffy.poisonMax);
+      builder.shankInfo.shock[1] = Math.max(builder.shankInfo.shock[1], builder.huffy.shockMax);
+    } else {
+      builder.shankInfo.bleed[1] = builder.huffy.bleedMax;
+    }
+    if (shankedShock) {
+      builder.shankInfo.poison[1] = Math.max(builder.shankInfo.poison[1], builder.huffy.poisonMax);
+      builder.shankInfo.bleed[1] = Math.max(builder.shankInfo.bleed[1], builder.huffy.bleedMax);
+    } else {
+      builder.shankInfo.shock[1] = builder.huffy.shockMax;
+    }
     document.getElementById("huffyShank").innerHTML = (shankedPoison ? "poison" + (shankedBleed || shankedShock ? "/" : "") : "") + (shankedBleed ? "bleed" + (shankedShock ? "/" : "") : "") + (shankedShock ? "shock" : "");
     builder.shankInfo.shanked = true;
   },
