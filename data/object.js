@@ -62,6 +62,7 @@ export let autoBattle = {
             bleedChance: 0,
             bleedMod: 0,
             bleedTime: 0,
+            hadBleed: false,
             poisonChance: 0,
             poisonTime: 0,
             poisonMod: 0,
@@ -2612,6 +2613,7 @@ export let autoBattle = {
                     defender.bleed.mod = 1 + attacker.bleedMod;
                 if (defender.bleed.time < attacker.bleedTime)
                     defender.bleed.time = attacker.bleedTime;
+                if (defender.bleed.time > 0) defender.hadBleed = true;
             }
         }
         var poisonChance = attacker.poisonChance - defender.poisonResist;
@@ -3000,8 +3002,8 @@ export let autoBattle = {
         }
         if (
             this.items.Box_of_Spores.equipped &&
-            this.enemy.bleed.time <= 0 &&
-            this.enemy.poison.time >= 0
+            !this.enemy.hadBleed &&
+            this.enemy.poison.time > 0
         ) {
             amt *= this.items.Box_of_Spores.dustMult();
         }
